@@ -1,0 +1,90 @@
+include:
+  - ./services/tle-ingestion-service/docker-compose.yaml
+  - ./services/trajectory-service/docker-compose.yaml
+
+networks:
+  orbitalik-net:
+    name: orbitalik-network
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:17.5
+    networks:
+      - orbitalik-net
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init-sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 16G
+
+  alloy:
+    image: grafana/alloy:latest
+    networks:
+      - orbitalik-net
+    volumes:
+      - ./config/alloy:/etc/alloy
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --storage.path=/var/lib/alloy/data
+      - --server.http.listen-addr=0.0.0.0:12345
+    ports:
+      - '${ALLOY_PORT}:12345'
+
+  loki:
+    image: grafana/loki:latest
+    networks:
+      - orbitalik-net
+    ports:
+      - "${LOKI_PORT}:3100"
+    volumes:
+      - ./config/loki/loki-config.yaml:/etc/loki/local-config.yaml
+
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      - orbitalik-net
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheusdata:/prometheus
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    user: root
+
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - orbitalik-net
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./config/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - grafanadata:/var/lib/grafana
+
+volumes:
+  pgdata:
+  grafanadata:
+  prometheusdata:

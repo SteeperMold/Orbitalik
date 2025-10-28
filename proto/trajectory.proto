@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package trajectory;
+
+import "google/protobuf/timestamp.proto";
+
+service TrajectoryService {
+    rpc GetPosition (PositionRequest) returns (PositionResponse);
+    rpc GetLookAngles (LookAnglesRequest) returns (LookAnglesResponse);
+}
+
+message Vector3 {
+    double x_km = 1;
+    double y_km = 2;
+    double z_km = 3;
+
+    double x_m = 4;
+    double y_m = 5;
+    double z_m = 6;
+}
+
+message GeodeticOutput {
+    double lat_deg = 1;
+    double lon_deg = 2;
+
+    double lat_rad = 3;
+    double lon_rad = 4;
+
+    double alt_km = 5;
+    double alt_m = 6;
+}
+
+message GeodeticInput {
+    oneof lat {
+        double lat_deg = 1;
+        double lat_rad = 2;
+    }
+    oneof lon {
+        double lon_deg = 3;
+        double lon_rad = 4;
+    }
+    oneof alt {
+        double alt_m = 5;
+        double alt_km = 6;
+    }
+}
+
+message SatelliteIdentifier {
+    oneof kind {
+        uint32 norad_id = 1;
+        string satellite_name = 2;
+    }
+}
+
+message PositionRequest {
+    SatelliteIdentifier identifier = 1;
+    google.protobuf.Timestamp datetime = 2;
+}
+
+message PositionResponse {
+    Vector3 eci = 1;
+    Vector3 ecef = 2;
+    GeodeticOutput geodetic = 3;
+}
+
+message LookAnglesRequest {
+    SatelliteIdentifier identifier = 1;
+    google.protobuf.Timestamp datetime = 2;
+    GeodeticInput observer = 3;
+}
+
+message LookAnglesResponse {
+    double azimuth_deg = 1;
+    double azimuth_rad = 2;
+
+    double elevation_deg = 3;
+    double elevation_rad = 4;
+
+    double range_km = 5;
+    double range_m = 6;
+}

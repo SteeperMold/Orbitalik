@@ -1,0 +1,23 @@
+services:
+  trajectory-service:
+    build:
+      context: ./../..
+      dockerfile: services/trajectory-service/Dockerfile
+    networks:
+      - orbitalik-net
+    ports:
+      - "50051:${GRPC_PORT}"
+    env_file:
+      - .env
+    labels:
+      prometheus.scrape: "true"
+      prometheus.port: "${HTTP_PORT}"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${HTTP_PORT}/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      tle-ingestion-service:
+        condition: service_healthy
