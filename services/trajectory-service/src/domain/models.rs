@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use std::fmt;
 use std::fmt::Formatter;
 
@@ -15,3 +16,12 @@ impl fmt::Display for SatelliteIdentifier {
         }
     }
 }
+
+pub struct ComputationMetadata {
+    pub propagation_model: String,
+    pub computation_time: DateTime<Utc>,
+    pub norad_id: u32,
+    pub satellite_name: String,
+    pub tle_epoch: DateTime<Utc>,
+}
+

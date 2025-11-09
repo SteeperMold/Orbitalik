@@ -11,12 +11,28 @@ use crate::astro::models::LookAngles;
 use crate::astro::propagator::Propagator;
 use crate::domain::errors::PropagationError;
 
+#[derive(Default)]
+pub struct LookAnglesComputation {
+    pub azimuth: bool,
+    pub elevation: bool,
+    pub range: bool,
+}
+
 impl Propagator {
     pub fn look_angles_at(
         &self,
         datetime: DateTime<Utc>,
         observer: &Geodetic,
+        compute: &LookAnglesComputation,
     ) -> Result<LookAngles, PropagationError> {
+        if !compute.azimuth && !compute.elevation && !compute.range {
+            return Ok(LookAngles {
+                azimuth: None,
+                elevation: None,
+                range: None,
+            });
+        }
+
         let eci = self.eci_at(datetime)?;
         let gst = astro::time::utc_to_gst(datetime);
 
@@ -38,19 +54,38 @@ impl Propagator {
         let e_km = e.get::<kilometer>();
         let z_km = z.get::<kilometer>();
 
-        let mut range_km = (s_km * s_km + e_km * e_km + z_km * z_km).sqrt();
-        if range_km == 0.0 {
+        let range_km = if compute.range || compute.elevation {
+            let r = (s_km * s_km + e_km * e_km + z_km * z_km).sqrt();
             // prevent division by zero (practically impossible)
-            range_km = f64::EPSILON;
-        }
+            if r == 0.0 { f64::EPSILON } else { r }
+        } else {
+            0.0
+        };
 
-        let az_rad = e_km.atan2(s_km).rem_euclid(TWO_PI);
-        let el_rad = (z_km / range_km).asin();
+        let azimuth = if compute.azimuth {
+            let az_rad = e_km.atan2(s_km).rem_euclid(TWO_PI);
+            Some(Angle::new::<radian>(az_rad))
+        } else {
+            None
+        };
+
+        let elevation = if compute.elevation {
+            let el_rad = (z_km / range_km).asin();
+            Some(Angle::new::<radian>(el_rad))
+        } else {
+            None
+        };
+
+        let range = if compute.range {
+            Some(Length::new::<kilometer>(range_km))
+        } else {
+            None
+        };
 
         Ok(LookAngles {
-            azimuth: Angle::new::<radian>(az_rad),
-            elevation: Angle::new::<radian>(el_rad),
-            range: Length::new::<kilometer>(range_km),
+            azimuth,
+            elevation,
+            range,
         })
     }
 }

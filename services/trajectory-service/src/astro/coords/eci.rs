@@ -4,6 +4,7 @@ use uom::si::length::kilometer;
 use crate::astro::coords::ecef::Ecef;
 
 /// Earth-Centered Inertial coordinates
+#[derive(Clone)]
 pub struct Eci {
     pub x: Length,
     pub y: Length,

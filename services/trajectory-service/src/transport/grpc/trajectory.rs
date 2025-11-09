@@ -1,8 +1,11 @@
 use tonic::{Request, Response, Status};
 
+use crate::astro::look_angles::LookAnglesComputation;
+use crate::astro::position::PositionComputation;
 use crate::service::look_angles::LookAnglesService;
 use crate::service::position::PositionService;
 use crate::transport::grpc::converters::ToChrono;
+
 use trajectory_grpc::{
     LookAnglesRequest, LookAnglesResponse, PositionRequest, PositionResponse,
     trajectory_service_server::TrajectoryService,
@@ -12,12 +15,12 @@ pub mod trajectory_grpc {
     tonic::include_proto!("trajectory");
 }
 
-pub struct TrajectoryGrpc {
+pub struct TrajectoryGrpcServer {
     position_service: PositionService,
     look_angles_service: LookAnglesService,
 }
 
-impl TrajectoryGrpc {
+impl TrajectoryGrpcServer {
     pub const fn new(
         position_service: PositionService,
         look_angles_service: LookAnglesService,
@@ -30,7 +33,7 @@ impl TrajectoryGrpc {
 }
 
 #[tonic::async_trait]
-impl TrajectoryService for TrajectoryGrpc {
+impl TrajectoryService for TrajectoryGrpcServer {
     async fn get_position(
         &self,
         request: Request<PositionRequest>,
@@ -39,9 +42,7 @@ impl TrajectoryService for TrajectoryGrpc {
 
         let identifier = req
             .identifier
-            .ok_or_else(|| {
-                Status::invalid_argument("Missing satellite identifier (norad_id or name)")
-            })?
+            .ok_or_else(|| Status::invalid_argument("Missing satellite identifier"))?
             .try_into()?;
 
         let datetime = req
@@ -49,12 +50,16 @@ impl TrajectoryService for TrajectoryGrpc {
             .ok_or_else(|| Status::invalid_argument("Missing datetime"))?
             .to_chrono()?;
 
-        let sat_pos = self
+        let mask = req.output_mask.as_ref();
+
+        let compute = mask.map_or_else(PositionComputation::default, PositionComputation::from);
+
+        let (position, metadata) = self
             .position_service
-            .calculate_position(identifier, datetime)
+            .get_position_with_metadata(identifier, datetime, &compute)
             .await?;
 
-        let response = PositionResponse::from(sat_pos);
+        let response = PositionResponse::from_position(&position, metadata, req.units)?;
         Ok(Response::new(response))
     }
 
@@ -81,12 +86,16 @@ impl TrajectoryService for TrajectoryGrpc {
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;
 
-        let look_angles = self
+        let mask = req.output_mask.as_ref();
+
+        let compute = mask.map_or_else(LookAnglesComputation::default, LookAnglesComputation::from);
+
+        let (look_angles, metadata) = self
             .look_angles_service
-            .calculate_look_angles(identifier, datetime, &observer)
+            .get_look_angles_with_metadata(identifier, datetime, &observer, &compute)
             .await?;
 
-        let response = LookAnglesResponse::from(look_angles);
+        let response = LookAnglesResponse::from_look_angles(&look_angles, metadata, req.units)?;
         Ok(Response::new(response))
     }
 }

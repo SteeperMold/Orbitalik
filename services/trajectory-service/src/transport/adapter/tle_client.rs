@@ -44,11 +44,11 @@ impl TleGrpcClient {
             .to_chrono()?;
 
         Ok(Tle {
-            _norad_id: t.norad_id,
+            norad_id: t.norad_id,
             satellite_name: t.satellite_name,
             line1: t.line1,
             line2: t.line2,
-            _epoch: epoch,
+            epoch,
         })
     }
 }

@@ -5,7 +5,7 @@ use crate::service::look_angles::LookAnglesService;
 use crate::service::position::PositionService;
 use crate::transport::grpc::interceptors::LoggingMiddlewareLayer;
 use crate::transport::grpc::trajectory::{
-    TrajectoryGrpc, trajectory_grpc::trajectory_service_server::TrajectoryServiceServer,
+    TrajectoryGrpcServer, trajectory_grpc::trajectory_service_server::TrajectoryServiceServer,
 };
 
 pub async fn run(
@@ -13,7 +13,7 @@ pub async fn run(
     position_service: PositionService,
     look_angles_service: LookAnglesService,
 ) -> Result<(), GrpcServerError> {
-    let trajectory_service = TrajectoryGrpc::new(position_service, look_angles_service);
+    let trajectory_service = TrajectoryGrpcServer::new(position_service, look_angles_service);
 
     let layer = tower::ServiceBuilder::new()
         .layer(LoggingMiddlewareLayer::default())
