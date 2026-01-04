@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net"
-	"net/http"
 
 	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/gen/tlepb"
 	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/domain"
@@ -19,17 +18,14 @@ import (
 
 func StartSchedulers(ctx context.Context, cfg *infrastructure.Config, db domain.DBConn, logger *zap.Logger) {
 	tleRepository := repository.NewTLERepository(db)
-
-	httpClient := &http.Client{Timeout: cfg.TLEFetchTimeout}
-	fetchService := service.NewFetchTLEService(tleRepository, httpClient, cfg.TLESourceUrl)
-
+	fetchService := service.NewFetchTLEService(tleRepository, cfg.TLESourceUrl, cfg.TLEFetchTimeout, cfg.TLEFetchMaxRetries)
 	tleScheduler := scheduler.NewTLEFetchScheduler(fetchService, logger, cfg.TLEFetchInterval, cfg.ContextTimeout)
 
-	go tleScheduler.Start(ctx)
+	tleScheduler.Start(ctx)
 }
 
 func StartHTTPServer(cfg *infrastructure.Config, db domain.DBConn, logger *zap.Logger) {
-	go route.Serve(cfg, db, logger)
+	route.Serve(cfg, db, logger)
 }
 
 func StartGRPCServer(cfg *infrastructure.Config, db domain.DBConn, logger *zap.Logger) {

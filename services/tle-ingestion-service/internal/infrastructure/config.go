@@ -4,21 +4,21 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	AppEnv           string
-	HTTPPort         string
-	GRPCPort         string
-	ContextTimeout   time.Duration
-	TLEFetchInterval time.Duration
-	TLEFetchTimeout  time.Duration
-	TLESourceUrl     string
-	DB               *DBConfig
+	AppEnv             string
+	HTTPPort           string
+	GRPCPort           string
+	ContextTimeout     time.Duration
+	TLEFetchInterval   time.Duration
+	TLEFetchTimeout    time.Duration
+	TLEFetchMaxRetries int
+	TLESourceUrl       string
+	DB                 *DBConfig
 }
 
 type DBConfig struct {
@@ -37,13 +37,14 @@ func NewConfig() *Config {
 	}
 
 	return &Config{
-		AppEnv:           getEnv("APP_ENV", "development"),
-		HTTPPort:         getEnv("HTTP_PORT", "8080"),
-		GRPCPort:         getEnv("GRPC_PORT", "50051"),
-		ContextTimeout:   getEnvAsDuration("CONTEXT_TIMEOUT_MS", 10000) * time.Millisecond,
-		TLEFetchInterval: getEnvAsDuration("TLE_FETCH_INTERVAL_H", 6) * time.Hour,
-		TLEFetchTimeout:  getEnvAsDuration("TLE_FETCH_TIMEOUT_MS", 10000) * time.Millisecond,
-		TLESourceUrl:     getEnv("TLE_SOURCE_URL", "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"),
+		AppEnv:             getEnv("APP_ENV", "development"),
+		HTTPPort:           getEnv("HTTP_PORT", "8080"),
+		GRPCPort:           getEnv("GRPC_PORT", "50051"),
+		ContextTimeout:     getEnvAsDuration("CONTEXT_TIMEOUT_MS", 10000) * time.Millisecond,
+		TLEFetchInterval:   getEnvAsDuration("TLE_FETCH_INTERVAL_H", 6) * time.Hour,
+		TLEFetchTimeout:    getEnvAsDuration("TLE_FETCH_TIMEOUT_MS", 10000) * time.Millisecond,
+		TLEFetchMaxRetries: getEnvAsInt("TLE_FETCH_MAX_RETRIES", 10),
+		TLESourceUrl:       getEnv("TLE_SOURCE_URL", "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"),
 
 		DB: &DBConfig{
 			Host:              getEnv("DB_HOST", "tle-ingestion-service"),
@@ -79,26 +80,4 @@ func getEnvAsInt(name string, defaultVal int) int {
 func getEnvAsDuration(name string, defaultVal time.Duration) time.Duration {
 	value := getEnvAsInt(name, int(defaultVal))
 	return time.Duration(value)
-}
-
-func getEnvAsSlice(name string, defaultVal []string, sep string) []string {
-	valueStr := getEnv(name, "")
-	if valueStr == "" {
-		return defaultVal
-	}
-
-	split := strings.Split(valueStr, sep)
-	result := make([]string, 0, len(split))
-	for _, v := range split {
-		trimmed := strings.TrimSpace(v)
-		if trimmed != "" {
-			result = append(result, trimmed)
-		}
-	}
-
-	if len(result) == 0 {
-		return defaultVal
-	}
-
-	return result
 }

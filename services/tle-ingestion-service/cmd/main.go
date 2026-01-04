@@ -17,8 +17,8 @@ func main() {
 	ctx, cancel := bootstrap.SignalContext()
 	defer cancel()
 
-	bootstrap.StartSchedulers(ctx, cfg, db, logger)
-	bootstrap.StartHTTPServer(cfg, db, logger)
+	go bootstrap.StartSchedulers(ctx, cfg, db, logger)
+	go bootstrap.StartHTTPServer(cfg, db, logger)
 	bootstrap.StartGRPCServer(cfg, db, logger)
 }
 

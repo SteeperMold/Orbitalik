@@ -32,6 +32,7 @@ func (s *TLEServiceServer) GetTle(ctx context.Context, req *tlepb.GetTleRequest)
 	var identifier string
 
 	switch id := req.Identifier.Kind.(type) {
+
 	case *tlepb.SatelliteIdentifier_NoradId:
 		identifier = fmt.Sprintf("norad_id=%d", id.NoradId)
 		tle, err = s.service.GetTLEByNoradID(ctx, int(id.NoradId))
