@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package tle;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gen/tlepb;tlepb";
+
+service TleService {
+    rpc GetTle (GetTleRequest) returns (GetTleResponse);
+    rpc ListTles (ListTlesRequest) returns (ListTlesResponse);
+}
+
+message Tle {
+    uint32 norad_id = 1;
+    string satellite_name = 2;
+    string line1 = 3;
+    string line2 = 4;
+    google.protobuf.Timestamp epoch = 5;
+}
+
+message SatelliteIdentifier {
+    oneof kind {
+        uint32 norad_id = 1;
+        string satellite_name = 2;
+    }
+}
+
+message GetTleRequest {
+    SatelliteIdentifier identifier = 1;
+}
+
+message GetTleResponse {
+    Tle tle = 1;
+}
+
+message ListTlesRequest {}
+
+message ListTlesResponse {
+    repeated Tle tles = 1;
+}

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package trajectory;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+
+service TrajectoryService {
+    rpc GetPosition (PositionRequest) returns (PositionResponse);
+    rpc GetLookAngles (LookAnglesRequest) returns (LookAnglesResponse);
+}
+
+message UnitSettings {
+    enum DistanceUnit {
+        DISTANCE_UNIT_UNSPECIFIED = 0;
+        DISTANCE_UNIT_METERS = 1;
+        DISTANCE_UNIT_KILOMETERS = 2;
+        DISTANCE_UNIT_MILES = 3;
+    }
+
+    enum AngleUnit {
+        ANGLE_UNIT_UNSPECIFIED = 0;
+        ANGLE_UNIT_DEGREES = 1;
+        ANGLE_UNIT_RADIANS = 2;
+    }
+
+    DistanceUnit distance_unit = 1;
+    AngleUnit angle_unit = 2;
+}
+
+message Vector3 {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message GeodeticOutput {
+    double lat = 1;
+    double lon = 2;
+    double alt = 3;
+}
+
+message GeodeticInput {
+    oneof lat {
+        double lat_deg = 1;
+        double lat_rad = 2;
+    }
+    oneof lon {
+        double lon_deg = 3;
+        double lon_rad = 4;
+    }
+    oneof alt {
+        double alt_m = 5;
+        double alt_km = 6;
+    }
+}
+
+message SatelliteIdentifier {
+    oneof kind {
+        uint32 norad_id = 1;
+        string satellite_name = 2;
+    }
+}
+
+message ComputationMetadata {
+    string propagation_model = 1;
+    google.protobuf.Timestamp computation_time = 2;
+    uint32 norad_id = 3;
+    string satellite_name = 4;
+    google.protobuf.Timestamp tle_epoch = 5;
+    UnitSettings units = 6;
+}
+
+message PositionRequest {
+    SatelliteIdentifier identifier = 1;
+    google.protobuf.Timestamp datetime = 2;
+    google.protobuf.FieldMask output_mask = 3;
+    UnitSettings units = 4;
+}
+
+message PositionResponse {
+    ComputationMetadata metadata = 1;
+    optional Vector3 eci = 2;
+    optional Vector3 ecef = 4;
+    optional GeodeticOutput geodetic = 5;
+}
+
+message LookAnglesRequest {
+    SatelliteIdentifier identifier = 1;
+    google.protobuf.Timestamp datetime = 2;
+    GeodeticInput observer = 3;
+    google.protobuf.FieldMask output_mask = 4;
+    UnitSettings units = 5;
+}
+
+message LookAnglesResponse {
+    ComputationMetadata metadata = 1;
+    optional double azimuth = 2;
+    optional double elevation = 3;
+    optional double range = 4;
+}

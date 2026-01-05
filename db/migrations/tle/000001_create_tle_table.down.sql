@@ -1,0 +1,4 @@
+DROP DATABASE IF EXISTS tle;
+
+DROP INDEX IF EXISTS idx_tle_norad;
+DROP INDEX IF EXISTS idx_tle_name;
