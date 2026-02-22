@@ -39,6 +39,12 @@ func toZap(fields []log.Field) []zap.Field {
 			out = append(out, zap.Float64(f.Key, v))
 		case time.Duration:
 			out = append(out, zap.Duration(f.Key, v))
+		case error:
+			if f.Key == "" {
+				out = append(out, zap.Error(v))
+			} else {
+				out = append(out, zap.NamedError(f.Key, v))
+			}
 		default:
 			out = append(out, zap.Any(f.Key, v))
 		}

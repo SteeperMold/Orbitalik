@@ -16,3 +16,10 @@ func NewField(key string, value any) Field {
 		Value: value,
 	}
 }
+
+func NewErrorField(err error) Field {
+	return Field{
+		Key:   "",
+		Value: err,
+	}
+}
