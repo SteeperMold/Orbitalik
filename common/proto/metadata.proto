@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package metadata;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gen/metadatapb;metadatapb";
+
+service SatelliteMetadataService {
+    rpc GetSatelliteMetadata (GetMetadataRequest) returns (GetMetadataResponse);
+    rpc ListSatelliteMetadata (ListSatelliteMetadataRequest) returns (ListSatelliteMetadataResponse);
+}
+
+message GetMetadataRequest {
+    SatelliteIdentifier identifier = 1;
+}
+
+message GetMetadataResponse {
+    SatelliteMetadata metadata = 1;
+}
+
+message ListSatelliteMetadataRequest {
+    ObjectType object_type = 1;
+    MissionType mission_type = 2;
+    OperationalStatus operational_status = 3;
+    OrbitRegime orbit_regime = 4;
+
+    string constellation = 5;
+
+    uint32 page_size = 6;
+    uint32 page_token = 7;
+}
+
+message ListSatelliteMetadataResponse {
+    repeated SatelliteMetadata items = 1;
+    string next_page_token = 2;
+    uint32 total = 3;
+}
+
+message SatelliteIdentifier {
+    oneof kind {
+        uint32 norad_id = 1;
+        string satellite_name = 2;
+    }
+}
+
+message SatelliteMetadata {
+    uint32 norad_id = 1;
+    optional string cospar_id = 2;
+
+    string name = 3;
+    repeated string aliases = 4;
+
+    ObjectType object_type = 5;
+    MissionType mission_type = 6;
+    OrbitRegime orbit_regime = 7;
+
+    optional string operator = 8;
+    optional string owner = 9;
+    optional string constellation = 10;
+
+    optional google.protobuf.Timestamp launch_date = 11;
+    optional string launch_site = 12;
+    optional string launch_vehicle = 13;
+
+    OperationalStatus operational_status = 14;
+
+    repeated Frequency frequencies = 15;
+
+    repeated SourceAttribution sources = 16;
+
+    google.protobuf.Timestamp updated_at = 17;
+}
+
+enum ObjectType {
+    OBJECT_TYPE_UNSPECIFIED = 0;
+    OBJECT_TYPE_PAYLOAD = 1;
+    OBJECT_TYPE_ROCKET_BODY = 2;
+    OBJECT_TYPE_DEBRIS = 3;
+    OBJECT_TYPE_UNKNOWN = 4;
+}
+
+enum MissionType {
+    MISSION_TYPE_UNSPECIFIED = 0;
+    MISSION_TYPE_COMMUNICATIONS = 1;
+    MISSION_TYPE_EARTH_OBSERVATION = 2;
+    MISSION_TYPE_NAVIGATION = 3;
+    MISSION_TYPE_SCIENCE = 4;
+    MISSION_TYPE_WEATHER = 5;
+    MISSION_TYPE_AMATEUR = 6;
+    MISSION_TYPE_TECH_DEMO = 7;
+}
+
+enum OrbitRegime {
+    ORBIT_REGIME_UNSPECIFIED = 0;
+    ORBIT_REGIME_LEO = 1;
+    ORBIT_REGIME_MEO = 2;
+    ORBIT_REGIME_GEO = 3;
+    ORBIT_REGIME_HEO = 4;
+}
+
+enum OperationalStatus {
+    OPERATIONAL_STATUS_UNSPECIFIED = 0;
+    OPERATIONAL_STATUS_ACTIVE = 1;
+    OPERATIONAL_STATUS_INACTIVE = 2;
+    OPERATIONAL_STATUS_DECAYED = 3;
+    OPERATIONAL_STATUS_UNKNOWN = 4;
+}
+
+message Frequency {
+    FrequencyDirection direction = 1;
+    double frequency_mhz = 2;
+    double bandwidth_khz = 3;
+    string modulation = 4;
+    string mode = 5;
+}
+
+enum FrequencyDirection {
+    FREQUENCY_DIRECTION_UNSPECIFIED = 0;
+    FREQUENCY_DIRECTION_UPLINK = 1;
+    FREQUENCY_DIRECTION_DOWNLINK = 2;
+}
+
+message SourceAttribution {
+    Source source = 1;
+    string source_record_id = 2;
+    google.protobuf.Timestamp fetched_at = 3;
+}
+
+enum Source {
+    SOURCE_UNSPECIFIED = 0;
+    SOURCE_CELESTRAK = 1;
+    SOURCE_AMSAT = 2;
+    SOURCE_UCS = 3;
+    SOURCE_MANUAL = 4;
+}
