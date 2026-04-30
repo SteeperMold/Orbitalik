@@ -1,0 +1,7 @@
+go 1.25.7
+
+use (
+	./common/go
+	./services/metadata-service
+	./services/tle-ingestion-service
+)

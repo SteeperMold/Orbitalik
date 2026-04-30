@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"time"
 
 	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/models"
 )
@@ -18,6 +19,7 @@ type TLEService interface {
 
 type TLERepository interface {
 	SaveBatch(ctx context.Context, tles []*models.TLE) error
+	DeleteOlderThan(ctx context.Context, d time.Duration) error
 	GetAllTLEs(ctx context.Context) ([]*models.TLE, error)
 	GetTLEByNoradID(ctx context.Context, noradID int) (*models.TLE, error)
 	GetTLEBySatelliteName(ctx context.Context, name string) (*models.TLE, error)

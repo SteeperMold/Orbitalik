@@ -1,1 +1,2 @@
 CREATE DATABASE tle_db;
+CREATE DATABASE metadata_db;

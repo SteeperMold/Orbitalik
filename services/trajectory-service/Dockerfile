@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y protobuf-compiler && rm -rf /var/lib/ap
 
 COPY /services/trajectory-service .
 
-COPY /proto /app/proto
+COPY /common/proto /app/proto
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \

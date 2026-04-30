@@ -1,4 +1,5 @@
 include:
+  - ./services/metadata-service/docker-compose.yaml
   - ./services/tle-ingestion-service/docker-compose.yaml
   - ./services/trajectory-service/docker-compose.yaml
 

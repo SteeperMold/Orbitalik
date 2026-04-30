@@ -6,4 +6,4 @@ lint:
 .PHONY: dev-rebuild-proto
 dev-update-proto:
 	@echo "Copying proto files..."
-	cp -r ../../proto .
+	cp -r ../../common/proto .

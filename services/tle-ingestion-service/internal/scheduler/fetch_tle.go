@@ -2,19 +2,26 @@ package scheduler
 
 import (
 	"context"
-	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/domain"
-	"go.uber.org/zap"
 	"time"
+
+	applog "github.com/SteeperMold/Orbitalik/common/go/log"
+	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/domain"
 )
 
 type TLEFetchScheduler struct {
 	service        domain.FetchTLEService
-	logger         *zap.Logger
+	logger         applog.Logger
 	interval       time.Duration
 	contextTimeout time.Duration
 }
 
-func NewTLEFetchScheduler(s domain.FetchTLEService, logger *zap.Logger, interval, contextTimeout time.Duration) *TLEFetchScheduler {
+func NewTLEFetchScheduler(
+	s domain.FetchTLEService,
+	logger applog.Logger,
+	interval,
+	contextTimeout time.Duration,
+) *TLEFetchScheduler {
+
 	return &TLEFetchScheduler{
 		service:        s,
 		logger:         logger,
@@ -27,7 +34,7 @@ func (s *TLEFetchScheduler) Start(ctx context.Context) {
 	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()
 
-	s.logger.Info("starting TLE fetch scheduler", zap.Duration("interval", s.interval))
+	s.logger.Info("starting TLE fetch scheduler", applog.NewField("interval", s.interval))
 
 	s.runFetch(ctx)
 
@@ -36,7 +43,7 @@ func (s *TLEFetchScheduler) Start(ctx context.Context) {
 		case <-ticker.C:
 			s.runFetch(ctx)
 		case <-ctx.Done():
-			s.logger.Info("TLE fetch scheduler stopped", zap.Error(ctx.Err()))
+			s.logger.Info("TLE fetch scheduler stopped", applog.NewErrorField(ctx.Err()))
 			return
 		}
 	}
@@ -48,7 +55,7 @@ func (s *TLEFetchScheduler) runFetch(ctx context.Context) {
 
 	err := s.service.FetchTLE(ctx)
 	if err != nil {
-		s.logger.Error("error fetching TLEs", zap.Error(err))
+		s.logger.Error("error fetching TLEs", applog.NewErrorField(err))
 		return
 	}
 

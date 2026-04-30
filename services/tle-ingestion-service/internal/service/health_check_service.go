@@ -3,17 +3,17 @@ package service
 import (
 	"context"
 
-	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/domain"
+	"github.com/SteeperMold/Orbitalik/common/go/db"
 )
 
 // HealthCheckService provides methods to check the health of system dependencies.
 // It verifies connectivity to the database and Kafka.
 type HealthCheckService struct {
-	db domain.DBConn
+	db db.Conn
 }
 
 // NewHealthCheckService creates and returns a new HealthCheckService.
-func NewHealthCheckService(db domain.DBConn) *HealthCheckService {
+func NewHealthCheckService(db db.Conn) *HealthCheckService {
 	return &HealthCheckService{
 		db: db,
 	}

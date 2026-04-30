@@ -20,15 +20,15 @@ message GetMetadataResponse {
 }
 
 message ListSatelliteMetadataRequest {
-    ObjectType object_type = 1;
-    MissionType mission_type = 2;
-    OperationalStatus operational_status = 3;
-    OrbitRegime orbit_regime = 4;
+    optional ObjectType object_type = 1;
+    optional MissionType mission_type = 2;
+    optional OperationalStatus operational_status = 3;
+    optional OrbitRegime orbit_regime = 4;
 
-    string constellation = 5;
+    optional string constellation = 5;
 
     uint32 page_size = 6;
-    uint32 page_token = 7;
+    string page_token = 7;
 }
 
 message ListSatelliteMetadataResponse {

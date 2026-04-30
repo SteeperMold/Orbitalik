@@ -5,19 +5,19 @@ import (
 	"net/http"
 	"time"
 
+	applog "github.com/SteeperMold/Orbitalik/common/go/log"
 	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/domain"
-	"go.uber.org/zap"
 )
 
 // HealthCheckHandler handles HTTP requests for system health checks.
 type HealthCheckHandler struct {
 	service        domain.HealthCheckService
-	logger         *zap.Logger
+	logger         applog.Logger
 	contextTimeout time.Duration
 }
 
 // NewHealthHandler creates and returns a new HealthCheckHandler.
-func NewHealthHandler(s domain.HealthCheckService, logger *zap.Logger, timeout time.Duration) *HealthCheckHandler {
+func NewHealthHandler(s domain.HealthCheckService, logger applog.Logger, timeout time.Duration) *HealthCheckHandler {
 	return &HealthCheckHandler{
 		service:        s,
 		logger:         logger,

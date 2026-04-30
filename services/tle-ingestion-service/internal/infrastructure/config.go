@@ -2,10 +2,9 @@ package infrastructure
 
 import (
 	"log"
-	"os"
-	"strconv"
 	"time"
 
+	"github.com/SteeperMold/Orbitalik/common/go/config"
 	"github.com/joho/godotenv"
 )
 
@@ -14,10 +13,13 @@ type Config struct {
 	HTTPPort           string
 	GRPCPort           string
 	ContextTimeout     time.Duration
+	TLESourceUrl       string
 	TLEFetchInterval   time.Duration
 	TLEFetchTimeout    time.Duration
 	TLEFetchMaxRetries int
-	TLESourceUrl       string
+	TLECleanupInterval time.Duration
+	TLERetentionPeriod time.Duration
+	TLECleanupTimeout  time.Duration
 	DB                 *DBConfig
 }
 
@@ -33,51 +35,29 @@ type DBConfig struct {
 func NewConfig() *Config {
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("failed to load .env file, using defaults: %v\n", err)
+		log.Printf("failed to load .env filesource, using defaults: %v\n", err)
 	}
 
 	return &Config{
-		AppEnv:             getEnv("APP_ENV", "development"),
-		HTTPPort:           getEnv("HTTP_PORT", "8080"),
-		GRPCPort:           getEnv("GRPC_PORT", "50051"),
-		ContextTimeout:     getEnvAsDuration("CONTEXT_TIMEOUT_MS", 10000) * time.Millisecond,
-		TLEFetchInterval:   getEnvAsDuration("TLE_FETCH_INTERVAL_H", 6) * time.Hour,
-		TLEFetchTimeout:    getEnvAsDuration("TLE_FETCH_TIMEOUT_MS", 10000) * time.Millisecond,
-		TLEFetchMaxRetries: getEnvAsInt("TLE_FETCH_MAX_RETRIES", 10),
-		TLESourceUrl:       getEnv("TLE_SOURCE_URL", "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"),
+		AppEnv:             config.GetEnv("APP_ENV", "development"),
+		HTTPPort:           config.GetEnv("HTTP_PORT", "8080"),
+		GRPCPort:           config.GetEnv("GRPC_PORT", "50051"),
+		ContextTimeout:     config.GetEnvAsDuration("CONTEXT_TIMEOUT", 10*time.Second),
+		TLESourceUrl:       config.GetEnv("TLE_SOURCE_URL", "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"),
+		TLEFetchInterval:   config.GetEnvAsDuration("TLE_FETCH_INTERVAL", 6*time.Hour),
+		TLEFetchTimeout:    config.GetEnvAsDuration("TLE_FETCH_TIMEOUT", 60*time.Second),
+		TLEFetchMaxRetries: config.GetEnvAsInt("TLE_FETCH_MAX_RETRIES", 10),
+		TLECleanupInterval: config.GetEnvAsDuration("TLE_CLEANUP_INTERVAL", 24*time.Hour),
+		TLERetentionPeriod: config.GetEnvAsDuration("TLE_RETENTION_PERIOD", 31*24*time.Hour),
+		TLECleanupTimeout:  config.GetEnvAsDuration("TLE_CLEANUP_TIMEOUT", 5*time.Minute),
 
 		DB: &DBConfig{
-			Host:              getEnv("DB_HOST", "tle-ingestion-service"),
-			Port:              getEnv("DB_PORT", "5432"),
-			Name:              getEnv("DB_NAME", "tle_database"),
-			User:              getEnv("DB_USER", "user"),
-			Password:          getEnv("DB_PASSWORD", "123456789admin"),
-			ConnectionTimeout: getEnvAsDuration("DB_CONNECTION_TIMEOUT_MS", 10_000) * time.Millisecond,
+			Host:              config.GetEnv("DB_HOST", "metadata-service"),
+			Port:              config.GetEnv("DB_PORT", "5432"),
+			Name:              config.GetEnv("DB_NAME", "metadata_db"),
+			User:              config.GetEnv("DB_USER", "user"),
+			Password:          config.GetEnv("DB_PASSWORD", "123456789admin"),
+			ConnectionTimeout: config.GetEnvAsDuration("DB_CONNECTION_TIMEOUT", 10*time.Second),
 		},
 	}
-}
-
-func getEnv(key string, defaultVal string) string {
-	value, exists := os.LookupEnv(key)
-	if !exists {
-		return defaultVal
-	}
-
-	return value
-}
-
-func getEnvAsInt(name string, defaultVal int) int {
-	valueStr := getEnv(name, "")
-
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		return defaultVal
-	}
-
-	return value
-}
-
-func getEnvAsDuration(name string, defaultVal time.Duration) time.Duration {
-	value := getEnvAsInt(name, int(defaultVal))
-	return time.Duration(value)
 }
