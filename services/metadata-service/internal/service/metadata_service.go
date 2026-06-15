@@ -3,15 +3,20 @@ package service
 import (
 	"context"
 
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
 )
 
-type MetadataService struct {
-	repo domain.MetadataRepository
+type MetadataRepository interface {
+	GetMetadataByNoradID(ctx context.Context, noradID int) (*models.SatelliteMetadata, error)
+	GetMetadataByName(ctx context.Context, name string) (*models.SatelliteMetadata, error)
+	ListSatellites(ctx context.Context, filter *models.ListFilter) ([]*models.SatelliteMetadata, string, uint32, error)
 }
 
-func NewMetadataService(repo domain.MetadataRepository) *MetadataService {
+type MetadataService struct {
+	repo MetadataRepository
+}
+
+func NewMetadataService(repo MetadataRepository) *MetadataService {
 	return &MetadataService{
 		repo: repo,
 	}

@@ -14,20 +14,26 @@ type MetadataSource interface {
 	Name() string
 }
 
-type MetadataRepository interface {
+type RawMetadataRepository interface {
 	SaveRawBatch(ctx context.Context, data []*models.SatelliteIngestRecord) error
+}
+
+type DirtyMarker interface {
+	MarkDirty(ctx context.Context, noradIDs []int) error
 }
 
 type Service struct {
 	sources []MetadataSource
-	repo    MetadataRepository
+	repo    RawMetadataRepository
+	dirty   DirtyMarker
 	logger  applog.Logger
 }
 
-func NewService(sources []MetadataSource, repo MetadataRepository, logger applog.Logger) *Service {
+func NewService(sources []MetadataSource, repo RawMetadataRepository, dirty DirtyMarker, logger applog.Logger) *Service {
 	return &Service{
 		sources: sources,
 		repo:    repo,
+		dirty:   dirty,
 		logger:  logger,
 	}
 }
@@ -61,18 +67,29 @@ func (s *Service) ingestSource(ctx context.Context, src MetadataSource) error {
 		}
 
 		ingestBatch := make([]*models.SatelliteIngestRecord, 0, len(batch))
+		noradIDs := make([]int, 0, len(batch))
 
 		for _, r := range batch {
 			rec, err := toIngestRecord(r)
 			if err != nil {
 				continue
 			}
+
 			ingestBatch = append(ingestBatch, rec)
+			noradIDs = append(noradIDs, rec.NoradID)
 		}
 
 		total += len(batch)
 
-		return s.repo.SaveRawBatch(ctx, ingestBatch)
+		if err := s.repo.SaveRawBatch(ctx, ingestBatch); err != nil {
+			return err
+		}
+
+		if err := s.dirty.MarkDirty(ctx, noradIDs); err != nil {
+			s.logger.Error("failed to mark satellites dirty", applog.NewErrorField(err))
+		}
+
+		return nil
 	})
 
 	if err != nil {

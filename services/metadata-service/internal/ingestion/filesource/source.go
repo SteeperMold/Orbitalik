@@ -12,14 +12,12 @@ import (
 )
 
 type Parser interface {
-	Stream(r io.Reader, fn func(row Row) error) error
+	Stream(r io.Reader, fn func(row ingestion.Row) error) error
 }
 
 type Mapper interface {
-	Map(row Row) (json.RawMessage, error)
+	Map(row ingestion.Row) (json.RawMessage, error)
 }
-
-type Row map[string]string
 
 type Source struct {
 	name      string
@@ -53,7 +51,7 @@ func (s *Source) StreamBatch(ctx context.Context, fn func([]*ingestion.Satellite
 	now := time.Now()
 	batch := make([]*ingestion.SatelliteSourceRecord, 0, s.batchSize)
 
-	err = s.parser.Stream(f, func(row Row) error {
+	err = s.parser.Stream(f, func(row ingestion.Row) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

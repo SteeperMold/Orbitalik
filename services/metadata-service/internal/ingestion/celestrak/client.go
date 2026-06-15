@@ -51,6 +51,14 @@ func (c *Client) fetchOnce(ctx context.Context) (io.ReadCloser, error) {
 		return nil, err
 	}
 
+	req.Header.Set("Accept-Encoding", "gzip")
+	req.Header.Set("User-Agent", "Mozilla/5.0 ...")
+	req.Header.Set("Accept", "text/plain, */*;q=0.9")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Accept-Encoding", "gzip")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Cache-Control", "no-cache")
+
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err

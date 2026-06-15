@@ -1,0 +1,17 @@
+services:
+  metadata-aggregation-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - orbitalik-net
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      metadata-service:
+        condition: service_healthy
+    restart: unless-stopped

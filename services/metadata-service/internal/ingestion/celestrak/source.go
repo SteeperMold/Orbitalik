@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/filesource"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
 )
 
@@ -35,7 +34,7 @@ func (s *Source) StreamBatch(ctx context.Context, fn func([]*ingestion.Satellite
 	now := time.Now()
 	batch := make([]*ingestion.SatelliteSourceRecord, 0, s.batchSize)
 
-	err = s.parser.Stream(reader, func(r filesource.Row) error {
+	err = s.parser.Stream(reader, func(r ingestion.Row) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

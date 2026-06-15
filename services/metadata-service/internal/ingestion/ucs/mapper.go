@@ -2,11 +2,11 @@ package ucs
 
 import (
 	"encoding/json"
+	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/filesource"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
 )
 
@@ -16,7 +16,7 @@ func NewMapper() *Mapper {
 	return &Mapper{}
 }
 
-func (m *Mapper) Map(r filesource.Row) (json.RawMessage, error) {
+func (m *Mapper) Map(r ingestion.Row) (json.RawMessage, error) {
 	noradID, err := strconv.Atoi(clean(r["norad_id"]))
 	if err != nil {
 		return nil, err
@@ -24,31 +24,29 @@ func (m *Mapper) Map(r filesource.Row) (json.RawMessage, error) {
 
 	now := time.Now()
 
-	meta := &models.SatelliteMetadata{
+	meta := &models.SatelliteMetadataPartial{
 		NoradID: noradID,
-		Name:    clean(r["name"]),
+		Name:    getPtr(clean(r["name"])),
 
-		ObjectType:  models.ObjectTypePayload,
-		MissionType: mapMissionType(r["users"], r["purpose"]),
-		OrbitRegime: mapOrbit(r["orbit_class"]),
+		ObjectType:  getPtr(models.ObjectTypePayload),
+		MissionType: getPtr(mapMissionType(r["users"], r["purpose"])),
+		OrbitRegime: getPtr(mapOrbit(r["orbit_class"])),
 
-		OperationalStatus: models.OperationalStatusUnknown,
-		UpdatedAt:         now,
+		OperationalStatus: getPtr(models.OperationalStatusUnknown),
+		FetchedAt:         now,
 
-		Sources: []models.SourceAttribution{
-			{
-				Source:         models.SourceUCS,
-				SourceRecordID: clean(r["norad_id"]),
-				FetchedAt:      now,
-			},
+		Source: models.SourceAttribution{
+			Source:         models.SourceUCS,
+			SourceRecordID: clean(r["norad_id"]),
+			FetchedAt:      now,
 		},
 	}
 
-	meta.Operator = getStrPtr(r["operator"])
-	meta.Owner = getStrPtr(r["owner"])
-	meta.LaunchSite = getStrPtr(r["launch_site"])
-	meta.LaunchVehicle = getStrPtr(r["launch_vehicle"])
-	meta.CosparID = getStrPtr(r["cospar"])
+	meta.Operator = getPtr(r["operator"])
+	meta.Owner = getPtr(r["owner"])
+	meta.LaunchSite = getPtr(r["launch_site"])
+	meta.LaunchVehicle = getPtr(r["launch_vehicle"])
+	meta.CosparID = getPtr(r["cospar"])
 
 	meta.LaunchDate = parseDate(r["launch_date"])
 
@@ -57,8 +55,7 @@ func (m *Mapper) Map(r filesource.Row) (json.RawMessage, error) {
 	return json.Marshal(meta)
 }
 
-func getStrPtr(s string) *string {
-	s = clean(s)
+func getPtr[T ~string](s T) *T {
 	if s == "" {
 		return nil
 	}
@@ -116,7 +113,7 @@ func extractAliases(name string) []string {
 }
 
 func mapMissionType(users, purpose string) models.MissionType {
-	s := strings.ToLower(users + " " + purpose)
+	s := strings.ToLower(clean(users) + " " + clean(purpose))
 
 	switch {
 	case strings.Contains(s, "communication"):

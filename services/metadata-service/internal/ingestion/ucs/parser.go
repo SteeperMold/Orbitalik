@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/filesource"
+	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
 )
 
 type Parser struct{}
@@ -16,7 +16,7 @@ func NewParser() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Stream(r io.Reader, fn func(filesource.Row) error) error {
+func (p *Parser) Stream(r io.Reader, fn func(ingestion.Row) error) error {
 	reader := csv.NewReader(r)
 	reader.Comma = '\t'
 	reader.LazyQuotes = true
@@ -67,7 +67,7 @@ func normalizeHeader(h string) string {
 	return strings.ToLower(strings.TrimSpace(h))
 }
 
-func mapRow(idx map[string]int, row []string) filesource.Row {
+func mapRow(idx map[string]int, row []string) ingestion.Row {
 	get := func(key string) string {
 		i, ok := idx[key]
 		if !ok || i >= len(row) {
@@ -81,7 +81,7 @@ func mapRow(idx map[string]int, row []string) filesource.Row {
 		return nil
 	}
 
-	return filesource.Row{
+	return ingestion.Row{
 		"norad_id":       norad,
 		"name":           get("current official name of satellite"),
 		"aliases":        get("name of satellite, alternate names"),

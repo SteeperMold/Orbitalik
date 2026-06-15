@@ -1,5 +1,6 @@
 include:
   - ./services/metadata-service/docker-compose.yaml
+  - ./services/metadata-aggregation-worker/docker-compose.yaml
   - ./services/tle-ingestion-service/docker-compose.yaml
   - ./services/trajectory-service/docker-compose.yaml
 
@@ -35,6 +36,25 @@ services:
         limits:
           cpus: '4'
           memory: 16G
+
+  redis:
+    image: redis:7
+    networks:
+      - orbitalik-net
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "PING" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   alloy:
     image: grafana/alloy:latest
@@ -87,5 +107,6 @@ services:
 
 volumes:
   pgdata:
+  redisdata:
   grafanadata:
   prometheusdata:

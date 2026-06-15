@@ -13,3 +13,5 @@ type SatelliteSourceRecord struct {
 
 	Raw json.RawMessage
 }
+
+type Row map[string]string

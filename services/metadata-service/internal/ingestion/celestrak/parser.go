@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/filesource"
+	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
 )
 
 type Parser struct{}
@@ -15,7 +15,7 @@ func NewParser() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Stream(r io.Reader, fn func(filesource.Row) error) error {
+func (p *Parser) Stream(r io.Reader, fn func(ingestion.Row) error) error {
 	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
@@ -34,9 +34,8 @@ func (p *Parser) Stream(r io.Reader, fn func(filesource.Row) error) error {
 	return scanner.Err()
 }
 
-func parseLine(line string) filesource.Row {
-	// SATCAT lines are ~130 chars, guard early
-	if len(line) < 50 {
+func parseLine(line string) ingestion.Row {
+	if len(line) < 80 {
 		return nil
 	}
 
@@ -55,15 +54,22 @@ func parseLine(line string) filesource.Row {
 		return nil
 	}
 
-	noradID, err := strconv.Atoi(noradStr)
-	if err != nil {
+	if _, err := strconv.Atoi(noradStr); err != nil {
 		return nil
 	}
 
-	return filesource.Row{
-		"norad_id":    strconv.Itoa(noradID),
-		"object_type": slice(7, 11),
-		"status":      slice(21, 23),
+	return ingestion.Row{
+		"norad_id":    noradStr,
+		"cospar_id":   slice(0, 11),
 		"name":        slice(23, 47),
+		"flags":       slice(21, 23), // *, D, etc
+		"owner":       slice(49, 54),
+		"launch_date": slice(56, 66),
+		"launch_site": slice(68, 73),
+		"decay_date":  slice(75, 85),
+		"period":      slice(87, 94),
+		"inclination": slice(96, 101),
+		"apogee":      slice(103, 109),
+		"perigee":     slice(111, 117),
 	}
 }

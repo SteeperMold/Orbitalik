@@ -13,36 +13,68 @@ import (
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/celestrak"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/fallback"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/filesource"
+	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/satnogs"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion/ucs"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
+	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/queue"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/repository"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/scheduler"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/service"
 	transportGrpc "github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/transport/grpc"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/transport/http/route"
+	"github.com/redis/go-redis/v9"
 )
 
-func StartSchedulers(ctx context.Context, cfg *infrastructure.Config, db db.Conn, logger applog.Logger) {
-	ucsSource := ucs.NewSource(
-		ucs.NewClient(cfg.UCS.SourceURL, cfg.UCS.FetchTimeout, cfg.UCS.FetchRetries),
-		ucs.NewParser(),
-		ucs.NewMapper(),
-		cfg.UCS.BatchSize,
+func StartSchedulers(ctx context.Context, cfg *infrastructure.Config, db db.Conn, rdb *redis.Client, logger applog.Logger) {
+	ucsWithFallback := fallback.NewFallbackSource(
+		ucs.NewSource(
+			ucs.NewClient(cfg.UCS.SourceURL, cfg.UCS.FetchTimeout, cfg.UCS.FetchRetries),
+			ucs.NewParser(),
+			ucs.NewMapper(),
+			cfg.UCS.BatchSize,
+		),
+		filesource.NewSource(
+			string(models.SourceUCS),
+			cfg.UCS.FallbackFilePath,
+			ucs.NewParser(),
+			ucs.NewMapper(),
+			cfg.UCS.BatchSize,
+		),
+		logger,
 	)
-	ucsFallbackFile := filesource.NewSource(string(models.SourceUCS), cfg.UCS.FallbackFilePath, ucs.NewParser(), ucs.NewMapper(), cfg.UCS.BatchSize)
-	ucsWithFallback := fallback.NewFallbackSource(ucsSource, ucsFallbackFile, logger)
-	celestrakSource := celestrak.NewSource(
-		celestrak.NewClient(cfg.Celestrak.SourceURL, cfg.Celestrak.FetchTimeout, cfg.Celestrak.FetchRetries),
-		celestrak.NewParser(),
-		celestrak.NewMapper(),
-		cfg.Celestrak.BatchSize,
+	celestrakWithFallback := fallback.NewFallbackSource(
+		celestrak.NewSource(
+			celestrak.NewClient(cfg.Celestrak.SourceURL, cfg.Celestrak.FetchTimeout, cfg.Celestrak.FetchRetries),
+			celestrak.NewParser(),
+			celestrak.NewMapper(),
+			cfg.Celestrak.BatchSize,
+		),
+		filesource.NewSource(
+			string(models.SourceCelestrak),
+			cfg.Celestrak.FallbackFilePath,
+			celestrak.NewParser(),
+			celestrak.NewMapper(),
+			cfg.Celestrak.BatchSize,
+		),
+		logger,
 	)
-	celecstrakFallbackFile := filesource.NewSource(string(models.SourceCelestrak), cfg.Celestrak.FallbackFilePath, celestrak.NewParser(), celestrak.NewMapper(), cfg.Celestrak.BatchSize)
-	celestrakWithFallback := fallback.NewFallbackSource(celestrakSource, celecstrakFallbackFile, logger)
-	sources := []ingestion.MetadataSource{ucsWithFallback, celestrakWithFallback}
-	metadataRepo := repository.NewMetadataRepository(db)
-	ingestionService := ingestion.NewService(sources, metadataRepo, logger)
-	fetchMetadataScheduler := scheduler.NewFetchMetadataScheduler(ingestionService, logger, cfg.IngestionInterval, cfg.IngestionTimeout)
+	satnogsSource := satnogs.NewSource(
+		satnogs.NewClient(cfg.SatNOGS.SourceURL, cfg.SatNOGS.FetchTimeout, cfg.SatNOGS.FetchRetries),
+		satnogs.NewMapper(),
+		cfg.SatNOGS.BatchSize,
+	)
+	sources := []ingestion.MetadataSource{ucsWithFallback, celestrakWithFallback, satnogsSource}
+
+	metadataRepo := repository.NewRawMetadataRepository(db)
+	dirtyMarker := queue.NewDirtyMarker(rdb, cfg.Redis.DirtySatellitesSetKey, cfg.Redis.DirtySatellitesQueueKey)
+	ingestionService := ingestion.NewService(sources, metadataRepo, dirtyMarker, logger)
+
+	fetchMetadataScheduler := scheduler.NewFetchMetadataScheduler(
+		ingestionService,
+		logger,
+		cfg.IngestionInterval,
+		cfg.IngestionTimeout,
+	)
 	fetchMetadataScheduler.Start(ctx)
 }
 

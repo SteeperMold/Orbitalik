@@ -6,22 +6,27 @@ import (
 
 	applog "github.com/SteeperMold/Orbitalik/common/go/log"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/gen/metadatapb"
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+type MetadataService interface {
+	GetMetadataByNoradID(ctx context.Context, noradID int) (*models.SatelliteMetadata, error)
+	GetMetadataByName(ctx context.Context, name string) (*models.SatelliteMetadata, error)
+	ListSatellites(ctx context.Context, filter *models.ListFilter) ([]*models.SatelliteMetadata, string, uint32, error)
+}
+
 type MetadataServer struct {
 	metadatapb.UnimplementedSatelliteMetadataServiceServer
 
-	service         domain.MetadataService
+	service         MetadataService
 	logger          applog.Logger
 	maxPageSize     uint32
 	defaultPageSize uint32
 }
 
-func NewMetadataServer(s domain.MetadataService, logger applog.Logger, maxPageSize, defaultPageSize uint32) *MetadataServer {
+func NewMetadataServer(s MetadataService, logger applog.Logger, maxPageSize, defaultPageSize uint32) *MetadataServer {
 	return &MetadataServer{
 		service:         s,
 		logger:          logger,

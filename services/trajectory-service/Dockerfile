@@ -1,7 +1,12 @@
-FROM rust:1.89 AS cargo-tools
+FROM rust:1.90-slim AS cargo-tools
 
-RUN cargo install sccache --version ^0.7 && \
-    cargo install cargo-chef --version ^0.1
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN cargo install sccache --locked && \
+    cargo install cargo-chef --locked
 
 ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
 

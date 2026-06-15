@@ -2,13 +2,11 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/SteeperMold/Orbitalik/common/go/db"
-	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
 	"github.com/jackc/pgx/v5"
 )
@@ -23,42 +21,6 @@ func NewMetadataRepository(db db.Conn) *MetadataRepository {
 		db:   db,
 		psql: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
-}
-
-func (r *MetadataRepository) SaveRawBatch(ctx context.Context, data []*models.SatelliteIngestRecord) error {
-	if len(data) == 0 {
-		return nil
-	}
-
-	tx, err := r.db.Begin(ctx)
-	if err != nil {
-		return err
-	}
-
-	pgxTx, ok := tx.(postgres.CopyFromTx)
-	if !ok {
-		return errors.New("CopyFrom not supported")
-	}
-
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback(ctx)
-		} else {
-			err = tx.Commit(ctx)
-		}
-	}()
-
-	_, err = pgxTx.CopyFrom(
-		ctx,
-		pgx.Identifier{"satellite_metadata_raw"},
-		[]string{"norad_id", "cospar_id", "source", "payload", "fetched_at"},
-		newRawMetadataCopySource(data),
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *MetadataRepository) GetMetadataByNoradID(ctx context.Context, noradID int) (*models.SatelliteMetadata, error) {
