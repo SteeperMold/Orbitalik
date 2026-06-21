@@ -27,6 +27,8 @@ impl Propagator {
     ) -> Result<LookAngles, PropagationError> {
         if !compute.azimuth && !compute.elevation && !compute.range {
             return Ok(LookAngles {
+                time: datetime,
+
                 azimuth: None,
                 elevation: None,
                 range: None,
@@ -83,6 +85,8 @@ impl Propagator {
         };
 
         Ok(LookAngles {
+            time: datetime,
+
             azimuth,
             elevation,
             range,

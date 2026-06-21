@@ -48,6 +48,8 @@ pub enum PropagationError {
     DatetimeToMinutesSinceEpochFailed(#[from] sgp4::DatetimeToMinutesSinceEpochError),
     #[error("SGP4 propagation failed: {0}")]
     PropagationFailed(#[from] sgp4::Error),
+    #[error("Failed to convert numeric types")]
+    IntConversion(#[from] std::num::TryFromIntError),
 }
 
 impl From<PropagationError> for tonic::Status {
@@ -57,7 +59,8 @@ impl From<PropagationError> for tonic::Status {
             PropagationError::TleParse(_)
             | PropagationError::ElementsCreation(_)
             | PropagationError::DatetimeToMinutesSinceEpochFailed(_)
-            | PropagationError::PropagationFailed(_) => {
+            | PropagationError::PropagationFailed(_)
+            | PropagationError::IntConversion(_) => {
                 tracing::error!("propagation error: {:?}", value);
                 Self::internal("Internal server error")
             }
@@ -78,4 +81,16 @@ impl From<TimestampConversionError> for tonic::Status {
         tracing::error!("timestamp conversion failed: {:?}", value);
         Self::internal("Internal server error")
     }
+}
+
+#[derive(Debug, Error)]
+pub enum TimeRangeError {
+    #[error("Start must be <= end")]
+    InvalidOrder,
+}
+
+#[derive(Debug, Error)]
+pub enum SamplingError {
+    #[error("Step must be > 0")]
+    InvalidStep,
 }

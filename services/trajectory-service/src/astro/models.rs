@@ -12,13 +12,35 @@ pub struct Tle {
 }
 
 pub struct SatellitePosition {
+    pub time: DateTime<Utc>,
+
     pub eci: Option<Eci>,
     pub ecef: Option<Ecef>,
     pub geodetic: Option<Geodetic>,
 }
 
 pub struct LookAngles {
+    pub time: DateTime<Utc>,
+
     pub azimuth: Option<Angle>,
     pub elevation: Option<Angle>,
     pub range: Option<Length>,
+}
+
+pub struct Trajectory {
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
+
+    pub step_seconds: u32,
+
+    pub samples: Vec<SatellitePosition>,
+}
+
+pub struct ObserverTrajectory {
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
+
+    pub step_seconds: u32,
+
+    pub samples: Vec<LookAngles>,
 }

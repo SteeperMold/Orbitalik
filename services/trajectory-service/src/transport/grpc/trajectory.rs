@@ -2,42 +2,16 @@ use tonic::{Request, Response, Status};
 
 use crate::astro::look_angles::LookAnglesComputation;
 use crate::astro::position::PositionComputation;
-use crate::service::look_angles::LookAnglesService;
-use crate::service::position::PositionService;
-use crate::transport::grpc::converters::ToChrono;
-
-use trajectory_grpc::{
-    LookAnglesRequest, LookAnglesResponse, PositionRequest, PositionResponse,
-    trajectory_service_server::TrajectoryService,
+use crate::transport::grpc::service::TrajectoryGrpcServer;
+use crate::transport::grpc::service::trajectory_grpc::{
+    ObserverTrajectoryRequest, ObserverTrajectoryResponse, TrajectoryRequest, TrajectoryResponse,
 };
 
-pub mod trajectory_grpc {
-    tonic::include_proto!("trajectory");
-}
-
-pub struct TrajectoryGrpcServer {
-    position_service: PositionService,
-    look_angles_service: LookAnglesService,
-}
-
 impl TrajectoryGrpcServer {
-    pub const fn new(
-        position_service: PositionService,
-        look_angles_service: LookAnglesService,
-    ) -> Self {
-        Self {
-            position_service,
-            look_angles_service,
-        }
-    }
-}
-
-#[tonic::async_trait]
-impl TrajectoryService for TrajectoryGrpcServer {
-    async fn get_position(
+    pub async fn handle_get_trajectory(
         &self,
-        request: Request<PositionRequest>,
-    ) -> Result<Response<PositionResponse>, Status> {
+        request: Request<TrajectoryRequest>,
+    ) -> Result<Response<TrajectoryResponse>, Status> {
         let req = request.into_inner();
 
         let identifier = req
@@ -45,41 +19,48 @@ impl TrajectoryService for TrajectoryGrpcServer {
             .ok_or_else(|| Status::invalid_argument("Missing satellite identifier"))?
             .try_into()?;
 
-        let datetime = req
-            .datetime
-            .ok_or_else(|| Status::invalid_argument("Missing datetime"))?
-            .to_chrono()?;
+        let range = req
+            .range
+            .ok_or_else(|| Status::invalid_argument("Missing range"))?
+            .try_into()?;
+
+        let sampling = req
+            .sampling
+            .ok_or_else(|| Status::invalid_argument("Missing sampling"))?
+            .try_into()?;
 
         let mask = req.output_mask.as_ref();
-
         let compute = mask.map_or_else(PositionComputation::default, PositionComputation::from);
 
-        let (position, metadata) = self
-            .position_service
-            .get_position_with_metadata(identifier, datetime, &compute)
+        let (trajectory, metadata) = self
+            .trajectory_service
+            .get_trajectory(identifier, range, sampling, &compute)
             .await?;
 
-        let response = PositionResponse::from_position(&position, metadata, req.units)?;
+        let response = TrajectoryResponse::from_trajectory(&trajectory, metadata, req.units)?;
         Ok(Response::new(response))
     }
 
-    async fn get_look_angles(
+    pub async fn handle_get_observer_trajectory(
         &self,
-        request: Request<LookAnglesRequest>,
-    ) -> Result<Response<LookAnglesResponse>, Status> {
+        request: Request<ObserverTrajectoryRequest>,
+    ) -> Result<Response<ObserverTrajectoryResponse>, Status> {
         let req = request.into_inner();
 
         let identifier = req
             .identifier
-            .ok_or_else(|| {
-                Status::invalid_argument("Missing satellite identifier (norad_id or name)")
-            })?
+            .ok_or_else(|| Status::invalid_argument("Missing satellite identifier"))?
             .try_into()?;
 
-        let datetime = req
-            .datetime
-            .ok_or_else(|| Status::invalid_argument("Missing datetime"))?
-            .to_chrono()?;
+        let range = req
+            .range
+            .ok_or_else(|| Status::invalid_argument("Missing range"))?
+            .try_into()?;
+
+        let sampling = req
+            .sampling
+            .ok_or_else(|| Status::invalid_argument("Missing sampling"))?
+            .try_into()?;
 
         let observer = req
             .observer
@@ -87,15 +68,18 @@ impl TrajectoryService for TrajectoryGrpcServer {
             .try_into()?;
 
         let mask = req.output_mask.as_ref();
-
         let compute = mask.map_or_else(LookAnglesComputation::default, LookAnglesComputation::from);
 
-        let (look_angles, metadata) = self
-            .look_angles_service
-            .get_look_angles_with_metadata(identifier, datetime, &observer, &compute)
+        let (observer_trajectory, metadata) = self
+            .trajectory_service
+            .get_observer_trajectory(identifier, range, sampling, &observer, &compute)
             .await?;
 
-        let response = LookAnglesResponse::from_look_angles(&look_angles, metadata, req.units)?;
+        let response = ObserverTrajectoryResponse::from_observer_trajectory(
+            &observer_trajectory,
+            metadata,
+            req.units,
+        )?;
         Ok(Response::new(response))
     }
 }

@@ -1,37 +1,38 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use std::sync::Arc;
 
 use crate::astro::coords::geodetic::Geodetic;
 use crate::astro::look_angles::LookAnglesComputation;
-use crate::astro::models::{LookAngles, SatellitePosition};
+use crate::astro::models::{ObserverTrajectory, Trajectory};
 use crate::astro::position::PositionComputation;
 use crate::astro::propagator::Propagator;
 use crate::domain::errors::PropagationError;
-use crate::domain::models::{ComputationMetadata, SatelliteIdentifier};
+use crate::domain::models::{ComputationMetadata, Sampling, SatelliteIdentifier, TimeRange};
 use crate::transport::adapter::tle_client::TleGrpcClient;
 
-pub struct PositionService {
+pub struct TrajectoryService {
     tle_grpc_client: Arc<TleGrpcClient>,
 }
 
-impl PositionService {
+impl TrajectoryService {
     pub const fn new(tle_grpc_client: Arc<TleGrpcClient>) -> Self {
         Self { tle_grpc_client }
     }
 
-    pub async fn get_position(
+    pub async fn get_trajectory(
         &self,
         satellite_identifier: SatelliteIdentifier,
-        datetime: DateTime<Utc>,
+        range: TimeRange,
+        sampling: Sampling,
         compute: &PositionComputation,
-    ) -> Result<(SatellitePosition, ComputationMetadata), PropagationError> {
+    ) -> Result<(Trajectory, ComputationMetadata), PropagationError> {
         let tle = self
             .tle_grpc_client
             .get_tle(satellite_identifier.clone())
             .await?;
 
-        let position = Propagator::from_tle(&tle)?.position_at(datetime, compute)?;
-        
+        let trajectory = Propagator::from_tle(&tle)?.trajectory_at(range, sampling, compute)?;
+
         let metadata = ComputationMetadata {
             propagation_model: "SGP4".to_string(),
             computation_time: Utc::now(),
@@ -40,23 +41,25 @@ impl PositionService {
             tle_epoch: tle.epoch,
         };
 
-        Ok((position, metadata))
+        Ok((trajectory, metadata))
     }
 
-    pub async fn get_look_angles(
+    pub async fn get_observer_trajectory(
         &self,
         satellite_identifier: SatelliteIdentifier,
-        datetime: DateTime<Utc>,
+        range: TimeRange,
+        sampling: Sampling,
         observer: &Geodetic,
         compute: &LookAnglesComputation,
-    ) -> Result<(LookAngles, ComputationMetadata), PropagationError> {
+    ) -> Result<(ObserverTrajectory, ComputationMetadata), PropagationError> {
         let tle = self
             .tle_grpc_client
             .get_tle(satellite_identifier.clone())
             .await?;
 
-        let look_angles =
-            Propagator::from_tle(&tle)?.look_angles_at(datetime, observer, compute)?;
+        let observer_trajectory = Propagator::from_tle(&tle)?
+            .observer_trajectory_at(range, sampling, observer, compute)?;
+
         let metadata = ComputationMetadata {
             propagation_model: "SGP4".to_string(),
             computation_time: Utc::now(),
@@ -65,6 +68,6 @@ impl PositionService {
             tle_epoch: tle.epoch,
         };
 
-        Ok((look_angles, metadata))
+        Ok((observer_trajectory, metadata))
     }
 }

@@ -42,6 +42,8 @@ impl Propagator {
         };
 
         Ok(SatellitePosition {
+            time: datetime,
+
             eci: compute.eci.then_some(eci).flatten(),
             ecef: compute.ecef.then_some(ecef).flatten(),
             geodetic,

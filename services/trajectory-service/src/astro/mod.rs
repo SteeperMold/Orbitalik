@@ -5,3 +5,4 @@ pub mod models;
 pub mod position;
 pub mod propagator;
 pub mod time;
+pub mod trajectory;

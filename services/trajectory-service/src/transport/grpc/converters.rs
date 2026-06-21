@@ -9,14 +9,15 @@ use crate::astro::coords::ecef::Ecef;
 use crate::astro::coords::eci::Eci;
 use crate::astro::coords::geodetic::Geodetic;
 use crate::astro::look_angles::LookAnglesComputation;
-use crate::astro::models::{LookAngles, SatellitePosition};
+use crate::astro::models::{LookAngles, ObserverTrajectory, SatellitePosition, Trajectory};
 use crate::astro::position::PositionComputation;
 use crate::domain::errors::TimestampConversionError;
-use crate::domain::models::{ComputationMetadata, SatelliteIdentifier};
+use crate::domain::models::Sampling;
+use crate::domain::models::{ComputationMetadata, SatelliteIdentifier, TimeRange};
 use crate::transport::adapter::tle_client::tle_grpc;
-use crate::transport::grpc::trajectory::trajectory_grpc;
-use crate::transport::grpc::trajectory::trajectory_grpc::unit_settings::{AngleUnit, DistanceUnit};
-use crate::transport::grpc::trajectory::trajectory_grpc::{
+use crate::transport::grpc::service::trajectory_grpc;
+use crate::transport::grpc::service::trajectory_grpc::unit_settings::{AngleUnit, DistanceUnit};
+use crate::transport::grpc::service::trajectory_grpc::{
     GeodeticInput, GeodeticOutput, UnitSettings, Vector3, geodetic_input,
 };
 
@@ -134,6 +135,34 @@ impl TryFrom<trajectory_grpc::SatelliteIdentifier> for SatelliteIdentifier {
     }
 }
 
+impl TryFrom<trajectory_grpc::TimeRange> for TimeRange {
+    type Error = Status;
+
+    fn try_from(value: trajectory_grpc::TimeRange) -> Result<Self, Self::Error> {
+        let start = value
+            .start
+            .ok_or_else(|| Status::invalid_argument("Missing start timestamp"))?
+            .to_chrono()
+            .map_err(|e| Status::invalid_argument(format!("Invalid start timestamp: {e}")))?;
+
+        let end = value
+            .end
+            .ok_or_else(|| Status::invalid_argument("Missing end timestamp"))?
+            .to_chrono()
+            .map_err(|e| Status::invalid_argument(format!("Invalid end timestamp: {e}")))?;
+
+        Self::new(start, end).map_err(|_| Status::invalid_argument("Start must be <= end"))
+    }
+}
+
+impl TryFrom<trajectory_grpc::SamplingOptions> for Sampling {
+    type Error = Status;
+
+    fn try_from(value: trajectory_grpc::SamplingOptions) -> Result<Self, Self::Error> {
+        Self::new(value.step_seconds).map_err(|_| Status::invalid_argument("Step must be > 0"))
+    }
+}
+
 impl trajectory_grpc::ComputationMetadata {
     pub fn with_units(
         metadata: ComputationMetadata,
@@ -223,6 +252,59 @@ impl Vector3 {
     }
 }
 
+type LookAnglesValues = (Option<f64>, Option<f64>, Option<f64>);
+
+fn look_angles_values(
+    look_angles: &LookAngles,
+    units: Option<UnitSettings>,
+) -> Result<LookAnglesValues, Status> {
+    let distance_unit = units
+        .as_ref()
+        .and_then(|u| DistanceUnit::try_from(u.distance_unit).ok())
+        .unwrap_or(DistanceUnit::Unspecified);
+
+    let angle_unit = units
+        .as_ref()
+        .and_then(|u| AngleUnit::try_from(u.angle_unit).ok())
+        .unwrap_or(AngleUnit::Unspecified);
+
+    if distance_unit == DistanceUnit::Unspecified {
+        return Err(Status::invalid_argument(
+            "Distance unit is unspecified in UnitSettings",
+        ));
+    }
+
+    if angle_unit == AngleUnit::Unspecified {
+        return Err(Status::invalid_argument(
+            "Angle unit is unspecified in UnitSettings",
+        ));
+    }
+
+    let azimuth = match (&look_angles.azimuth, angle_unit) {
+        (Some(a), AngleUnit::Degrees) => Some(a.get::<degree>()),
+        (Some(a), AngleUnit::Radians) => Some(a.get::<radian>()),
+        (None, _) => None,
+        (_, AngleUnit::Unspecified) => unreachable!(),
+    };
+
+    let elevation = match (&look_angles.elevation, angle_unit) {
+        (Some(a), AngleUnit::Degrees) => Some(a.get::<degree>()),
+        (Some(a), AngleUnit::Radians) => Some(a.get::<radian>()),
+        (None, _) => None,
+        (_, AngleUnit::Unspecified) => unreachable!(),
+    };
+
+    let range = match (&look_angles.range, distance_unit) {
+        (Some(r), DistanceUnit::Meters) => Some(r.get::<meter>()),
+        (Some(r), DistanceUnit::Kilometers) => Some(r.get::<kilometer>()),
+        (Some(r), DistanceUnit::Miles) => Some(r.get::<mile>()),
+        (None, _) => None,
+        (_, DistanceUnit::Unspecified) => unreachable!(),
+    };
+
+    Ok((azimuth, elevation, range))
+}
+
 impl GeodeticOutput {
     pub fn from_geodetic(
         geodetic: Option<&Geodetic>,
@@ -269,6 +351,38 @@ impl GeodeticOutput {
     }
 }
 
+impl trajectory_grpc::StateVector {
+    pub fn from_position(
+        position: &SatellitePosition,
+        units: Option<UnitSettings>,
+    ) -> Result<Self, Status> {
+        Ok(Self {
+            datetime: Some(position.time.to_proto_timestamp()?),
+            position_eci: Vector3::from_xyz(position.eci.as_ref(), units)?,
+            velocity_eci: None,
+            position_ecef: Vector3::from_xyz(position.ecef.as_ref(), units)?,
+            velocity_ecef: None,
+            geodetic: GeodeticOutput::from_geodetic(position.geodetic.as_ref(), units)?,
+        })
+    }
+}
+
+impl trajectory_grpc::ObserverTrajectoryPoint {
+    pub fn from_look_angles(
+        look_angles: &LookAngles,
+        units: Option<UnitSettings>,
+    ) -> Result<Self, Status> {
+        let (azimuth, elevation, range) = look_angles_values(look_angles, units)?;
+
+        Ok(Self {
+            datetime: Some(look_angles.time.to_proto_timestamp()?),
+            azimuth,
+            elevation,
+            range,
+        })
+    }
+}
+
 impl trajectory_grpc::PositionResponse {
     pub fn from_position(
         position: &SatellitePosition,
@@ -276,6 +390,7 @@ impl trajectory_grpc::PositionResponse {
         units: Option<UnitSettings>,
     ) -> Result<Self, Status> {
         Ok(Self {
+            time: Some(position.time.to_proto_timestamp()?),
             metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
             eci: Vector3::from_xyz(position.eci.as_ref(), units)?,
             ecef: Vector3::from_xyz(position.ecef.as_ref(), units)?,
@@ -335,10 +450,59 @@ impl trajectory_grpc::LookAnglesResponse {
         };
 
         Ok(Self {
+            time: Some(look_angles.time.to_proto_timestamp()?),
             metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
             azimuth,
             elevation,
             range,
+        })
+    }
+}
+
+impl trajectory_grpc::TrajectoryResponse {
+    pub fn from_trajectory(
+        trajectory: &Trajectory,
+        metadata: ComputationMetadata,
+        units: Option<UnitSettings>,
+    ) -> Result<Self, Status> {
+        Ok(Self {
+            metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
+            states: trajectory
+                .samples
+                .iter()
+                .map(|p| trajectory_grpc::StateVector::from_position(p, units))
+                .collect::<Result<Vec<_>, Status>>()?,
+            range: Some(trajectory_grpc::TimeRange {
+                start: Some(trajectory.start.to_proto_timestamp()?),
+                end: Some(trajectory.end.to_proto_timestamp()?),
+            }),
+            sampling: Some(trajectory_grpc::SamplingOptions {
+                step_seconds: trajectory.step_seconds,
+            }),
+        })
+    }
+}
+
+impl trajectory_grpc::ObserverTrajectoryResponse {
+    pub fn from_observer_trajectory(
+        observer_trajectory: &ObserverTrajectory,
+        metadata: ComputationMetadata,
+        units: Option<UnitSettings>,
+    ) -> Result<Self, Status> {
+        Ok(Self {
+            metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
+            points: observer_trajectory
+                .samples
+                .iter()
+                .map(|p| trajectory_grpc::ObserverTrajectoryPoint::from_look_angles(p, units))
+                .collect::<Result<Vec<_>, Status>>()?,
+            range: Some(trajectory_grpc::TimeRange {
+                start: Some(observer_trajectory.start.to_proto_timestamp()?),
+                end: Some(observer_trajectory.end.to_proto_timestamp()?),
+            }),
+            sampling: Some(trajectory_grpc::SamplingOptions {
+                step_seconds: observer_trajectory.step_seconds,
+            }),
         })
     }
 }

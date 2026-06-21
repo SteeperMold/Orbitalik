@@ -8,6 +8,9 @@ import "google/protobuf/field_mask.proto";
 service TrajectoryService {
     rpc GetPosition (PositionRequest) returns (PositionResponse);
     rpc GetLookAngles (LookAnglesRequest) returns (LookAnglesResponse);
+
+    rpc GetTrajectory (TrajectoryRequest) returns (TrajectoryResponse);
+    rpc GetObserverTrajectory (ObserverTrajectoryRequest) returns (ObserverTrajectoryResponse);
 }
 
 message UnitSettings {
@@ -69,6 +72,15 @@ message ComputationMetadata {
     UnitSettings units = 6;
 }
 
+message TimeRange {
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Timestamp end = 2;
+}
+
+message SamplingOptions {
+    uint32 step_seconds = 1;
+}
+
 message PositionRequest {
     SatelliteIdentifier identifier = 1;
     google.protobuf.Timestamp datetime = 2;
@@ -78,7 +90,10 @@ message PositionRequest {
 
 message PositionResponse {
     ComputationMetadata metadata = 1;
-    optional Vector3 eci = 2;
+
+    google.protobuf.Timestamp time = 2;
+
+    optional Vector3 eci = 3;
     optional Vector3 ecef = 4;
     optional GeodeticOutput geodetic = 5;
 }
@@ -93,7 +108,70 @@ message LookAnglesRequest {
 
 message LookAnglesResponse {
     ComputationMetadata metadata = 1;
+
+    google.protobuf.Timestamp time = 2;
+
+    optional double azimuth = 3;
+    optional double elevation = 4;
+    optional double range = 5;
+}
+
+message StateVector {
+    google.protobuf.Timestamp datetime = 1;
+
+    optional Vector3 position_eci = 2;
+    optional Vector3 velocity_eci = 3;
+
+    optional Vector3 position_ecef = 4;
+    optional Vector3 velocity_ecef = 5;
+
+    optional GeodeticOutput geodetic = 6;
+}
+
+message TrajectoryRequest {
+    SatelliteIdentifier identifier = 1;
+
+    TimeRange range = 2;
+    SamplingOptions sampling = 3;
+
+    google.protobuf.FieldMask output_mask = 4;
+    UnitSettings units = 5;
+}
+
+message TrajectoryResponse {
+    ComputationMetadata metadata = 1;
+
+    repeated StateVector states = 2;
+
+    TimeRange range = 3;
+    SamplingOptions sampling = 4;
+}
+
+message ObserverTrajectoryPoint {
+    google.protobuf.Timestamp datetime = 1;
+
     optional double azimuth = 2;
     optional double elevation = 3;
     optional double range = 4;
+}
+
+message ObserverTrajectoryRequest {
+    SatelliteIdentifier identifier = 1;
+
+    TimeRange range = 2;
+    SamplingOptions sampling = 3;
+
+    GeodeticInput observer = 4;
+
+    google.protobuf.FieldMask output_mask = 5;
+    UnitSettings units = 6;
+}
+
+message ObserverTrajectoryResponse {
+    ComputationMetadata metadata = 1;
+
+    repeated ObserverTrajectoryPoint points = 2;
+
+    TimeRange range = 3;
+    SamplingOptions sampling = 4;
 }
