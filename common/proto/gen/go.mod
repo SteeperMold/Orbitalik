@@ -1,4 +1,4 @@
-module github.com/SteeperMold/Orbitalik/gen/go
+module github.com/SteeperMold/Orbitalik/gen
 
 go 1.26.4
 
