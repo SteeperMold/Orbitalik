@@ -2,9 +2,8 @@ syntax = "proto3";
 
 package metadata;
 
+import "common.proto";
 import "google/protobuf/timestamp.proto";
-
-option go_package = "gen/metadatapb;metadatapb";
 
 service SatelliteMetadataService {
     rpc GetSatelliteMetadata (GetMetadataRequest) returns (GetMetadataResponse);
@@ -12,7 +11,7 @@ service SatelliteMetadataService {
 }
 
 message GetMetadataRequest {
-    SatelliteIdentifier identifier = 1;
+    common.SatelliteIdentifier identifier = 1;
 }
 
 message GetMetadataResponse {
@@ -35,13 +34,6 @@ message ListSatelliteMetadataResponse {
     repeated SatelliteMetadata items = 1;
     string next_page_token = 2;
     uint32 total = 3;
-}
-
-message SatelliteIdentifier {
-    oneof kind {
-        uint32 norad_id = 1;
-        string satellite_name = 2;
-    }
 }
 
 message SatelliteMetadata {

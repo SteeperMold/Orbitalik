@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package passes;
+
+import "common.proto";
+import "google/protobuf/timestamp.proto";
+
+service PassesService {
+    rpc GetPasses (PassPredictionRequest) returns (PassPredictionResponse);
+
+    // Optional future extension (more efficient streaming / early stop)
+    rpc GetNextPasses (NextPassesRequest) returns (PassPredictionResponse);
+}
+
+message PassPredictionRequest {
+    repeated common.SatelliteIdentifier satellites = 1;
+
+    common.TimeRange range = 2;
+
+    common.GeodeticInput observer = 3;
+
+    common.UnitSettings units = 4;
+
+    double min_peak_elevation = 5;
+    double min_elevation = 6;
+
+    uint32 max_results = 7;
+}
+
+// next n passes query
+message NextPassesRequest {
+    repeated common.SatelliteIdentifier satellites = 1;
+
+    common.GeodeticInput observer = 2;
+
+    common.UnitSettings units = 3;
+
+    double min_peak_elevation = 4;
+
+    double min_elevation = 5;
+
+    uint32 count = 6;
+
+    common.TimeRange lookahead_range = 7;
+}
+
+
+message PassPredictionResponse {
+    PassesComputationMetadata metadata = 1;
+
+    repeated Pass passes = 2;
+
+    common.TimeRange range = 3;
+}
+
+
+message Pass {
+    common.SatelliteIdentifier satellite = 1;
+
+    // acquisition of signal (rise above min elevation)
+    google.protobuf.Timestamp aos = 2;
+    double aos_azimuth = 3;
+
+    // maximum elevation point
+    google.protobuf.Timestamp max_elevation_time = 4;
+    double max_elevation = 5;
+    double max_elevation_azimuth = 6;
+
+    // loss of signal (drop below min elevation)
+    google.protobuf.Timestamp los = 7;
+    double los_azimuth = 8;
+
+    uint32 duration_seconds = 9;
+}
+
+
+message PassesComputationMetadata {
+    string propagation_model = 1;
+
+    google.protobuf.Timestamp computation_time = 2;
+
+    repeated uint32 norad_ids = 3;
+    repeated string satellite_names = 4;
+
+    google.protobuf.Timestamp tle_epoch = 5;
+
+    common.UnitSettings units = 6;
+
+    uint32 satellites_evaluated = 7;
+    uint32 passes_found = 8;
+
+    uint32 computation_ms = 9;
+}

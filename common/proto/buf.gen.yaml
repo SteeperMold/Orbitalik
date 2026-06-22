@@ -1,0 +1,34 @@
+version: v2
+clean: true
+plugins:
+  # Go
+  - local: protoc-gen-go
+    out: gen/go
+    opt: paths=source_relative
+
+  - local: protoc-gen-go-grpc
+    out: gen/go
+    opt: paths=source_relative
+
+  - local: protoc-gen-grpc-gateway
+    out: gen/go
+    opt: paths=source_relative
+
+  # Rust (prost)
+  - local: protoc-gen-prost
+    out: gen/rust
+
+  - local: protoc-gen-prost-serde
+    out: gen/rust
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/SteeperMold/Orbitalik/gen/go
+
+#go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+#go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+#go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+#
+#cargo install protoc-gen-prost
+#cargo install protoc-gen-prost-serde

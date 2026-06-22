@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package trajectory;
+
+import "common.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+service TrajectoryService {
+    rpc GetPosition (PositionRequest) returns (PositionResponse);
+    rpc GetLookAngles (LookAnglesRequest) returns (LookAnglesResponse);
+
+    rpc GetTrajectory (TrajectoryRequest) returns (TrajectoryResponse);
+    rpc GetObserverTrajectory (ObserverTrajectoryRequest) returns (ObserverTrajectoryResponse);
+}
+
+message TrajectoryComputationMetadata {
+    string propagation_model = 1;
+    google.protobuf.Timestamp computation_time = 2;
+    uint32 norad_id = 3;
+    string satellite_name = 4;
+    google.protobuf.Timestamp tle_epoch = 5;
+    common.UnitSettings units = 6;
+}
+
+message PositionRequest {
+    common.SatelliteIdentifier identifier = 1;
+    google.protobuf.Timestamp datetime = 2;
+    google.protobuf.FieldMask output_mask = 3;
+    common.UnitSettings units = 4;
+}
+
+message PositionResponse {
+    TrajectoryComputationMetadata metadata = 1;
+
+    google.protobuf.Timestamp time = 2;
+
+    optional common.Vector3 eci = 3;
+    optional common.Vector3 ecef = 4;
+    optional common.GeodeticOutput geodetic = 5;
+}
+
+message LookAnglesRequest {
+    common.SatelliteIdentifier identifier = 1;
+    google.protobuf.Timestamp datetime = 2;
+    common.GeodeticInput observer = 3;
+    google.protobuf.FieldMask output_mask = 4;
+    common.UnitSettings units = 5;
+}
+
+message LookAnglesResponse {
+    TrajectoryComputationMetadata metadata = 1;
+
+    google.protobuf.Timestamp time = 2;
+
+    optional double azimuth = 3;
+    optional double elevation = 4;
+    optional double range = 5;
+}
+
+message StateVector {
+    google.protobuf.Timestamp datetime = 1;
+
+    optional common.Vector3 position_eci = 2;
+    optional common.Vector3 velocity_eci = 3;
+
+    optional common.Vector3 position_ecef = 4;
+    optional common.Vector3 velocity_ecef = 5;
+
+    optional common.GeodeticOutput geodetic = 6;
+}
+
+message TrajectoryRequest {
+    common.SatelliteIdentifier identifier = 1;
+
+    common.TimeRange range = 2;
+    common.SamplingOptions sampling = 3;
+
+    google.protobuf.FieldMask output_mask = 4;
+    common.UnitSettings units = 5;
+}
+
+message TrajectoryResponse {
+    TrajectoryComputationMetadata metadata = 1;
+
+    repeated StateVector states = 2;
+
+    common.TimeRange range = 3;
+    common.SamplingOptions sampling = 4;
+}
+
+message ObserverTrajectoryPoint {
+    google.protobuf.Timestamp datetime = 1;
+
+    optional double azimuth = 2;
+    optional double elevation = 3;
+    optional double range = 4;
+}
+
+message ObserverTrajectoryRequest {
+    common.SatelliteIdentifier identifier = 1;
+
+    common.TimeRange range = 2;
+    common.SamplingOptions sampling = 3;
+
+    common.GeodeticInput observer = 4;
+
+    google.protobuf.FieldMask output_mask = 5;
+    common.UnitSettings units = 6;
+}
+
+message ObserverTrajectoryResponse {
+    TrajectoryComputationMetadata metadata = 1;
+
+    repeated ObserverTrajectoryPoint points = 2;
+
+    common.TimeRange range = 3;
+    common.SamplingOptions sampling = 4;
+}
