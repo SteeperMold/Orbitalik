@@ -12,8 +12,8 @@ service TrajectoryService {
     rpc GetTrajectory (TrajectoryRequest) returns (TrajectoryResponse);
     rpc GetObserverTrajectory (ObserverTrajectoryRequest) returns (ObserverTrajectoryResponse);
 
-    rpc GetPasses (PassPredictionRequest) returns (PassPredictionResponse);
-    rpc GetNextPasses (NextPassesRequest) returns (PassPredictionResponse);
+    rpc GetPasses (PassPredictionRequest) returns (GetPassesResponse);
+    rpc GetNextPasses (NextPassesRequest) returns (NextPassesResponse);
 }
 
 message UnitSettings {
@@ -221,12 +221,18 @@ message NextPassesRequest {
     TimeRange lookahead_range = 9;
 }
 
-message PassPredictionResponse {
+message GetPassesResponse {
     PassesComputationMetadata metadata = 1;
 
     repeated Pass passes = 2;
 
     TimeRange range = 3;
+}
+
+message NextPassesResponse {
+    PassesComputationMetadata metadata = 1;
+
+    repeated Pass passes = 2;
 }
 
 message Pass {

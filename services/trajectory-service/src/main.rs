@@ -41,7 +41,11 @@ async fn main() -> Result<(), StartupError> {
 
     let position_service = PositionService::new(tle_grpc_client.clone());
     let trajectory_service = TrajectoryService::new(tle_grpc_client.clone());
-    let passes_service = PassesService::new(tle_grpc_client.clone(), config.max_satellites);
+    let passes_service = PassesService::new(
+        tle_grpc_client.clone(),
+        config.max_satellites,
+        config.next_passes_lookahead,
+    );
 
     let http_server = transport::http::server::run(config.http_port)?;
     let grpc_server = transport::grpc::server::run(

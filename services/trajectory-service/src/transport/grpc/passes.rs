@@ -3,17 +3,18 @@ use uom::si::angle::{degree, radian};
 use uom::si::f64::Angle;
 
 use crate::astro::models::SatelliteIdentifier;
-use crate::astro::passes::detector::PassPredictionOptions;
-use crate::transport::grpc::service::TrajectoryGrpcServer;
+use crate::service::passes::{GetPassesOptions, NextPassesOptions};
 use crate::transport::grpc::service::trajectory_grpc::{
-    NextPassesRequest, PassPredictionRequest, PassPredictionResponse, pass_prediction_request,
+    next_passes_request, pass_prediction_request, GetPassesResponse, NextPassesRequest,
+    NextPassesResponse, PassPredictionRequest,
 };
+use crate::transport::grpc::service::TrajectoryGrpcServer;
 
 impl TrajectoryGrpcServer {
     pub async fn handle_get_passes(
         &self,
         request: Request<PassPredictionRequest>,
-    ) -> Result<Response<PassPredictionResponse>, Status> {
+    ) -> Result<Response<GetPassesResponse>, Status> {
         let req = request.into_inner();
 
         let satellites: Vec<SatelliteIdentifier> = req
@@ -51,7 +52,7 @@ impl TrajectoryGrpcServer {
             None => Angle::new::<degree>(0.0),
         };
 
-        let prediction_options = PassPredictionOptions {
+        let prediction_options = GetPassesOptions {
             range,
             observer,
             min_elevation,
@@ -64,15 +65,57 @@ impl TrajectoryGrpcServer {
             .get_passes(satellites, &prediction_options)
             .await?;
 
-        let response = PassPredictionResponse::from_passes(&passes, metadata, range, req.units)?;
+        let response = GetPassesResponse::from_passes(&passes, metadata, range, req.units)?;
 
         Ok(Response::new(response))
     }
 
     pub async fn handle_get_next_passes(
         &self,
-        _request: Request<NextPassesRequest>,
-    ) -> Result<Response<PassPredictionResponse>, Status> {
-        todo!()
+        request: Request<NextPassesRequest>,
+    ) -> Result<Response<NextPassesResponse>, Status> {
+        let req = request.into_inner();
+
+        let satellites: Vec<SatelliteIdentifier> = req
+            .satellites
+            .into_iter()
+            .map(|s| s.try_into())
+            .collect::<Result<_, _>>()?;
+
+        let observer = &req
+            .observer
+            .ok_or_else(|| Status::invalid_argument("Missing observer"))?
+            .try_into()?;
+
+        let min_elevation = match req.min_elevation {
+            Some(next_passes_request::MinElevation::MinElevationDeg(v)) => Angle::new::<degree>(v),
+            Some(next_passes_request::MinElevation::MinElevationRad(v)) => Angle::new::<radian>(v),
+            None => Angle::new::<degree>(0.0),
+        };
+        let min_peak_elevation = match req.min_peak_elevation {
+            Some(next_passes_request::MinPeakElevation::MinPeakElevationDeg(v)) => {
+                Angle::new::<degree>(v)
+            }
+            Some(next_passes_request::MinPeakElevation::MinPeakElevationRad(v)) => {
+                Angle::new::<radian>(v)
+            }
+            None => Angle::new::<degree>(0.0),
+        };
+
+        let prediction_options = NextPassesOptions {
+            observer,
+            min_elevation,
+            min_peak_elevation,
+            passes_count: req.count as usize,
+        };
+
+        let (passes, metadata) = self
+            .passes_service
+            .next_passes(satellites, &prediction_options)
+            .await?;
+
+        let response = NextPassesResponse::from_passes(&passes, metadata, req.units)?;
+
+        Ok(Response::new(response))
     }
 }

@@ -3,10 +3,14 @@ use std::str::FromStr;
 
 pub struct AppConfig {
     pub app_env: String,
+
     pub http_port: u16,
     pub grpc_port: u16,
+
     pub tle_service_address: String,
+
     pub max_satellites: usize,
+    pub next_passes_lookahead: chrono::Duration,
 }
 
 impl AppConfig {
@@ -21,6 +25,7 @@ impl AppConfig {
                 "grpc://tle-ingestion-service:50051".to_string(),
             ),
             max_satellites: parse_env("MAX_SATELLITES", 30),
+            next_passes_lookahead: parse_duration_env("NEXT_PASSES_LOOKAHEAD", "15d"),
         }
     }
 }
@@ -33,4 +38,11 @@ where
         .ok()
         .and_then(|v| v.parse::<T>().ok())
         .unwrap_or(default)
+}
+
+fn parse_duration_env(key: &str, default: &str) -> chrono::Duration {
+    let raw = std::env::var(key).unwrap_or_else(|_| default.to_string());
+    let std_dur: std::time::Duration =
+        humantime::parse_duration(&raw).expect("invalid duration in env var");
+    chrono::Duration::from_std(std_dur).expect("invalid duration in env var")
 }

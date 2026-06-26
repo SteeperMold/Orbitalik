@@ -561,7 +561,7 @@ impl trajectory_grpc::Pass {
     }
 }
 
-impl trajectory_grpc::PassPredictionResponse {
+impl trajectory_grpc::GetPassesResponse {
     pub fn from_passes(
         passes: &[Pass],
         metadata: PassesComputationMetadata,
@@ -578,6 +578,22 @@ impl trajectory_grpc::PassPredictionResponse {
                 start: Some(range.start.to_proto_timestamp()?),
                 end: Some(range.end.to_proto_timestamp()?),
             }),
+        })
+    }
+}
+
+impl trajectory_grpc::NextPassesResponse {
+    pub fn from_passes(
+        passes: &[Pass],
+        metadata: PassesComputationMetadata,
+        units: Option<UnitSettings>,
+    ) -> Result<Self, Status> {
+        Ok(Self {
+            metadata: trajectory_grpc::PassesComputationMetadata::with_units(metadata, units)?,
+            passes: passes
+                .iter()
+                .map(trajectory_grpc::Pass::from_pass)
+                .collect::<Result<Vec<_>, Status>>()?,
         })
     }
 }
