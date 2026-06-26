@@ -1,9 +1,11 @@
 use tonic::{Request, Response, Status};
 
+use crate::service::passes::PassesService;
 use crate::service::position::PositionService;
 use crate::service::trajectory::TrajectoryService;
 use crate::transport::grpc::service::trajectory_grpc::{
-    ObserverTrajectoryRequest, ObserverTrajectoryResponse, TrajectoryRequest, TrajectoryResponse,
+    NextPassesRequest, ObserverTrajectoryRequest, ObserverTrajectoryResponse,
+    PassPredictionRequest, PassPredictionResponse, TrajectoryRequest, TrajectoryResponse,
 };
 use trajectory_grpc::{
     LookAnglesRequest, LookAnglesResponse, PositionRequest, PositionResponse,
@@ -17,16 +19,19 @@ pub mod trajectory_grpc {
 pub struct TrajectoryGrpcServer {
     pub position_service: PositionService,
     pub trajectory_service: TrajectoryService,
+    pub passes_service: PassesService,
 }
 
 impl TrajectoryGrpcServer {
     pub const fn new(
         position_service: PositionService,
         trajectory_service: TrajectoryService,
+        passes_service: PassesService,
     ) -> Self {
         Self {
             position_service,
             trajectory_service,
+            passes_service,
         }
     }
 }
@@ -59,5 +64,19 @@ impl TonicTrajectoryService for TrajectoryGrpcServer {
         request: Request<ObserverTrajectoryRequest>,
     ) -> Result<Response<ObserverTrajectoryResponse>, Status> {
         self.handle_get_observer_trajectory(request).await
+    }
+
+    async fn get_passes(
+        &self,
+        request: Request<PassPredictionRequest>,
+    ) -> Result<Response<PassPredictionResponse>, Status> {
+        self.handle_get_passes(request).await
+    }
+
+    async fn get_next_passes(
+        &self,
+        request: Request<NextPassesRequest>,
+    ) -> Result<Response<PassPredictionResponse>, Status> {
+        self.handle_get_next_passes(request).await
     }
 }

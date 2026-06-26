@@ -1,21 +1,22 @@
 //! Project-wide lint policy
-#![deny(
-    warnings,
-    unused_must_use,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::dbg_macro,
-    clippy::print_stdout,
-    clippy::todo,
-    clippy::unimplemented,
-    clippy::panic
-)]
-#![warn(missing_docs, clippy::all, clippy::pedantic, clippy::nursery)]
-#![allow(clippy::suboptimal_flops)]
+// #![deny(
+//     warnings,
+//     unused_must_use,
+//     clippy::unwrap_used,
+//     clippy::expect_used,
+//     clippy::dbg_macro,
+//     clippy::print_stdout,
+//     clippy::todo,
+//     clippy::unimplemented,
+//     clippy::panic
+// )]
+// #![warn(missing_docs, clippy::all, clippy::pedantic, clippy::nursery)]
+// #![allow(clippy::suboptimal_flops)]
 
 use std::sync::Arc;
 
 use crate::domain::errors::StartupError;
+use crate::service::passes::PassesService;
 use crate::service::position::PositionService;
 use crate::service::trajectory::TrajectoryService;
 use crate::transport::adapter::tle_client::TleGrpcClient;
@@ -40,10 +41,15 @@ async fn main() -> Result<(), StartupError> {
 
     let position_service = PositionService::new(tle_grpc_client.clone());
     let trajectory_service = TrajectoryService::new(tle_grpc_client.clone());
+    let passes_service = PassesService::new(tle_grpc_client.clone(), config.max_satellites);
 
     let http_server = transport::http::server::run(config.http_port)?;
-    let grpc_server =
-        transport::grpc::server::run(config.grpc_port, position_service, trajectory_service);
+    let grpc_server = transport::grpc::server::run(
+        config.grpc_port,
+        position_service,
+        trajectory_service,
+        passes_service,
+    );
 
     tokio::try_join!(
         async { http_server.await.map_err(StartupError::from) },

@@ -3,8 +3,8 @@ use chrono::{DateTime, Utc};
 use crate::astro;
 use crate::astro::coords::geodetic::Geodetic;
 use crate::astro::models::SatellitePosition;
-use crate::astro::propagator::Propagator;
-use crate::domain::errors::PropagationError;
+use crate::astro::propagation::propagator::Propagator;
+use crate::astro::errors::PropagationError;
 
 #[derive(Default)]
 pub struct PositionComputation {

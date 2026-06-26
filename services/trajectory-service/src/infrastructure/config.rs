@@ -1,34 +1,36 @@
 use dotenv::dotenv;
+use std::str::FromStr;
 
 pub struct AppConfig {
     pub app_env: String,
     pub http_port: u16,
     pub grpc_port: u16,
     pub tle_service_address: String,
+    pub max_satellites: usize,
 }
 
 impl AppConfig {
     pub fn from_dotenv() -> Self {
         dotenv().ok();
         Self {
-            app_env: env_string("APP_ENV", "development"),
-            http_port: env_u16("HTTP_PORT", 8080),
-            grpc_port: env_u16("GRPC_PORT", 50051),
-            tle_service_address: env_string(
+            app_env: parse_env("APP_ENV", "development".to_string()),
+            http_port: parse_env("HTTP_PORT", 8080),
+            grpc_port: parse_env("GRPC_PORT", 50051),
+            tle_service_address: parse_env(
                 "TLE_SERVICE_ADDRESS",
-                "grpc://tle-ingestion-service:50051",
+                "grpc://tle-ingestion-service:50051".to_string(),
             ),
+            max_satellites: parse_env("MAX_SATELLITES", 30),
         }
     }
 }
 
-fn env_string(key: &str, default: &str) -> String {
-    std::env::var(key).unwrap_or_else(|_| default.to_string())
-}
-
-fn env_u16(key: &str, default: u16) -> u16 {
+fn parse_env<T>(key: &str, default: T) -> T
+where
+    T: FromStr,
+{
     std::env::var(key)
         .ok()
-        .and_then(|v| v.parse::<u16>().ok())
+        .and_then(|v| v.parse::<T>().ok())
         .unwrap_or(default)
 }

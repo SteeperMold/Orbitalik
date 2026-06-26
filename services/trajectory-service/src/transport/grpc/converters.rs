@@ -8,12 +8,12 @@ use uom::si::length::{kilometer, meter, mile};
 use crate::astro::coords::ecef::Ecef;
 use crate::astro::coords::eci::Eci;
 use crate::astro::coords::geodetic::Geodetic;
-use crate::astro::look_angles::LookAnglesComputation;
-use crate::astro::models::{LookAngles, ObserverTrajectory, SatellitePosition, Trajectory};
-use crate::astro::position::PositionComputation;
+use crate::astro::models::{LookAngles, ObserverTrajectory, Pass, SatellitePosition, Trajectory};
+use crate::astro::models::{Sampling, SatelliteIdentifier, TimeRange};
+use crate::astro::propagation::look_angles::LookAnglesComputation;
+use crate::astro::propagation::position::PositionComputation;
 use crate::domain::errors::TimestampConversionError;
-use crate::domain::models::Sampling;
-use crate::domain::models::{ComputationMetadata, SatelliteIdentifier, TimeRange};
+use crate::domain::models::{PassesComputationMetadata, TrajectoryComputationMetadata};
 use crate::transport::adapter::tle_client::tle_grpc;
 use crate::transport::grpc::service::trajectory_grpc;
 use crate::transport::grpc::service::trajectory_grpc::unit_settings::{AngleUnit, DistanceUnit};
@@ -163,9 +163,24 @@ impl TryFrom<trajectory_grpc::SamplingOptions> for Sampling {
     }
 }
 
-impl trajectory_grpc::ComputationMetadata {
+impl From<SatelliteIdentifier> for trajectory_grpc::SatelliteIdentifier {
+    fn from(value: SatelliteIdentifier) -> Self {
+        match value {
+            SatelliteIdentifier::NoradId(id) => Self {
+                kind: Some(trajectory_grpc::satellite_identifier::Kind::NoradId(id)),
+            },
+            SatelliteIdentifier::Name(name) => Self {
+                kind: Some(trajectory_grpc::satellite_identifier::Kind::SatelliteName(
+                    name,
+                )),
+            },
+        }
+    }
+}
+
+impl trajectory_grpc::TrajectoryComputationMetadata {
     pub fn with_units(
-        metadata: ComputationMetadata,
+        metadata: TrajectoryComputationMetadata,
         units: Option<UnitSettings>,
     ) -> Result<Option<Self>, Status> {
         Ok(Some(Self {
@@ -174,6 +189,25 @@ impl trajectory_grpc::ComputationMetadata {
             norad_id: metadata.norad_id,
             satellite_name: metadata.satellite_name,
             tle_epoch: Some(metadata.tle_epoch.to_proto_timestamp()?),
+            units,
+        }))
+    }
+}
+
+impl trajectory_grpc::PassesComputationMetadata {
+    pub fn with_units(
+        metadata: PassesComputationMetadata,
+        units: Option<UnitSettings>,
+    ) -> Result<Option<Self>, Status> {
+        Ok(Some(Self {
+            propagation_model: metadata.propagation_model,
+            computation_time: Some(metadata.computation_time.to_proto_timestamp()?),
+            norad_ids: metadata.norad_ids,
+            satellite_names: metadata.satellite_names,
+            tle_epoch: Some(metadata.tle_epoch.to_proto_timestamp()?),
+            satellites_evaluated: metadata.satellites_evaluated,
+            passes_found: metadata.passes_found,
+            computation_ms: metadata.computation_ms,
             units,
         }))
     }
@@ -386,12 +420,12 @@ impl trajectory_grpc::ObserverTrajectoryPoint {
 impl trajectory_grpc::PositionResponse {
     pub fn from_position(
         position: &SatellitePosition,
-        metadata: ComputationMetadata,
+        metadata: TrajectoryComputationMetadata,
         units: Option<UnitSettings>,
     ) -> Result<Self, Status> {
         Ok(Self {
             time: Some(position.time.to_proto_timestamp()?),
-            metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
+            metadata: trajectory_grpc::TrajectoryComputationMetadata::with_units(metadata, units)?,
             eci: Vector3::from_xyz(position.eci.as_ref(), units)?,
             ecef: Vector3::from_xyz(position.ecef.as_ref(), units)?,
             geodetic: GeodeticOutput::from_geodetic(position.geodetic.as_ref(), units)?,
@@ -402,7 +436,7 @@ impl trajectory_grpc::PositionResponse {
 impl trajectory_grpc::LookAnglesResponse {
     pub fn from_look_angles(
         look_angles: &LookAngles,
-        metadata: ComputationMetadata,
+        metadata: TrajectoryComputationMetadata,
         units: Option<UnitSettings>,
     ) -> Result<Self, Status> {
         let distance_unit = units
@@ -451,7 +485,7 @@ impl trajectory_grpc::LookAnglesResponse {
 
         Ok(Self {
             time: Some(look_angles.time.to_proto_timestamp()?),
-            metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
+            metadata: trajectory_grpc::TrajectoryComputationMetadata::with_units(metadata, units)?,
             azimuth,
             elevation,
             range,
@@ -462,11 +496,11 @@ impl trajectory_grpc::LookAnglesResponse {
 impl trajectory_grpc::TrajectoryResponse {
     pub fn from_trajectory(
         trajectory: &Trajectory,
-        metadata: ComputationMetadata,
+        metadata: TrajectoryComputationMetadata,
         units: Option<UnitSettings>,
     ) -> Result<Self, Status> {
         Ok(Self {
-            metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
+            metadata: trajectory_grpc::TrajectoryComputationMetadata::with_units(metadata, units)?,
             states: trajectory
                 .samples
                 .iter()
@@ -486,11 +520,11 @@ impl trajectory_grpc::TrajectoryResponse {
 impl trajectory_grpc::ObserverTrajectoryResponse {
     pub fn from_observer_trajectory(
         observer_trajectory: &ObserverTrajectory,
-        metadata: ComputationMetadata,
+        metadata: TrajectoryComputationMetadata,
         units: Option<UnitSettings>,
     ) -> Result<Self, Status> {
         Ok(Self {
-            metadata: trajectory_grpc::ComputationMetadata::with_units(metadata, units)?,
+            metadata: trajectory_grpc::TrajectoryComputationMetadata::with_units(metadata, units)?,
             points: observer_trajectory
                 .samples
                 .iter()
@@ -502,6 +536,47 @@ impl trajectory_grpc::ObserverTrajectoryResponse {
             }),
             sampling: Some(trajectory_grpc::SamplingOptions {
                 step_seconds: observer_trajectory.step_seconds,
+            }),
+        })
+    }
+}
+
+impl trajectory_grpc::Pass {
+    pub fn from_pass(pass: &Pass) -> Result<Self, Status> {
+        Ok(Self {
+            satellite: Some(pass.satellite.clone().into()),
+
+            aos: Some(pass.aos.to_proto_timestamp()?),
+            aos_azimuth: pass.aos_azimuth,
+
+            max_elevation_time: Some(pass.max_elevation_time.to_proto_timestamp()?),
+            max_elevation: pass.max_elevation,
+            max_elevation_azimuth: pass.max_elevation_azimuth,
+
+            los: Some(pass.los.to_proto_timestamp()?),
+            los_azimuth: pass.los_azimuth,
+
+            duration_seconds: pass.duration_seconds,
+        })
+    }
+}
+
+impl trajectory_grpc::PassPredictionResponse {
+    pub fn from_passes(
+        passes: &[Pass],
+        metadata: PassesComputationMetadata,
+        range: TimeRange,
+        units: Option<UnitSettings>,
+    ) -> Result<Self, Status> {
+        Ok(Self {
+            metadata: trajectory_grpc::PassesComputationMetadata::with_units(metadata, units)?,
+            passes: passes
+                .iter()
+                .map(trajectory_grpc::Pass::from_pass)
+                .collect::<Result<Vec<_>, Status>>()?,
+            range: Some(trajectory_grpc::TimeRange {
+                start: Some(range.start.to_proto_timestamp()?),
+                end: Some(range.end.to_proto_timestamp()?),
             }),
         })
     }

@@ -1,12 +1,15 @@
 use chrono::{DateTime, Utc};
 
 use crate::astro::coords::eci::Eci;
+use crate::astro::errors::PropagationError;
 use crate::astro::models::Tle;
-use crate::domain::errors::PropagationError;
 
 pub struct Propagator {
-    pub elements: sgp4::Elements,
-    pub constants: sgp4::Constants,
+    pub satellite_name: String,
+    pub norad_id: u32,
+
+    elements: sgp4::Elements,
+    constants: sgp4::Constants,
 }
 
 impl Propagator {
@@ -20,6 +23,8 @@ impl Propagator {
         let constants = sgp4::Constants::from_elements(&elements)?;
 
         Ok(Self {
+            satellite_name: tle.satellite_name.clone(),
+            norad_id: tle.norad_id,
             elements,
             constants,
         })

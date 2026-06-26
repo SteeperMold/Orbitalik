@@ -1,6 +1,7 @@
 use tonic::transport::Server;
 
 use crate::domain::errors::GrpcServerError;
+use crate::service::passes::PassesService;
 use crate::service::position::PositionService;
 use crate::service::trajectory::TrajectoryService;
 use crate::transport::grpc::interceptors::LoggingMiddlewareLayer;
@@ -12,8 +13,10 @@ pub async fn run(
     port: u16,
     position_service: PositionService,
     trajectory_service: TrajectoryService,
+    passes_service: PassesService,
 ) -> Result<(), GrpcServerError> {
-    let trajectory_service = TrajectoryGrpcServer::new(position_service, trajectory_service);
+    let trajectory_service =
+        TrajectoryGrpcServer::new(position_service, trajectory_service, passes_service);
 
     let layer = tower::ServiceBuilder::new()
         .layer(LoggingMiddlewareLayer::default())

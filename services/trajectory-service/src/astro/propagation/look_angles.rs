@@ -8,8 +8,8 @@ use crate::astro::consts::TWO_PI;
 use crate::astro::coords::ecef::Ecef;
 use crate::astro::coords::geodetic::Geodetic;
 use crate::astro::models::LookAngles;
-use crate::astro::propagator::Propagator;
-use crate::domain::errors::PropagationError;
+use crate::astro::propagation::propagator::Propagator;
+use crate::astro::errors::PropagationError;
 
 #[derive(Default)]
 pub struct LookAnglesComputation {

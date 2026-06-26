@@ -2,12 +2,12 @@ use chrono::Duration;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::astro::coords::geodetic::Geodetic;
-use crate::astro::look_angles::LookAnglesComputation;
 use crate::astro::models::{ObserverTrajectory, Trajectory};
-use crate::astro::position::PositionComputation;
-use crate::astro::propagator::Propagator;
-use crate::domain::errors::PropagationError;
-use crate::domain::models::{Sampling, TimeRange};
+use crate::astro::models::{Sampling, TimeRange};
+use crate::astro::propagation::look_angles::LookAnglesComputation;
+use crate::astro::propagation::position::PositionComputation;
+use crate::astro::propagation::propagator::Propagator;
+use crate::astro::errors::PropagationError;
 
 impl Propagator {
     pub fn trajectory_at(

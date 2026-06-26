@@ -1,8 +1,7 @@
 pub mod consts;
 pub mod coords;
-pub mod look_angles;
 pub mod models;
-pub mod position;
-pub mod propagator;
+pub mod passes;
+pub mod propagation;
 pub mod time;
-pub mod trajectory;
+pub mod errors;
