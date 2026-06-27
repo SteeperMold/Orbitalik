@@ -1,12 +1,12 @@
-use chrono::{DateTime, Duration, Utc};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use uom::si::angle::radian;
-
 use crate::astro::errors::PropagationError;
 use crate::astro::models::{Pass, SatelliteIdentifier};
 use crate::astro::passes::predictor::PassPredictionOptions;
 use crate::astro::propagation::look_angles::LookAnglesComputation;
 use crate::astro::propagation::propagator::Propagator;
+use chrono::{DateTime, Duration, Utc};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use uom::si::angle::radian;
+use uom::si::f64::Angle;
 
 #[derive(Clone, Copy)]
 struct ElevationSample {
@@ -29,8 +29,8 @@ impl Propagator {
         options: &PassPredictionOptions,
         remaining: &AtomicUsize, // global quota
     ) -> Result<Vec<Pass>, PropagationError> {
-        let min_el = options.min_elevation.get::<radian>();
-        let min_peak_el = options.min_peak_elevation.get::<radian>();
+        let min_el_rad = options.min_elevation.get::<radian>();
+        let min_peak_el_rad = options.min_peak_elevation.get::<radian>();
 
         let compute = LookAnglesComputation {
             azimuth: true,
@@ -66,8 +66,8 @@ impl Propagator {
             // aos detection
             if let Some(prev) = prev_sample
                 && current_pass.is_none()
-                && prev.elevation_rad < min_el
-                && sample.elevation_rad >= min_el
+                && prev.elevation_rad < min_el_rad
+                && sample.elevation_rad >= min_el_rad
             {
                 current_pass = Some(PassState {
                     aos: prev,
@@ -78,7 +78,7 @@ impl Propagator {
 
             // inside pass tracking
             if let Some(pass) = &mut current_pass {
-                if sample.elevation_rad >= min_el {
+                if sample.elevation_rad >= min_el_rad {
                     if sample.elevation_rad > pass.max_el_rad {
                         pass.max = sample;
                         pass.max_el_rad = sample.elevation_rad;
@@ -91,7 +91,7 @@ impl Propagator {
                         sample,
                     );
 
-                    if final_pass.max_elevation < min_peak_el.to_degrees() {
+                    if final_pass.max_elevation.get::<radian>() < min_peak_el_rad {
                         current_pass = None;
                         prev_sample = Some(sample);
                         t += Duration::seconds(COARSE_STEP_SECONDS);
@@ -129,14 +129,14 @@ impl Propagator {
             satellite,
 
             aos: state.aos.time,
-            aos_azimuth: state.aos.azimuth_rad.to_degrees(),
+            aos_azimuth: Angle::new::<radian>(state.aos.azimuth_rad),
 
             max_elevation_time: state.max.time,
-            max_elevation: state.max.elevation_rad.to_degrees(),
-            max_elevation_azimuth: state.max.azimuth_rad.to_degrees(),
+            max_elevation: Angle::new::<radian>(state.max.elevation_rad),
+            max_elevation_azimuth: Angle::new::<radian>(state.max.azimuth_rad),
 
             los: los.time,
-            los_azimuth: los.azimuth_rad.to_degrees(),
+            los_azimuth: Angle::new::<radian>(los.azimuth_rad),
 
             duration_seconds: duration,
         }

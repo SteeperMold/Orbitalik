@@ -52,14 +52,14 @@ pub struct Pass {
     pub satellite: SatelliteIdentifier,
 
     pub aos: DateTime<Utc>,
-    pub aos_azimuth: f64,
+    pub aos_azimuth: Angle,
 
     pub max_elevation_time: DateTime<Utc>,
-    pub max_elevation: f64,
-    pub max_elevation_azimuth: f64,
+    pub max_elevation: Angle,
+    pub max_elevation_azimuth: Angle,
 
     pub los: DateTime<Utc>,
-    pub los_azimuth: f64,
+    pub los_azimuth: Angle,
 
     pub duration_seconds: u32,
 }

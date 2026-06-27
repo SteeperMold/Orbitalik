@@ -542,19 +542,54 @@ impl trajectory_grpc::ObserverTrajectoryResponse {
 }
 
 impl trajectory_grpc::Pass {
-    pub fn from_pass(pass: &Pass) -> Result<Self, Status> {
+    pub fn from_pass(pass: &Pass, units: Option<UnitSettings>) -> Result<Self, Status> {
+        let angle_unit = units
+            .as_ref()
+            .and_then(|u| AngleUnit::try_from(u.angle_unit).ok())
+            .unwrap_or(AngleUnit::Unspecified);
+
+        if angle_unit == AngleUnit::Unspecified {
+            return Err(Status::invalid_argument(
+                "Angle unit is unspecified in UnitSettings",
+            ));
+        }
+
+        let aos_azimuth = match (&pass.aos_azimuth, angle_unit) {
+            (a, AngleUnit::Degrees) => a.get::<degree>(),
+            (a, AngleUnit::Radians) => a.get::<radian>(),
+            (_, AngleUnit::Unspecified) => unreachable!(),
+        };
+
+        let max_elevation = match (&pass.max_elevation, angle_unit) {
+            (a, AngleUnit::Degrees) => a.get::<degree>(),
+            (a, AngleUnit::Radians) => a.get::<radian>(),
+            (_, AngleUnit::Unspecified) => unreachable!(),
+        };
+
+        let max_elevation_azimuth = match (&pass.max_elevation_azimuth, angle_unit) {
+            (a, AngleUnit::Degrees) => a.get::<degree>(),
+            (a, AngleUnit::Radians) => a.get::<radian>(),
+            (_, AngleUnit::Unspecified) => unreachable!(),
+        };
+
+        let los_azimuth = match (&pass.los_azimuth, angle_unit) {
+            (a, AngleUnit::Degrees) => a.get::<degree>(),
+            (a, AngleUnit::Radians) => a.get::<radian>(),
+            (_, AngleUnit::Unspecified) => unreachable!(),
+        };
+
         Ok(Self {
             satellite: Some(pass.satellite.clone().into()),
 
             aos: Some(pass.aos.to_proto_timestamp()?),
-            aos_azimuth: pass.aos_azimuth,
+            aos_azimuth,
 
             max_elevation_time: Some(pass.max_elevation_time.to_proto_timestamp()?),
-            max_elevation: pass.max_elevation,
-            max_elevation_azimuth: pass.max_elevation_azimuth,
+            max_elevation,
+            max_elevation_azimuth,
 
             los: Some(pass.los.to_proto_timestamp()?),
-            los_azimuth: pass.los_azimuth,
+            los_azimuth,
 
             duration_seconds: pass.duration_seconds,
         })
@@ -572,7 +607,7 @@ impl trajectory_grpc::GetPassesResponse {
             metadata: trajectory_grpc::PassesComputationMetadata::with_units(metadata, units)?,
             passes: passes
                 .iter()
-                .map(trajectory_grpc::Pass::from_pass)
+                .map(|p| trajectory_grpc::Pass::from_pass(p, units))
                 .collect::<Result<Vec<_>, Status>>()?,
             range: Some(trajectory_grpc::TimeRange {
                 start: Some(range.start.to_proto_timestamp()?),
@@ -592,7 +627,7 @@ impl trajectory_grpc::NextPassesResponse {
             metadata: trajectory_grpc::PassesComputationMetadata::with_units(metadata, units)?,
             passes: passes
                 .iter()
-                .map(trajectory_grpc::Pass::from_pass)
+                .map(|p| trajectory_grpc::Pass::from_pass(p, units))
                 .collect::<Result<Vec<_>, Status>>()?,
         })
     }
