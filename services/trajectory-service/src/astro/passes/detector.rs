@@ -1,12 +1,13 @@
+use chrono::{DateTime, Duration, Utc};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use uom::si::angle::radian;
+use uom::si::f64::Angle;
+
 use crate::astro::errors::PropagationError;
 use crate::astro::models::{Pass, SatelliteIdentifier};
 use crate::astro::passes::predictor::PassPredictionOptions;
 use crate::astro::propagation::look_angles::LookAnglesComputation;
 use crate::astro::propagation::propagator::Propagator;
-use chrono::{DateTime, Duration, Utc};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use uom::si::angle::radian;
-use uom::si::f64::Angle;
 
 #[derive(Clone, Copy)]
 struct ElevationSample {
@@ -18,7 +19,6 @@ struct ElevationSample {
 struct PassState {
     aos: ElevationSample,
     max: ElevationSample,
-    max_el_rad: f64,
 }
 
 const COARSE_STEP_SECONDS: i64 = 60;
@@ -27,62 +27,37 @@ impl Propagator {
     pub fn predict_passes(
         &self,
         options: &PassPredictionOptions,
-        remaining: &AtomicUsize, // global quota
+        remaining: &AtomicUsize,
     ) -> Result<Vec<Pass>, PropagationError> {
         let min_el_rad = options.min_elevation.get::<radian>();
         let min_peak_el_rad = options.min_peak_elevation.get::<radian>();
 
-        let compute = LookAnglesComputation {
-            azimuth: true,
-            elevation: true,
-            range: true,
-        };
-
         let mut passes = Vec::new();
-
         let mut prev_sample: Option<ElevationSample> = None;
         let mut current_pass: Option<PassState> = None;
 
         let mut t = options.range.start;
 
-        while t <= options.range.end {
-            if remaining.load(Ordering::Relaxed) == 0 {
-                break;
-            }
-
-            let la = self.look_angles_at(t, options.observer, &compute)?;
-
-            let (Some(az), Some(el)) = (la.azimuth, la.elevation) else {
+        while t <= options.range.end && remaining.load(Ordering::Relaxed) > 0 {
+            let Some(sample) = self.sample(t, options)? else {
                 t += Duration::seconds(COARSE_STEP_SECONDS);
                 continue;
             };
 
-            let sample = ElevationSample {
-                time: t,
-                azimuth_rad: az.get::<radian>(),
-                elevation_rad: el.get::<radian>(),
-            };
-
             // aos detection
-            if let Some(prev) = prev_sample
-                && current_pass.is_none()
-                && prev.elevation_rad < min_el_rad
-                && sample.elevation_rad >= min_el_rad
+            if let (Some(prev), None) = (&prev_sample, &current_pass)
+                && Self::crossed_horizon(prev, &sample, min_el_rad)
             {
                 current_pass = Some(PassState {
-                    aos: prev,
+                    aos: *prev,
                     max: sample,
-                    max_el_rad: sample.elevation_rad,
                 });
             }
 
-            // inside pass tracking
+            // inside pass
             if let Some(pass) = &mut current_pass {
                 if sample.elevation_rad >= min_el_rad {
-                    if sample.elevation_rad > pass.max_el_rad {
-                        pass.max = sample;
-                        pass.max_el_rad = sample.elevation_rad;
-                    }
+                    Self::update_peak(pass, &sample);
                 } else {
                     // los reached
                     let final_pass = Self::build_pass_from_state(
@@ -98,12 +73,8 @@ impl Propagator {
                         continue;
                     }
 
-                    let old = remaining.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
-                        if x > 0 { Some(x - 1) } else { None }
-                    });
-
-                    if old.is_err() {
-                        break; // no quota left
+                    if Self::decrement_remaining(remaining).is_err() {
+                        break;
                     }
 
                     passes.push(final_pass);
@@ -116,6 +87,45 @@ impl Propagator {
         }
 
         Ok(passes)
+    }
+
+    fn sample(
+        &self,
+        t: DateTime<Utc>,
+        options: &PassPredictionOptions,
+    ) -> Result<Option<ElevationSample>, PropagationError> {
+        let compute = LookAnglesComputation {
+            azimuth: true,
+            elevation: true,
+            range: true,
+        };
+
+        let la = self.look_angles_at(t, options.observer, &compute)?;
+
+        Ok(match (la.azimuth, la.elevation) {
+            (Some(az), Some(el)) => Some(ElevationSample {
+                time: t,
+                azimuth_rad: az.get::<radian>(),
+                elevation_rad: el.get::<radian>(),
+            }),
+            _ => None,
+        })
+    }
+
+    fn crossed_horizon(prev: &ElevationSample, curr: &ElevationSample, min_el_rad: f64) -> bool {
+        prev.elevation_rad < min_el_rad && curr.elevation_rad >= min_el_rad
+    }
+
+    fn update_peak(pass: &mut PassState, sample: &ElevationSample) {
+        if sample.elevation_rad > pass.max.elevation_rad {
+            pass.max = *sample;
+        }
+    }
+
+    fn decrement_remaining(remaining: &AtomicUsize) -> Result<usize, usize> {
+        remaining.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
+            if x > 0 { Some(x - 1) } else { None }
+        })
     }
 
     fn build_pass_from_state(
