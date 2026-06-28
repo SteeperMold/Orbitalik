@@ -2,12 +2,13 @@ use chrono::Utc;
 use std::sync::Arc;
 
 use crate::astro::coords::geodetic::Geodetic;
-use crate::astro::look_angles::LookAnglesComputation;
 use crate::astro::models::{ObserverTrajectory, Trajectory};
-use crate::astro::position::PositionComputation;
-use crate::astro::propagator::Propagator;
-use crate::domain::errors::PropagationError;
-use crate::domain::models::{ComputationMetadata, Sampling, SatelliteIdentifier, TimeRange};
+use crate::astro::models::{Sampling, SatelliteIdentifier, TimeRange};
+use crate::astro::propagation::look_angles::LookAnglesComputation;
+use crate::astro::propagation::position::PositionComputation;
+use crate::astro::propagation::propagator::Propagator;
+use crate::domain::errors::ServiceError;
+use crate::domain::models::TrajectoryComputationMetadata;
 use crate::transport::adapter::tle_client::TleGrpcClient;
 
 pub struct TrajectoryService {
@@ -25,7 +26,7 @@ impl TrajectoryService {
         range: TimeRange,
         sampling: Sampling,
         compute: &PositionComputation,
-    ) -> Result<(Trajectory, ComputationMetadata), PropagationError> {
+    ) -> Result<(Trajectory, TrajectoryComputationMetadata), ServiceError> {
         let tle = self
             .tle_grpc_client
             .get_tle(satellite_identifier.clone())
@@ -33,7 +34,7 @@ impl TrajectoryService {
 
         let trajectory = Propagator::from_tle(&tle)?.trajectory_at(range, sampling, compute)?;
 
-        let metadata = ComputationMetadata {
+        let metadata = TrajectoryComputationMetadata {
             propagation_model: "SGP4".to_string(),
             computation_time: Utc::now(),
             norad_id: tle.norad_id,
@@ -51,7 +52,7 @@ impl TrajectoryService {
         sampling: Sampling,
         observer: &Geodetic,
         compute: &LookAnglesComputation,
-    ) -> Result<(ObserverTrajectory, ComputationMetadata), PropagationError> {
+    ) -> Result<(ObserverTrajectory, TrajectoryComputationMetadata), ServiceError> {
         let tle = self
             .tle_grpc_client
             .get_tle(satellite_identifier.clone())
@@ -60,7 +61,7 @@ impl TrajectoryService {
         let observer_trajectory = Propagator::from_tle(&tle)?
             .observer_trajectory_at(range, sampling, observer, compute)?;
 
-        let metadata = ComputationMetadata {
+        let metadata = TrajectoryComputationMetadata {
             propagation_model: "SGP4".to_string(),
             computation_time: Utc::now(),
             norad_id: tle.norad_id,

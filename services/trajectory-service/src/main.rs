@@ -16,6 +16,7 @@
 use std::sync::Arc;
 
 use crate::domain::errors::StartupError;
+use crate::service::passes::PassesService;
 use crate::service::position::PositionService;
 use crate::service::trajectory::TrajectoryService;
 use crate::transport::adapter::tle_client::TleGrpcClient;
@@ -28,7 +29,7 @@ mod transport;
 
 #[actix_web::main]
 async fn main() -> Result<(), StartupError> {
-    let config = infrastructure::config::AppConfig::from_dotenv();
+    let config = infrastructure::config::AppConfig::from_dotenv()?;
 
     infrastructure::logger::init_logger(&config.app_env)?;
 
@@ -40,10 +41,19 @@ async fn main() -> Result<(), StartupError> {
 
     let position_service = PositionService::new(tle_grpc_client.clone());
     let trajectory_service = TrajectoryService::new(tle_grpc_client.clone());
+    let passes_service = PassesService::new(
+        tle_grpc_client.clone(),
+        config.max_satellites,
+        config.next_passes_lookahead,
+    );
 
     let http_server = transport::http::server::run(config.http_port)?;
-    let grpc_server =
-        transport::grpc::server::run(config.grpc_port, position_service, trajectory_service);
+    let grpc_server = transport::grpc::server::run(
+        config.grpc_port,
+        position_service,
+        trajectory_service,
+        passes_service,
+    );
 
     tokio::try_join!(
         async { http_server.await.map_err(StartupError::from) },

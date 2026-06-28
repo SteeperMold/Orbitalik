@@ -11,6 +11,9 @@ service TrajectoryService {
 
     rpc GetTrajectory (TrajectoryRequest) returns (TrajectoryResponse);
     rpc GetObserverTrajectory (ObserverTrajectoryRequest) returns (ObserverTrajectoryResponse);
+
+    rpc GetPasses (PassPredictionRequest) returns (GetPassesResponse);
+    rpc GetNextPasses (NextPassesRequest) returns (NextPassesResponse);
 }
 
 message UnitSettings {
@@ -63,15 +66,6 @@ message SatelliteIdentifier {
     }
 }
 
-message ComputationMetadata {
-    string propagation_model = 1;
-    google.protobuf.Timestamp computation_time = 2;
-    uint32 norad_id = 3;
-    string satellite_name = 4;
-    google.protobuf.Timestamp tle_epoch = 5;
-    UnitSettings units = 6;
-}
-
 message TimeRange {
     google.protobuf.Timestamp start = 1;
     google.protobuf.Timestamp end = 2;
@@ -79,6 +73,15 @@ message TimeRange {
 
 message SamplingOptions {
     uint32 step_seconds = 1;
+}
+
+message TrajectoryComputationMetadata {
+    string propagation_model = 1;
+    google.protobuf.Timestamp computation_time = 2;
+    uint32 norad_id = 3;
+    string satellite_name = 4;
+    google.protobuf.Timestamp tle_epoch = 5;
+    UnitSettings units = 6;
 }
 
 message PositionRequest {
@@ -89,7 +92,7 @@ message PositionRequest {
 }
 
 message PositionResponse {
-    ComputationMetadata metadata = 1;
+    TrajectoryComputationMetadata metadata = 1;
 
     google.protobuf.Timestamp time = 2;
 
@@ -107,7 +110,7 @@ message LookAnglesRequest {
 }
 
 message LookAnglesResponse {
-    ComputationMetadata metadata = 1;
+    TrajectoryComputationMetadata metadata = 1;
 
     google.protobuf.Timestamp time = 2;
 
@@ -139,7 +142,7 @@ message TrajectoryRequest {
 }
 
 message TrajectoryResponse {
-    ComputationMetadata metadata = 1;
+    TrajectoryComputationMetadata metadata = 1;
 
     repeated StateVector states = 2;
 
@@ -168,10 +171,103 @@ message ObserverTrajectoryRequest {
 }
 
 message ObserverTrajectoryResponse {
-    ComputationMetadata metadata = 1;
+    TrajectoryComputationMetadata metadata = 1;
 
     repeated ObserverTrajectoryPoint points = 2;
 
     TimeRange range = 3;
     SamplingOptions sampling = 4;
+}
+
+message PassPredictionRequest {
+    repeated SatelliteIdentifier satellites = 1;
+
+    TimeRange range = 2;
+
+    GeodeticInput observer = 3;
+
+    UnitSettings units = 4;
+
+    oneof min_peak_elevation {
+        double min_peak_elevation_deg = 5;
+        double min_peak_elevation_rad = 6;
+    }
+    oneof min_elevation {
+        double min_elevation_deg = 7;
+        double min_elevation_rad = 8;
+    }
+
+    optional uint32 max_results = 9;
+}
+
+message NextPassesRequest {
+    repeated SatelliteIdentifier satellites = 1;
+
+    GeodeticInput observer = 2;
+
+    UnitSettings units = 3;
+
+    oneof min_peak_elevation {
+        double min_peak_elevation_deg = 4;
+        double min_peak_elevation_rad = 5;
+    }
+    oneof min_elevation {
+        double min_elevation_deg = 6;
+        double min_elevation_rad = 7;
+    }
+
+    uint32 count = 8;
+
+    TimeRange lookahead_range = 9;
+}
+
+message GetPassesResponse {
+    PassesComputationMetadata metadata = 1;
+
+    repeated Pass passes = 2;
+
+    TimeRange range = 3;
+}
+
+message NextPassesResponse {
+    PassesComputationMetadata metadata = 1;
+
+    repeated Pass passes = 2;
+}
+
+message Pass {
+    SatelliteIdentifier satellite = 1;
+
+    // acquisition of signal (rise above min elevation)
+    google.protobuf.Timestamp aos = 2;
+    double aos_azimuth = 3;
+
+    // maximum elevation point
+    google.protobuf.Timestamp max_elevation_time = 4;
+    double max_elevation = 5;
+    double max_elevation_azimuth = 6;
+
+    // loss of signal (drop below min elevation)
+    google.protobuf.Timestamp los = 7;
+    double los_azimuth = 8;
+
+    uint32 duration_seconds = 9;
+}
+
+message PassesComputationMetadata {
+    string propagation_model = 1;
+
+    google.protobuf.Timestamp computation_time = 2;
+
+    repeated uint32 norad_ids = 3;
+    repeated string satellite_names = 4;
+
+    google.protobuf.Timestamp tle_epoch = 5;
+
+    UnitSettings units = 6;
+
+    uint32 satellites_evaluated = 7;
+    uint32 passes_found = 8;
+
+    uint32 computation_ms = 9;
 }
