@@ -1,3 +1,4 @@
+use std::num::TryFromIntError;
 use chrono::{DateTime, Duration, Utc};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use uom::si::angle::radian;
@@ -64,7 +65,7 @@ impl Propagator {
                         SatelliteIdentifier::NoradId(self.norad_id),
                         pass,
                         sample,
-                    );
+                    )?;
 
                     if final_pass.max_elevation.get::<radian>() < min_peak_el_rad {
                         current_pass = None;
@@ -132,10 +133,10 @@ impl Propagator {
         satellite: SatelliteIdentifier,
         state: &PassState,
         los: ElevationSample,
-    ) -> Pass {
-        let duration = (los.time - state.aos.time).num_seconds().max(0) as u32;
+    ) -> Result<Pass, TryFromIntError> {
+        let duration = u32::try_from((los.time - state.aos.time).num_seconds().max(0))?;
 
-        Pass {
+        Ok(Pass {
             satellite,
 
             aos: state.aos.time,
@@ -149,6 +150,6 @@ impl Propagator {
             los_azimuth: Angle::new::<radian>(los.azimuth_rad),
 
             duration_seconds: duration,
-        }
+        })
     }
 }

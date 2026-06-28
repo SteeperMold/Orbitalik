@@ -6,9 +6,9 @@ use uom::si::f64::Angle;
 
 use crate::astro::coords::geodetic::Geodetic;
 use crate::astro::models::{Pass, SatelliteIdentifier, TimeRange};
-use crate::astro::passes::context::SatelliteContext;
 use crate::astro::passes::predictor::PassPredictionOptions;
 use crate::astro::passes::predictor::PassPredictor;
+use crate::astro::propagation::propagator::Propagator;
 use crate::domain::errors::ServiceError;
 use crate::domain::models::PassesComputationMetadata;
 use crate::transport::adapter::tle_client::TleGrpcClient;
@@ -35,7 +35,7 @@ pub struct NextPassesOptions<'a> {
 }
 
 struct PredictionContext {
-    contexts: Vec<SatelliteContext>,
+    propagators: Vec<Propagator>,
     metadata: PassesComputationMetadata,
 }
 
@@ -69,10 +69,10 @@ impl PassesService {
 
         let start = Instant::now();
 
-        let passes = PassPredictor::predict_many(&ctx.contexts, astro_options)?;
+        let passes = PassPredictor::predict_many(&ctx.propagators, astro_options)?;
 
-        ctx.metadata.passes_found = passes.len() as u32;
-        ctx.metadata.computation_ms = start.elapsed().as_millis() as u32;
+        ctx.metadata.passes_found = u32::try_from(passes.len())?;
+        ctx.metadata.computation_ms = u32::try_from(start.elapsed().as_millis())?;
 
         Ok((passes, ctx.metadata))
     }
@@ -100,10 +100,10 @@ impl PassesService {
             max_results: Some(options.passes_count),
         };
 
-        let passes = PassPredictor::predict_many(&ctx.contexts, astro_options)?;
+        let passes = PassPredictor::predict_many(&ctx.propagators, astro_options)?;
 
-        ctx.metadata.passes_found = passes.len() as u32;
-        ctx.metadata.computation_ms = start.elapsed().as_millis() as u32;
+        ctx.metadata.passes_found = u32::try_from(passes.len())?;
+        ctx.metadata.computation_ms = u32::try_from(start.elapsed().as_millis())?;
 
         Ok((passes, ctx.metadata))
     }
@@ -138,13 +138,13 @@ impl PassesService {
         let mut norad_ids = Vec::with_capacity(tles.len());
         let mut satellite_names = Vec::with_capacity(tles.len());
 
-        let contexts: Vec<_> = tles
+        let propagators: Vec<_> = tles
             .iter()
             .map(|tle| {
                 norad_ids.push(tle.norad_id);
                 satellite_names.push(tle.satellite_name.clone());
 
-                SatelliteContext::from_tle(tle)
+                Propagator::from_tle(tle)
             })
             .collect::<Result<_, _>>()?;
 
@@ -154,12 +154,12 @@ impl PassesService {
             norad_ids,
             satellite_names,
             tle_epoch,
-            satellites_evaluated: contexts.len() as u32,
+            satellites_evaluated: u32::try_from(propagators.len())?,
 
             passes_found: 0,
             computation_ms: 0,
         };
 
-        Ok(PredictionContext { contexts, metadata })
+        Ok(PredictionContext { propagators, metadata })
     }
 }

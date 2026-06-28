@@ -5,7 +5,7 @@ use crate::astro::errors::PropagationError;
 use crate::astro::models::Tle;
 
 pub struct Propagator {
-    pub satellite_name: String,
+    pub _satellite_name: String,
     pub norad_id: u32,
 
     elements: sgp4::Elements,
@@ -23,7 +23,7 @@ impl Propagator {
         let constants = sgp4::Constants::from_elements(&elements)?;
 
         Ok(Self {
-            satellite_name: tle.satellite_name.clone(),
+            _satellite_name: tle.satellite_name.clone(),
             norad_id: tle.norad_id,
             elements,
             constants,

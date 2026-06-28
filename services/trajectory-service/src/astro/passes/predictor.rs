@@ -5,7 +5,7 @@ use uom::si::f64::Angle;
 use crate::astro::coords::geodetic::Geodetic;
 use crate::astro::errors::PropagationError;
 use crate::astro::models::{Pass, TimeRange};
-use crate::astro::passes::context::SatelliteContext;
+use crate::astro::propagation::propagator::Propagator;
 
 pub struct PassPredictor;
 
@@ -19,14 +19,14 @@ pub struct PassPredictionOptions<'a> {
 
 impl PassPredictor {
     pub fn predict_many(
-        satellites: &[SatelliteContext],
+        satellites: &[Propagator],
         options: &PassPredictionOptions,
     ) -> Result<Vec<Pass>, PropagationError> {
         let remaining = AtomicUsize::new(options.max_results.unwrap_or(usize::MAX));
 
         let mut all: Vec<Pass> = satellites
             .par_iter()
-            .map(|sat| sat.propagator.predict_passes(options, &remaining))
+            .map(|propagator| propagator.predict_passes(options, &remaining))
             .collect::<Result<Vec<_>, _>>()?
             .into_par_iter()
             .flatten()

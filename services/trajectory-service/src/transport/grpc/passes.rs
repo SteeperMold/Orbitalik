@@ -20,7 +20,7 @@ impl TrajectoryGrpcServer {
         let satellites: Vec<SatelliteIdentifier> = req
             .satellites
             .into_iter()
-            .map(|s| s.try_into())
+            .map(std::convert::TryInto::try_into)
             .collect::<Result<_, _>>()?;
 
         let range = req
@@ -61,7 +61,7 @@ impl TrajectoryGrpcServer {
         };
 
         let (passes, metadata) = self
-            .passes_service
+            .passes
             .get_passes(satellites, &prediction_options)
             .await?;
 
@@ -79,7 +79,7 @@ impl TrajectoryGrpcServer {
         let satellites: Vec<SatelliteIdentifier> = req
             .satellites
             .into_iter()
-            .map(|s| s.try_into())
+            .map(std::convert::TryInto::try_into)
             .collect::<Result<_, _>>()?;
 
         let observer = &req
@@ -110,7 +110,7 @@ impl TrajectoryGrpcServer {
         };
 
         let (passes, metadata) = self
-            .passes_service
+            .passes
             .next_passes(satellites, &prediction_options)
             .await?;
 

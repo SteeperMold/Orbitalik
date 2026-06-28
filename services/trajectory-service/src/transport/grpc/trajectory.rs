@@ -33,7 +33,7 @@ impl TrajectoryGrpcServer {
         let compute = mask.map_or_else(PositionComputation::default, PositionComputation::from);
 
         let (trajectory, metadata) = self
-            .trajectory_service
+            .trajectory
             .get_trajectory(identifier, range, sampling, &compute)
             .await?;
 
@@ -72,7 +72,7 @@ impl TrajectoryGrpcServer {
         let compute = mask.map_or_else(LookAnglesComputation::default, LookAnglesComputation::from);
 
         let (observer_trajectory, metadata) = self
-            .trajectory_service
+            .trajectory
             .get_observer_trajectory(identifier, range, sampling, &observer, &compute)
             .await?;
 

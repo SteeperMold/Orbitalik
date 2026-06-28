@@ -1,17 +1,17 @@
 //! Project-wide lint policy
-// #![deny(
-//     warnings,
-//     unused_must_use,
-//     clippy::unwrap_used,
-//     clippy::expect_used,
-//     clippy::dbg_macro,
-//     clippy::print_stdout,
-//     clippy::todo,
-//     clippy::unimplemented,
-//     clippy::panic
-// )]
-// #![warn(missing_docs, clippy::all, clippy::pedantic, clippy::nursery)]
-// #![allow(clippy::suboptimal_flops)]
+#![deny(
+    warnings,
+    unused_must_use,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::dbg_macro,
+    clippy::print_stdout,
+    clippy::todo,
+    clippy::unimplemented,
+    clippy::panic
+)]
+#![warn(missing_docs, clippy::all, clippy::pedantic, clippy::nursery)]
+#![allow(clippy::suboptimal_flops)]
 
 use std::sync::Arc;
 
@@ -29,7 +29,7 @@ mod transport;
 
 #[actix_web::main]
 async fn main() -> Result<(), StartupError> {
-    let config = infrastructure::config::AppConfig::from_dotenv();
+    let config = infrastructure::config::AppConfig::from_dotenv()?;
 
     infrastructure::logger::init_logger(&config.app_env)?;
 

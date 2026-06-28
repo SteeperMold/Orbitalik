@@ -14,9 +14,9 @@ pub mod trajectory_grpc {
 }
 
 pub struct TrajectoryGrpcServer {
-    pub position_service: PositionService,
-    pub trajectory_service: TrajectoryService,
-    pub passes_service: PassesService,
+    pub position: PositionService,
+    pub trajectory: TrajectoryService,
+    pub passes: PassesService,
 }
 
 impl TrajectoryGrpcServer {
@@ -26,9 +26,9 @@ impl TrajectoryGrpcServer {
         passes_service: PassesService,
     ) -> Self {
         Self {
-            position_service,
-            trajectory_service,
-            passes_service,
+            position: position_service,
+            trajectory: trajectory_service,
+            passes: passes_service,
         }
     }
 }
