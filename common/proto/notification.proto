@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package notification;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service NotificationService {
+  rpc CreateSubscription (CreateSubscriptionRequest) returns (Subscription);
+  rpc GetSubscription (GetSubscriptionRequest) returns (Subscription);
+  rpc ListSubscriptions (ListSubscriptionsRequest) returns (ListSubscriptionsResponse);
+  rpc UpdateSubscription (UpdateSubscriptionRequest) returns (Subscription);
+  rpc DeleteSubscription (DeleteSubscriptionRequest) returns (google.protobuf.Empty);
+  rpc SetSubscriptionStatus (SetSubscriptionStatusRequest) returns (Subscription);
+
+  rpc RegisterDevice (RegisterDeviceRequest) returns (Device);
+  rpc ListDevices (ListDevicesRequest) returns (ListDevicesResponse);
+  rpc DeleteDevice (DeleteDeviceRequest) returns (google.protobuf.Empty);
+}
+
+message Subscription {
+  string id = 1;
+
+  uint64 user_id = 2;
+
+  SatelliteIdentifier satellite = 3;
+
+  GeodeticInput observer = 4;
+
+  bool enabled = 5;
+
+  // notify n seconds before aos (acquisition of signal)
+  uint32 notify_before_seconds = 6;
+
+  // filtering constraints
+  optional double min_peak_elevation_deg = 7;
+  optional double min_elevation_deg = 8;
+
+  // lookahead safety window (prevents infinite scheduling)
+  uint32 lookahead_days = 9;
+
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message CreateSubscriptionRequest {
+  uint64 user_id = 1;
+
+  SatelliteIdentifier satellite = 2;
+
+  GeodeticInput observer = 3;
+
+  uint32 notify_before_seconds = 4;
+
+  oneof min_peak_elevation {
+    double min_peak_elevation_deg = 5;
+    double min_peak_elevation_rad = 6;
+  }
+  oneof min_elevation {
+    double min_elevation_deg = 7;
+    double min_elevation_rad = 8;
+  }
+
+  uint32 lookahead_days = 9;
+}
+
+message GetSubscriptionRequest {
+  string id = 1;
+}
+
+message ListSubscriptionsRequest {
+  uint64 user_id = 1;
+
+  optional bool enabled = 2;
+
+  uint32 page_size = 3;
+  string page_token = 4;
+}
+
+message ListSubscriptionsResponse {
+  repeated Subscription subscriptions = 1;
+  string next_page_token = 2;
+}
+
+message UpdateSubscriptionRequest {
+  string id = 1;
+
+  optional bool enabled = 2;
+  optional uint32 notify_before_seconds = 3;
+  optional double min_peak_elevation_deg = 4;
+  optional double min_elevation_deg = 5;
+}
+
+message DeleteSubscriptionRequest {
+  string id = 1;
+}
+
+message SetSubscriptionStatusRequest {
+  string id = 1;
+  bool enabled = 2;
+}
+
+message Device {
+  string id = 1;
+
+  uint64 user_id = 2;
+
+  enum DeviceType {
+    DEVICE_TYPE_UNSPECIFIED = 0;
+    DEVICE_TYPE_WEB_PUSH = 1;
+    DEVICE_TYPE_FCM = 2;
+    DEVICE_TYPE_EMAIL = 3;
+    DEVICE_TYPE_WEBHOOK = 4;
+  }
+
+  DeviceType type = 3;
+
+  string address = 4; // token, email, webhook url
+
+  bool enabled = 5;
+
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message RegisterDeviceRequest {
+  uint64 user_id = 1;
+
+  Device.DeviceType type = 2;
+
+  string address = 3;
+}
+
+message ListDevicesRequest {
+  uint64 user_id = 1;
+}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message DeleteDeviceRequest {
+  string id = 1;
+}
+
+message SatelliteIdentifier {
+  oneof kind {
+    uint32 norad_id = 1;
+    string satellite_name = 2;
+  }
+}
+
+message GeodeticInput {
+  oneof lat {
+    double lat_deg = 1;
+    double lat_rad = 2;
+  }
+  oneof lon {
+    double lon_deg = 3;
+    double lon_rad = 4;
+  }
+  oneof alt {
+    double alt_m = 5;
+    double alt_km = 6;
+  }
+}

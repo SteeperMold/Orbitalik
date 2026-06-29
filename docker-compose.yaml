@@ -3,6 +3,7 @@ include:
   - ./services/metadata-aggregation-worker/docker-compose.yaml
   - ./services/tle-ingestion-service/docker-compose.yaml
   - ./services/trajectory-service/docker-compose.yaml
+  - ./services/notification-service/docker-compose.yaml
 
 networks:
   orbitalik-net:
