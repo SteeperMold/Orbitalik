@@ -12,7 +12,7 @@ class SubscriptionService:
     repository: SubscriptionRepository
     max_page_size: int
 
-    async def create_subscription(
+    async def create(
         self,
         cmd: command.CreateSubscriptionCommand,
     ) -> models.Subscription:
@@ -50,7 +50,7 @@ class SubscriptionService:
 
         return await self.repository.create(cmd)
 
-    async def get_subscription(self, subscription_id: int) -> models.Subscription:
+    async def get(self, subscription_id: int) -> models.Subscription:
         subscription = await self.repository.get(subscription_id)
 
         if subscription is None:
@@ -58,7 +58,7 @@ class SubscriptionService:
 
         return subscription
 
-    async def list_subscriptions(
+    async def list(
         self,
         user_id: int,
         enabled: bool | None,
@@ -83,7 +83,7 @@ class SubscriptionService:
 
         return items, next_token
 
-    async def update_subscription(
+    async def update(
         self,
         subscription_id: int,
         cmd: command.UpdateSubscriptionCommand,
@@ -96,13 +96,13 @@ class SubscriptionService:
 
         return await self.repository.update(subscription_id, cmd)
 
-    async def delete_subscription(self, subscription_id: int) -> None:
+    async def delete(self, subscription_id: int) -> None:
         deleted = await self.repository.delete(subscription_id)
 
         if not deleted:
             raise ValueError(f"subscription {subscription_id} not found")
 
-    async def set_subscription_status(
+    async def set_status(
         self,
         subscription_id: int,
         enabled: bool,

@@ -4,7 +4,9 @@ from notification.container import Services
 from notification.infrastructure.db.session import create_engine, create_session_factory
 from notification.infrastructure.logger import configure_logging
 from notification.infrastructure.settings import Settings
+from notification.repository.device_repo import DeviceRepository
 from notification.repository.subscription_repo import SubscriptionRepository
+from notification.services.device_service import DeviceService
 from notification.services.subscription_service import SubscriptionService
 from notification.transport.grpc.server import GRPCServer
 from notification.transport.grpc.services import NotificationServicer
@@ -24,7 +26,9 @@ async def main() -> None:
         sub_repo,
         settings.max_page_size,
     )
-    servicer = NotificationServicer(notification_svc)
+    device_repo = DeviceRepository(session_factory)
+    device_svc = DeviceService(device_repo)
+    servicer = NotificationServicer(notification_svc, device_svc)
 
     grpc_server = GRPCServer(
         services=Services(notification_servicer=servicer),

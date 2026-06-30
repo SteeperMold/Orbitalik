@@ -6,13 +6,15 @@ import grpc.aio
 from google.protobuf import empty_pb2
 
 from notification.proto import notification_pb2 as pb2
+from notification.services.device_service import DeviceService
 from notification.services.subscription_service import SubscriptionService
 from notification.transport.grpc import converters
 
 
 @dataclasses.dataclass
 class NotificationServicer:
-    service: SubscriptionService
+    subscriptions: SubscriptionService
+    devices: DeviceService
 
     async def CreateSubscription(
         self,
@@ -21,7 +23,7 @@ class NotificationServicer:
     ) -> pb2.Subscription:
         try:
             cmd = converters.create_subscription_command_from_request(request)
-            subscription = await self.service.create_subscription(cmd)
+            subscription = await self.subscriptions.create(cmd)
 
             return converters.subscription_to_proto(subscription)
 
@@ -34,7 +36,7 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> pb2.Subscription:
         try:
-            subscription = await self.service.get_subscription(request.id)
+            subscription = await self.subscriptions.get(request.id)
 
             return converters.subscription_to_proto(subscription)
 
@@ -47,7 +49,7 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> pb2.ListSubscriptionsResponse:
         try:
-            items, next_page_token = await self.service.list_subscriptions(
+            items, next_page_token = await self.subscriptions.list(
                 user_id=request.user_id,
                 enabled=request.enabled if request.HasField("enabled") else None,
                 page_size=request.page_size,
@@ -70,7 +72,7 @@ class NotificationServicer:
         try:
             cmd = converters.update_subscription_command_from_request(request)
 
-            subscription = await self.service.update_subscription(
+            subscription = await self.subscriptions.update(
                 subscription_id=request.id,
                 cmd=cmd,
             )
@@ -86,7 +88,7 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> empty_pb2.Empty:
         try:
-            await self.service.delete_subscription(request.id)
+            await self.subscriptions.delete(request.id)
             return empty_pb2.Empty()
 
         except ValueError as e:
@@ -98,7 +100,7 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> pb2.Subscription:
         try:
-            subscription = await self.service.set_subscription_status(
+            subscription = await self.subscriptions.set_status(
                 subscription_id=request.id,
                 enabled=request.enabled,
             )
@@ -114,16 +116,13 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> pb2.Device:
         try:
-            device = await self.service.register_device(
+            device = await self.devices.register(
                 user_id=request.user_id,
-                token=request.token,
+                device_type=request.type,
+                address=request.address,
             )
 
-            return pb2.Device(
-                id=device.id,
-                user_id=device.user_id,
-                token=device.token,
-            )
+            return converters.device_to_proto(device)
 
         except ValueError as e:
             await context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(e))
@@ -133,23 +132,18 @@ class NotificationServicer:
         request: pb2.ListDevicesRequest,
         context: grpc.aio.ServicerContext,
     ) -> pb2.ListDevicesResponse:
-        devices = await self.service.list_devices(user_id=request.user_id)
+        devices = await self.devices.list(user_id=request.user_id)
 
-        return pb2.ListDevicesResponse(
-            devices=[
-                pb2.Device(
-                    id=d.id,
-                    user_id=d.user_id,
-                    token=d.token,
-                )
-                for d in devices
-            ]
-        )
+        return pb2.ListDevicesResponse(devices=[converters.device_to_proto(d) for d in devices])
 
     async def DeleteDevice(
         self,
         request: pb2.DeleteDeviceRequest,
         context: grpc.aio.ServicerContext,
     ) -> empty_pb2.Empty:
-        await self.service.delete_device(request.id)
-        return empty_pb2.Empty()
+        try:
+            await self.devices.delete_device(request.id)
+            return empty_pb2.Empty()
+
+        except ValueError as e:
+            await context.abort(grpc.StatusCode.NOT_FOUND, str(e))

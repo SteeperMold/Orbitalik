@@ -112,3 +112,18 @@ def subscription_to_proto(subscription: models.Subscription) -> pb2.Subscription
         created_at=created,
         updated_at=updated,
     )
+
+
+def device_to_proto(device: models.Device) -> pb2.Device:
+    ts = Timestamp()
+    if device.created_at:
+        ts.FromDatetime(device.created_at)
+
+    return pb2.Device(
+        id=device.id,
+        user_id=device.user_id,
+        type=device.type,
+        address=device.address,
+        enabled=device.enabled,
+        created_at=ts,
+    )

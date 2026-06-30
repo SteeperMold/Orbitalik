@@ -1,4 +1,5 @@
 import dataclasses
+import enum
 from datetime import datetime
 
 
@@ -58,3 +59,24 @@ class Subscription:
 
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+class DeviceType(enum.IntEnum):
+    WEB_PUSH = 1
+    FCM = 2
+    EMAIL = 3
+    WEBHOOK = 4
+
+
+@dataclasses.dataclass
+class Device:
+    id: int | None
+    user_id: int
+
+    type: DeviceType
+
+    address: str
+
+    enabled: bool
+
+    created_at: datetime | None = None
