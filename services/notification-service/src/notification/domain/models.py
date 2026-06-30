@@ -38,7 +38,7 @@ class GeodeticInput:
 
 @dataclasses.dataclass
 class Subscription:
-    id: str | None
+    id: int
     user_id: int
 
     satellite: SatelliteIdentifier

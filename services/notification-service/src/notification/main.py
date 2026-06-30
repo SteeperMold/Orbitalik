@@ -5,7 +5,7 @@ from notification.infrastructure.db.session import create_engine, create_session
 from notification.infrastructure.logger import configure_logging
 from notification.infrastructure.settings import Settings
 from notification.repository.subscription_repo import SubscriptionRepository
-from notification.services.notification_service import NotificationService
+from notification.services.subscription_service import SubscriptionService
 from notification.transport.grpc.server import GRPCServer
 from notification.transport.grpc.services import NotificationServicer
 from notification.transport.http.server import HTTPServer
@@ -17,10 +17,13 @@ async def main() -> None:
     configure_logging(settings.app_env)
 
     engine = create_engine(settings.database_url, settings.app_env)
-    SessionFactory = create_session_factory(engine)
+    session_factory = create_session_factory(engine)
 
-    sub_repo = SubscriptionRepository(SessionFactory)
-    notification_svc = NotificationService(sub_repo)
+    sub_repo = SubscriptionRepository(session_factory)
+    notification_svc = SubscriptionService(
+        sub_repo,
+        settings.max_page_size,
+    )
     servicer = NotificationServicer(notification_svc)
 
     grpc_server = GRPCServer(
@@ -37,5 +40,5 @@ async def main() -> None:
     await grpc_server.server.wait_for_termination()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

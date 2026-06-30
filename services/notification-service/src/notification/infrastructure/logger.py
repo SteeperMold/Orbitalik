@@ -1,6 +1,6 @@
+import logging
 import sys
 
-import logging
 import structlog
 
 from notification.infrastructure.settings import AppEnv

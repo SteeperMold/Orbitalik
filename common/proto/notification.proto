@@ -19,9 +19,9 @@ service NotificationService {
 }
 
 message Subscription {
-  string id = 1;
+  uint32 id = 1;
 
-  uint64 user_id = 2;
+  uint32 user_id = 2;
 
   SatelliteIdentifier satellite = 3;
 
@@ -44,7 +44,7 @@ message Subscription {
 }
 
 message CreateSubscriptionRequest {
-  uint64 user_id = 1;
+  uint32 user_id = 1;
 
   SatelliteIdentifier satellite = 2;
 
@@ -65,16 +65,16 @@ message CreateSubscriptionRequest {
 }
 
 message GetSubscriptionRequest {
-  string id = 1;
+  uint32 id = 1;
 }
 
 message ListSubscriptionsRequest {
-  uint64 user_id = 1;
+  uint32 user_id = 1;
 
   optional bool enabled = 2;
 
   uint32 page_size = 3;
-  string page_token = 4;
+  optional string page_token = 4;
 }
 
 message ListSubscriptionsResponse {
@@ -83,7 +83,7 @@ message ListSubscriptionsResponse {
 }
 
 message UpdateSubscriptionRequest {
-  string id = 1;
+  uint32 id = 1;
 
   optional bool enabled = 2;
   optional uint32 notify_before_seconds = 3;
@@ -92,18 +92,18 @@ message UpdateSubscriptionRequest {
 }
 
 message DeleteSubscriptionRequest {
-  string id = 1;
+  uint32 id = 1;
 }
 
 message SetSubscriptionStatusRequest {
-  string id = 1;
+  uint32 id = 1;
   bool enabled = 2;
 }
 
 message Device {
-  string id = 1;
+  uint32 id = 1;
 
-  uint64 user_id = 2;
+  uint32 user_id = 2;
 
   enum DeviceType {
     DEVICE_TYPE_UNSPECIFIED = 0;
@@ -123,7 +123,7 @@ message Device {
 }
 
 message RegisterDeviceRequest {
-  uint64 user_id = 1;
+  uint32 user_id = 1;
 
   Device.DeviceType type = 2;
 
@@ -131,7 +131,7 @@ message RegisterDeviceRequest {
 }
 
 message ListDevicesRequest {
-  uint64 user_id = 1;
+  uint32 user_id = 1;
 }
 
 message ListDevicesResponse {
@@ -139,7 +139,7 @@ message ListDevicesResponse {
 }
 
 message DeleteDeviceRequest {
-  string id = 1;
+  uint32 id = 1;
 }
 
 message SatelliteIdentifier {

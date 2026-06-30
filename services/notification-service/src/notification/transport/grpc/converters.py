@@ -1,23 +1,22 @@
 from google.protobuf.timestamp_pb2 import Timestamp
 
-from notification.domain.command import CreateSubscriptionCommand
-from notification.domain.models import SatelliteIdentifier, GeodeticInput, Subscription
+from notification.domain import command, models
 from notification.proto import notification_pb2 as pb2
 
 
-def satellite_from_proto(satellite: pb2.SatelliteIdentifier) -> SatelliteIdentifier:
+def satellite_from_proto(satellite: pb2.SatelliteIdentifier) -> models.SatelliteIdentifier:
     kind = satellite.WhichOneof("kind")
 
     if kind == "norad_id":
-        return SatelliteIdentifier(norad_id=satellite.norad_id)
+        return models.SatelliteIdentifier(norad_id=satellite.norad_id)
     elif kind == "satellite_name":
-        return SatelliteIdentifier(satellite_name=satellite.satellite_name)
+        return models.SatelliteIdentifier(satellite_name=satellite.satellite_name)
     else:
         raise ValueError("satellite identifier is required")
 
 
-def observer_from_proto(observer: pb2.GeodeticInput) -> GeodeticInput:
-    return GeodeticInput(
+def observer_from_proto(observer: pb2.GeodeticInput) -> models.GeodeticInput:
+    return models.GeodeticInput(
         lat_deg=observer.lat_deg if observer.HasField("lat_deg") else None,
         lat_rad=observer.lat_rad if observer.HasField("lat_rad") else None,
         lon_deg=observer.lon_deg if observer.HasField("lon_deg") else None,
@@ -27,34 +26,48 @@ def observer_from_proto(observer: pb2.GeodeticInput) -> GeodeticInput:
     )
 
 
-def create_subscription_command_from_request(request: pb2.CreateSubscriptionRequest) -> CreateSubscriptionCommand:
-    return CreateSubscriptionCommand(
+def create_subscription_command_from_request(
+    request: pb2.CreateSubscriptionRequest,
+) -> command.CreateSubscriptionCommand:
+    return command.CreateSubscriptionCommand(
         user_id=request.user_id,
         satellite=satellite_from_proto(request.satellite),
         observer=observer_from_proto(request.observer),
         notify_before_seconds=request.notify_before_seconds,
-
         min_peak_elevation_deg=request.min_peak_elevation_deg
         if request.WhichOneof("min_peak_elevation") == "min_peak_elevation_deg"
         else None,
-
         min_peak_elevation_rad=request.min_peak_elevation_rad
         if request.WhichOneof("min_peak_elevation") == "min_peak_elevation_rad"
         else None,
-
         min_elevation_deg=request.min_elevation_deg
         if request.WhichOneof("min_elevation") == "min_elevation_deg"
         else None,
-
         min_elevation_rad=request.min_elevation_rad
         if request.WhichOneof("min_elevation") == "min_elevation_rad"
         else None,
-
         lookahead_days=request.lookahead_days,
     )
 
 
-def subscription_to_proto(subscription: Subscription) -> pb2.Subscription:
+def update_subscription_command_from_request(
+    request: pb2.UpdateSubscriptionRequest,
+) -> command.UpdateSubscriptionCommand:
+    return command.UpdateSubscriptionCommand(
+        enabled=request.enabled if request.HasField("enabled") else None,
+        notify_before_seconds=(
+            request.notify_before_seconds if request.HasField("notify_before_seconds") else None
+        ),
+        min_peak_elevation_deg=(
+            request.min_peak_elevation_deg if request.HasField("min_peak_elevation_deg") else None
+        ),
+        min_elevation_deg=(
+            request.min_elevation_deg if request.HasField("min_elevation_deg") else None
+        ),
+    )
+
+
+def subscription_to_proto(subscription: models.Subscription) -> pb2.Subscription:
     created = Timestamp()
     if subscription.created_at:
         created.FromDatetime(subscription.created_at)
@@ -87,21 +100,15 @@ def subscription_to_proto(subscription: Subscription) -> pb2.Subscription:
         observer.alt_km = subscription.observer.alt_km
 
     return pb2.Subscription(
-        id=subscription.id or "",
+        id=subscription.id,
         user_id=subscription.user_id,
-
         satellite=satellite,
         observer=observer,
-
         enabled=subscription.enabled,
-
         notify_before_seconds=subscription.notify_before_seconds,
-
         min_peak_elevation_deg=subscription.min_peak_elevation_deg,
         min_elevation_deg=subscription.min_elevation_deg,
-
         lookahead_days=subscription.lookahead_days,
-
         created_at=created,
         updated_at=updated,
     )

@@ -3,7 +3,7 @@ import enum
 import pydantic_settings
 
 
-class AppEnv(str, enum.Enum):
+class AppEnv(enum.Enum):
     DEVELOPMENT = "development"
     PRODUCTION = "production"
     TEST = "test"
@@ -29,6 +29,8 @@ class Settings(pydantic_settings.BaseSettings):
 
     grpc_port: int = 50051
     http_port: int = 8080
+
+    max_page_size: int = 100
 
     @property
     def database_url(self) -> str:

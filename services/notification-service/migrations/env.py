@@ -1,3 +1,5 @@
+import asyncio
+
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -49,7 +51,6 @@ def run_migrations_online():
         with context.begin_transaction():
             context.run_migrations()
 
-    import asyncio
     asyncio.run(do_run_migrations())
 
 

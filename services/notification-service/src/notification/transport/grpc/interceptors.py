@@ -8,12 +8,9 @@ logger = structlog.get_logger()
 
 class LoggingInterceptor(grpc.aio.ServerInterceptor):
     async def intercept_service(
-            self,
-            continuation: Callable[
-                [grpc.HandlerCallDetails],
-                Awaitable[grpc.RpcMethodHandler | None]
-            ],
-            handler_call_details: grpc.HandlerCallDetails,
+        self,
+        continuation: Callable[[grpc.HandlerCallDetails], Awaitable[grpc.RpcMethodHandler | None]],
+        handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler | None:
         logger.info(
             "grpc_request",

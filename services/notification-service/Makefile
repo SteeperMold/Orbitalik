@@ -1,4 +1,4 @@
-.PHONY: compile-proto
+.PHONY: compile-proto lint format
 
 compile-proto:
 	python -m grpc_tools.protoc \
@@ -6,3 +6,9 @@ compile-proto:
 	  --python_out=src/notification/proto \
 	  --grpc_python_out=src/notification/proto \
 	  ../../common/proto/notification.proto
+
+lint:
+	ruff check . --fix
+
+format:
+	ruff format .
