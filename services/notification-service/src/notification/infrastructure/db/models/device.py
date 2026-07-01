@@ -1,18 +1,9 @@
-import enum
-from datetime import datetime
+import datetime as dt
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from notification.infrastructure.db.base import Base
-
-
-class DeviceTypeEnum(enum.IntEnum):
-    DEVICE_TYPE_UNSPECIFIED = 0
-    DEVICE_TYPE_WEB_PUSH = 1
-    DEVICE_TYPE_FCM = 2
-    DEVICE_TYPE_EMAIL = 3
-    DEVICE_TYPE_WEBHOOK = 4
 
 
 class DeviceORM(Base):
@@ -28,8 +19,8 @@ class DeviceORM(Base):
 
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: dt.datetime.now(dt.UTC),
         nullable=False,
     )

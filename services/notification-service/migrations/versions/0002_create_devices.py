@@ -27,7 +27,7 @@ def upgrade() -> None:
             nullable=False,
             server_default=sa.true(),
         ),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
     )
 
     op.create_index("ix_devices_user_id", "devices", ["user_id"], unique=False, if_not_exists=True)

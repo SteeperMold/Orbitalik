@@ -46,7 +46,6 @@ def create_subscription_command_from_request(
         min_elevation_rad=request.min_elevation_rad
         if request.WhichOneof("min_elevation") == "min_elevation_rad"
         else None,
-        lookahead_days=request.lookahead_days,
     )
 
 
@@ -108,7 +107,6 @@ def subscription_to_proto(subscription: models.Subscription) -> pb2.Subscription
         notify_before_seconds=subscription.notify_before_seconds,
         min_peak_elevation_deg=subscription.min_peak_elevation_deg,
         min_elevation_deg=subscription.min_elevation_deg,
-        lookahead_days=subscription.lookahead_days,
         created_at=created,
         updated_at=updated,
     )

@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -35,11 +35,15 @@ class SubscriptionORM(Base):
     min_elevation_deg: Mapped[float | None] = mapped_column(Float, nullable=True)
     min_elevation_rad: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    lookahead_days: Mapped[int] = mapped_column(Integer)
+    scheduled_until: Mapped[dt.datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), default=dt.datetime.utcnow
+    )
+    updated_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=dt.datetime.utcnow,
+        onupdate=dt.datetime.utcnow,
     )

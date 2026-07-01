@@ -25,7 +25,6 @@ class Settings(pydantic_settings.BaseSettings):
     db_name: str
 
     trajectory_service_url: str
-    metadata_service_url: str
 
     grpc_port: int = 50051
     http_port: int = 8080

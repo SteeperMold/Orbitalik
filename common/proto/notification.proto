@@ -36,11 +36,8 @@ message Subscription {
   optional double min_peak_elevation_deg = 7;
   optional double min_elevation_deg = 8;
 
-  // lookahead safety window (prevents infinite scheduling)
-  uint32 lookahead_days = 9;
-
-  google.protobuf.Timestamp created_at = 10;
-  google.protobuf.Timestamp updated_at = 11;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
 }
 
 message CreateSubscriptionRequest {
@@ -60,8 +57,6 @@ message CreateSubscriptionRequest {
     double min_elevation_deg = 7;
     double min_elevation_rad = 8;
   }
-
-  uint32 lookahead_days = 9;
 }
 
 message GetSubscriptionRequest {

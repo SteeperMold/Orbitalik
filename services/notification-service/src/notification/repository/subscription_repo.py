@@ -1,4 +1,6 @@
+import builtins
 import dataclasses
+import datetime as dt
 
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -30,7 +32,7 @@ class SubscriptionRepository:
                 min_peak_elevation_rad=cmd.min_peak_elevation_rad,
                 min_elevation_deg=cmd.min_elevation_deg,
                 min_elevation_rad=cmd.min_elevation_rad,
-                lookahead_days=cmd.lookahead_days,
+                scheduled_until=None,
             )
 
             session.add(orm)
@@ -70,6 +72,27 @@ class SubscriptionRepository:
             rows = rows[: cmd.limit]
 
             return [self._to_domain(r) for r in rows], has_next
+
+    async def list_needing_schedule(
+        self,
+        refill_before: dt.datetime,
+    ) -> builtins.list[models.Subscription]:
+        async with self.session_factory() as session:
+            stmt = (
+                sqlalchemy.select(SubscriptionORM)
+                .where(SubscriptionORM.enabled.is_(True))
+                .where(
+                    sqlalchemy.or_(
+                        SubscriptionORM.scheduled_until.is_(None),
+                        SubscriptionORM.scheduled_until < refill_before,
+                    )
+                )
+            )
+
+            result = await session.execute(stmt)
+            rows = result.scalars().all()
+
+            return [self._to_domain(r) for r in rows]
 
     async def update(
         self,
@@ -129,6 +152,24 @@ class SubscriptionRepository:
 
             return self._to_domain(orm)
 
+    async def advance_schedule_until(
+        self,
+        subscription_id: int,
+        new_value: dt.datetime,
+    ) -> None:
+        async with self.session_factory() as session:
+            stmt = (
+                sqlalchemy.update(SubscriptionORM)
+                .where(SubscriptionORM.id == subscription_id)
+                .values(
+                    scheduled_until=new_value,
+                    updated_at=dt.datetime.now(dt.UTC),
+                )
+            )
+
+            await session.execute(stmt)
+            await session.commit()
+
     @staticmethod
     def _to_domain(orm: SubscriptionORM) -> models.Subscription:
         return models.Subscription(
@@ -150,7 +191,7 @@ class SubscriptionRepository:
             notify_before_seconds=orm.notify_before_seconds,
             min_peak_elevation_deg=orm.min_peak_elevation_deg,
             min_elevation_deg=orm.min_elevation_deg,
-            lookahead_days=orm.lookahead_days,
             created_at=orm.created_at,
             updated_at=orm.updated_at,
+            scheduled_until=orm.scheduled_until,
         )

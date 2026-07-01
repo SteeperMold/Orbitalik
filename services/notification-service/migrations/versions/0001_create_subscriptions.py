@@ -34,9 +34,9 @@ def upgrade() -> None:
         sa.Column("min_peak_elevation_rad", sa.Float(), nullable=True),
         sa.Column("min_elevation_deg", sa.Float(), nullable=True),
         sa.Column("min_elevation_rad", sa.Float(), nullable=True),
-        sa.Column("lookahead_days", sa.Integer(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.Column("scheduled_until", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
     )
 
     op.create_index(

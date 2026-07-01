@@ -1,6 +1,6 @@
 import dataclasses
+import datetime as dt
 import enum
-from datetime import datetime
 
 
 @dataclasses.dataclass(frozen=True)
@@ -55,10 +55,10 @@ class Subscription:
     min_elevation_deg: float | None = None
     min_elevation_rad: float | None = None
 
-    lookahead_days: int = 0
+    scheduled_until: dt.datetime | None = None
 
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class DeviceType(enum.IntEnum):
@@ -79,4 +79,51 @@ class Device:
 
     enabled: bool
 
-    created_at: datetime | None = None
+    created_at: dt.datetime | None = None
+
+
+class NotificationJobStatus(enum.IntEnum):
+    PENDING = 0
+    PROCESSING = 1
+    SENT = 2
+    FAILED = 3
+    CANCELLED = 4
+
+
+@dataclasses.dataclass
+class NotificationJob:
+    id: int | None
+
+    subscription_id: int
+
+    scheduled_time: dt.datetime
+
+    aos: dt.datetime
+    los: dt.datetime
+    max_elevation_time: dt.datetime
+    max_elevation: float
+
+    status: NotificationJobStatus
+
+    attempts: int = 0
+    last_error: str | None = None
+
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
+
+
+@dataclasses.dataclass
+class Pass:
+    satellite: SatelliteIdentifier
+
+    aos: dt.datetime
+    aos_azimuth: float
+
+    max_elevation_time: dt.datetime
+    max_elevation: float
+    max_elevation_azimuth: float
+
+    los: dt.datetime
+    los_azimuth: float
+
+    duration_seconds: int

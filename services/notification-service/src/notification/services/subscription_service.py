@@ -25,15 +25,6 @@ class SubscriptionService:
         if cmd.notify_before_seconds > limits.MAX_INT32:
             raise ValueError("notify_before_seconds exceeds int32 limit")
 
-        if cmd.lookahead_days is None:
-            raise ValueError("lookahead_days is required")
-
-        if cmd.lookahead_days < limits.MIN_LOOKAHEAD_DAYS:
-            raise ValueError(f"lookahead_days must be >= {limits.MAX_LOOKAHEAD_DAYS}")
-
-        if cmd.lookahead_days > limits.MAX_LOOKAHEAD_DAYS:
-            raise ValueError("lookahead_days is unreasonably large")
-
         obs = cmd.observer
 
         if obs.lat_deg is not None and not (limits.MIN_LAT <= obs.lat_deg <= limits.MAX_LAT):
