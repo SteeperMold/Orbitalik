@@ -14,7 +14,6 @@ class DeviceService:
         device_type: int,
         address: str,
     ) -> models.Device:
-
         if user_id <= 0:
             raise ValueError("invalid user_id")
 

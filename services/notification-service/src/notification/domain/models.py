@@ -94,16 +94,18 @@ class NotificationJobStatus(enum.IntEnum):
 class NotificationJob:
     id: int | None
 
+    user_id: int
+
     subscription_id: int
 
     scheduled_time: dt.datetime
+    status: NotificationJobStatus
 
+    satellite: SatelliteIdentifier
     aos: dt.datetime
     los: dt.datetime
     max_elevation_time: dt.datetime
     max_elevation: float
-
-    status: NotificationJobStatus
 
     attempts: int = 0
     last_error: str | None = None

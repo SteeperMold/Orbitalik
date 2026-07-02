@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 import datetime as dt
 
 from notification.adapter.trajectory_client import TrajectoryClient
@@ -6,26 +7,20 @@ from notification.domain import models
 from notification.repository.notification_job_repo import NotificationJobRepository
 from notification.repository.subscription_repo import SubscriptionRepository
 
-REFILL_THRESHOLD = dt.timedelta(hours=1)
-SCHEDULING_WINDOW = dt.timedelta(days=2)
 
-
+@dataclasses.dataclass
 class NotificationScheduler:
-    def __init__(
-        self,
-        subscription_repository: SubscriptionRepository,
-        job_repository: NotificationJobRepository,
-        trajectory_client: TrajectoryClient,
-    ):
-        self._subscriptions = subscription_repository
-        self._jobs = job_repository
-        self._trajectory = trajectory_client
+    _subscriptions: SubscriptionRepository
+    _jobs: NotificationJobRepository
+    _trajectory: TrajectoryClient
+    _refill_threshold: dt.timedelta
+    _scheduling_window: dt.timedelta
 
     async def run_cycle(self) -> None:
         now = dt.datetime.now(dt.UTC)
 
         subscriptions = await self._subscriptions.list_needing_schedule(
-            refill_before=now + REFILL_THRESHOLD,
+            refill_before=now + self._refill_threshold,
         )
 
         await asyncio.gather(
@@ -42,7 +37,7 @@ class NotificationScheduler:
         else:
             start = now
 
-        end = start + SCHEDULING_WINDOW
+        end = start + self._scheduling_window
 
         passes = await self._trajectory.get_passes(
             subscription=subscription,
@@ -57,6 +52,8 @@ class NotificationScheduler:
                 models.NotificationJob(
                     id=None,
                     subscription_id=subscription.id,
+                    user_id=subscription.user_id,
+                    satellite=subscription.satellite,
                     scheduled_time=p.aos - dt.timedelta(seconds=subscription.notify_before_seconds),
                     aos=p.aos,
                     los=p.los,

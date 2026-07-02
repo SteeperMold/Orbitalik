@@ -1,3 +1,4 @@
+import datetime as dt
 import enum
 
 import pydantic_settings
@@ -26,10 +27,19 @@ class Settings(pydantic_settings.BaseSettings):
 
     trajectory_service_url: str
 
+    smtp_host: str = ""
+    smtp_port: int = 0
+
     grpc_port: int = 50051
     http_port: int = 8080
 
+    request_timeout_seconds: int = 5
+
     max_page_size: int = 100
+    scheduling_interval_seconds: int = 60
+    scheduling_refill_threshold: dt.timedelta = dt.timedelta(hours=1)
+    scheduling_window: dt.timedelta = dt.timedelta(hours=2)
+    worker_polling_interval_seconds: int = 2
 
     @property
     def database_url(self) -> str:

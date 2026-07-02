@@ -4,11 +4,14 @@ version = "0.1.0"
 description = "Orbitalik notification service"
 requires-python = ">=3.12"
 dependencies = [
+    "aiosmtplib>=5.1.2",
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
     "fastapi>=0.138.1",
+    "firebase-admin>=7.4.0",
     "grpcio>=1.81.1",
     "grpcio-tools>=1.81.1",
+    "httpx>=0.28.1",
     "logging>=0.4.9.6",
     "prometheus-client>=0.25.0",
     "pydantic-settings>=2.14.2",

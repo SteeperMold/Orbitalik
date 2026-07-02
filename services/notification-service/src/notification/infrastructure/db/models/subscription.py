@@ -1,9 +1,14 @@
 import datetime as dt
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Float, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from notification.infrastructure.db.base import Base
+from notification.infrastructure.db.models.notification_job import NotificationJobORM
+
+if TYPE_CHECKING:
+    from notification.infrastructure.db.models.notification_job import NotificationJobORM
 
 
 class SubscriptionORM(Base):
@@ -36,14 +41,23 @@ class SubscriptionORM(Base):
     min_elevation_rad: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     scheduled_until: Mapped[dt.datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    jobs: Mapped[list["NotificationJobORM"]] = relationship(
+        back_populates="subscription",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     created_at: Mapped[dt.datetime] = mapped_column(
-        DateTime(timezone=True), default=dt.datetime.utcnow
+        DateTime(timezone=True),
+        default=lambda: dt.datetime.now(dt.UTC),
     )
+
     updated_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True),
-        default=dt.datetime.utcnow,
-        onupdate=dt.datetime.utcnow,
+        default=lambda: dt.datetime.now(dt.UTC),
+        onupdate=lambda: dt.datetime.now(dt.UTC),
     )

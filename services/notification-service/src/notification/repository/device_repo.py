@@ -1,3 +1,4 @@
+import builtins
 import dataclasses
 
 import sqlalchemy
@@ -29,6 +30,16 @@ class DeviceRepository:
     async def list(self, user_id: int) -> list[models.Device]:
         async with self.session_factory() as session:
             stmt = sqlalchemy.select(DeviceORM).where(DeviceORM.user_id == user_id)
+            result = await session.execute(stmt)
+
+            return [self._to_domain(row) for row in result.scalars().all()]
+
+    async def list_enabled(self, user_id: int) -> builtins.list[models.Device]:
+        async with self.session_factory() as session:
+            stmt = sqlalchemy.select(DeviceORM).where(
+                DeviceORM.user_id == user_id,
+                DeviceORM.enabled.is_(True),
+            )
             result = await session.execute(stmt)
 
             return [self._to_domain(row) for row in result.scalars().all()]

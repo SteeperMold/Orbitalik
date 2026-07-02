@@ -1,10 +1,13 @@
 import asyncio
 
+import firebase_admin
+import httpx
+
 from notification.adapter.trajectory_client import TrajectoryClient
 from notification.container import Services
 from notification.infrastructure.db.session import create_engine, create_session_factory
 from notification.infrastructure.logger import configure_logging
-from notification.infrastructure.settings import Settings
+from notification.infrastructure.settings import AppEnv, Settings
 from notification.repository.device_repo import DeviceRepository
 from notification.repository.notification_job_repo import NotificationJobRepository
 from notification.repository.subscription_repo import SubscriptionRepository
@@ -15,6 +18,9 @@ from notification.services.subscription_service import SubscriptionService
 from notification.transport.grpc.server import GRPCServer
 from notification.transport.grpc.services import NotificationServicer
 from notification.transport.http.server import HTTPServer
+from notification.worker import push_provider
+from notification.worker.notification_worker import NotificationWorker
+from notification.worker.push_service import PushService
 
 
 async def main() -> None:
@@ -46,15 +52,41 @@ async def main() -> None:
     http_server = HTTPServer(settings)
 
     notification_scheduler = NotificationScheduler(
-        subscription_repository=sub_repo,
-        job_repository=job_repo,
-        trajectory_client=trajectory_client,
+        _subscriptions=sub_repo,
+        _jobs=job_repo,
+        _trajectory=trajectory_client,
+        _scheduling_window=settings.scheduling_window,
+        _refill_threshold=settings.scheduling_refill_threshold,
+    )
+
+    if settings.app_env == AppEnv.PRODUCTION:
+        cred = firebase_admin.credentials.Certificate("service-account.json")
+        firebase_admin.initialize_app(cred)
+
+    push_service = PushService(
+        _fcm=push_provider.FCMPushProvider(),
+        _email=push_provider.EmailPushProvider(settings.smtp_host, settings.smtp_port),
+        _webhook=push_provider.WebhookPushProvider(
+            httpx.AsyncClient(
+                timeout=settings.request_timeout_seconds,
+                headers={"User-Agent": "notification-service"},
+            )
+        ),
+        _file=push_provider.FilePushProvider(),
+        is_development=settings.app_env == AppEnv.DEVELOPMENT,
+    )
+    notification_worker = NotificationWorker(
+        job_repo,
+        device_repo,
+        push_service,
+        settings.worker_polling_interval_seconds,
     )
 
     await asyncio.gather(
         grpc_server.start(),
         http_server.start(),
-        run_scheduler(notification_scheduler),
+        run_scheduler(notification_scheduler, settings.scheduling_interval_seconds),
+        notification_worker.run_worker(),
     )
 
     await grpc_server.server.wait_for_termination()

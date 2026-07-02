@@ -24,8 +24,11 @@ def upgrade() -> None:
             sa.ForeignKey("subscriptions.id", ondelete="CASCADE"),
             nullable=False,
         ),
+        sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("status", sa.SmallInteger(), nullable=False, server_default="0"),  # pending
         sa.Column("scheduled_time", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("norad_id", sa.BigInteger(), nullable=True),
+        sa.Column("satellite_name", sa.String(), nullable=True),
         sa.Column("aos", sa.DateTime(timezone=True), nullable=False),
         sa.Column("los", sa.DateTime(timezone=True), nullable=False),
         sa.Column("max_elevation_time", sa.DateTime(timezone=True), nullable=False),
