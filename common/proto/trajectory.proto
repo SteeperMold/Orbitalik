@@ -217,8 +217,6 @@ message NextPassesRequest {
     }
 
     uint32 count = 8;
-
-    TimeRange lookahead_range = 9;
 }
 
 message GetPassesResponse {

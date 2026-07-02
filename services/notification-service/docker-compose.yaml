@@ -1,0 +1,38 @@
+services:
+  notification-db-migrate:
+    build:
+      context: .
+    working_dir: /app
+    networks:
+      - orbitalik-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: ["uv", "run", "alembic", "-c", "migrations/alembic.ini", "upgrade", "head"]
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - orbitalik-net
+    ports:
+      - "50054:${GRPC_PORT}"
+    env_file:
+      - .env
+    labels:
+      prometheus.scrape: "true"
+      prometheus.port: "${HTTP_PORT}"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${HTTP_PORT}/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification-db-migrate:
+        condition: service_completed_successfully
