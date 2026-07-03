@@ -1,3 +1,4 @@
 CREATE DATABASE tle_db;
 CREATE DATABASE metadata_db;
 CREATE DATABASE notification_db;
+CREATE DATABASE user_db;

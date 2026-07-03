@@ -4,6 +4,7 @@ include:
   - ./services/tle-ingestion-service/docker-compose.yaml
   - ./services/trajectory-service/docker-compose.yaml
   - ./services/notification-service/docker-compose.yaml
+  - ./services/user-service/docker-compose.yaml
 
 networks:
   orbitalik-net:

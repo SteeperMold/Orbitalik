@@ -4,7 +4,7 @@ go 1.25.6
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/SteeperMold/Orbitalik/common/go v0.4.0
+	github.com/SteeperMold/Orbitalik/common/go v0.5.0
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
