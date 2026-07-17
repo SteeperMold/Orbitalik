@@ -1,8 +1,9 @@
-go 1.26.2
+go 1.26.4
 
 use (
 	./common/go
 	./services/metadata-service
 	./services/tle-ingestion-service
 	./services/metadata-aggregation-worker
+	./services/user-service
 )

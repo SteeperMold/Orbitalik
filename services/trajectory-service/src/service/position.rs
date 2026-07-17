@@ -2,12 +2,12 @@ use chrono::{DateTime, Utc};
 use std::sync::Arc;
 
 use crate::astro::coords::geodetic::Geodetic;
-use crate::astro::look_angles::LookAnglesComputation;
-use crate::astro::models::{LookAngles, SatellitePosition};
-use crate::astro::position::PositionComputation;
-use crate::astro::propagator::Propagator;
-use crate::domain::errors::PropagationError;
-use crate::domain::models::{ComputationMetadata, SatelliteIdentifier};
+use crate::astro::models::{LookAngles, SatelliteIdentifier, SatellitePosition};
+use crate::astro::propagation::look_angles::LookAnglesComputation;
+use crate::astro::propagation::position::PositionComputation;
+use crate::astro::propagation::propagator::Propagator;
+use crate::domain::errors::ServiceError;
+use crate::domain::models::TrajectoryComputationMetadata;
 use crate::transport::adapter::tle_client::TleGrpcClient;
 
 pub struct PositionService {
@@ -24,15 +24,15 @@ impl PositionService {
         satellite_identifier: SatelliteIdentifier,
         datetime: DateTime<Utc>,
         compute: &PositionComputation,
-    ) -> Result<(SatellitePosition, ComputationMetadata), PropagationError> {
+    ) -> Result<(SatellitePosition, TrajectoryComputationMetadata), ServiceError> {
         let tle = self
             .tle_grpc_client
             .get_tle(satellite_identifier.clone())
             .await?;
 
         let position = Propagator::from_tle(&tle)?.position_at(datetime, compute)?;
-        
-        let metadata = ComputationMetadata {
+
+        let metadata = TrajectoryComputationMetadata {
             propagation_model: "SGP4".to_string(),
             computation_time: Utc::now(),
             norad_id: tle.norad_id,
@@ -49,7 +49,7 @@ impl PositionService {
         datetime: DateTime<Utc>,
         observer: &Geodetic,
         compute: &LookAnglesComputation,
-    ) -> Result<(LookAngles, ComputationMetadata), PropagationError> {
+    ) -> Result<(LookAngles, TrajectoryComputationMetadata), ServiceError> {
         let tle = self
             .tle_grpc_client
             .get_tle(satellite_identifier.clone())
@@ -57,7 +57,8 @@ impl PositionService {
 
         let look_angles =
             Propagator::from_tle(&tle)?.look_angles_at(datetime, observer, compute)?;
-        let metadata = ComputationMetadata {
+        
+        let metadata = TrajectoryComputationMetadata {
             propagation_model: "SGP4".to_string(),
             computation_time: Utc::now(),
             norad_id: tle.norad_id,

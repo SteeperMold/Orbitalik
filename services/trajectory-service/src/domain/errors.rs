@@ -1,9 +1,11 @@
 use thiserror::Error;
 
+use crate::astro;
+
 #[derive(Debug, Error)]
 pub enum StartupError {
-    #[error("Invalid APP_ENV: {0}")]
-    InvalidAppEnv(String),
+    #[error("Invalid config: {0}")]
+    InvalidConfig(String),
     #[error("Failed to initialize logger: {0}")]
     LoggerInit(String),
     #[error("HTTP server error: {0}")]
@@ -37,33 +39,28 @@ pub enum GrpcServerError {
 }
 
 #[derive(Debug, Error)]
-pub enum PropagationError {
+pub enum ServiceError {
     #[error("Failed to fetch TLE: {0}")]
     TleFetch(#[from] tonic::Status),
-    #[error("TLE parsing failed: {0}")]
-    TleParse(#[from] sgp4::TleError),
-    #[error("Failed to create SGP4 elements: {0}")]
-    ElementsCreation(#[from] sgp4::ElementsError),
-    #[error("Failed to convert datetime into minutes since epoch: {0}")]
-    DatetimeToMinutesSinceEpochFailed(#[from] sgp4::DatetimeToMinutesSinceEpochError),
-    #[error("SGP4 propagation failed: {0}")]
-    PropagationFailed(#[from] sgp4::Error),
+    #[error("No satellites provided")]
+    NoSatellites,
+    #[error("Too many satellites: {provided} (max {max})")]
+    TooManySatellites { provided: usize, max: usize },
     #[error("Failed to convert numeric types")]
     IntConversion(#[from] std::num::TryFromIntError),
+    #[error(transparent)]
+    Propagation(#[from] astro::errors::PropagationError),
 }
 
-impl From<PropagationError> for tonic::Status {
-    fn from(value: PropagationError) -> Self {
+impl From<ServiceError> for tonic::Status {
+    fn from(value: ServiceError) -> Self {
         match value {
-            PropagationError::TleFetch(status) => status,
-            PropagationError::TleParse(_)
-            | PropagationError::ElementsCreation(_)
-            | PropagationError::DatetimeToMinutesSinceEpochFailed(_)
-            | PropagationError::PropagationFailed(_)
-            | PropagationError::IntConversion(_) => {
-                tracing::error!("propagation error: {:?}", value);
+            ServiceError::TleFetch(status) => status,
+            ServiceError::Propagation(e) => {
+                tracing::error!("{:?}", e);
                 Self::internal("Internal server error")
             }
+            other => Self::invalid_argument(other.to_string()),
         }
     }
 }
@@ -81,16 +78,4 @@ impl From<TimestampConversionError> for tonic::Status {
         tracing::error!("timestamp conversion failed: {:?}", value);
         Self::internal("Internal server error")
     }
-}
-
-#[derive(Debug, Error)]
-pub enum TimeRangeError {
-    #[error("Start must be <= end")]
-    InvalidOrder,
-}
-
-#[derive(Debug, Error)]
-pub enum SamplingError {
-    #[error("Step must be > 0")]
-    InvalidStep,
 }

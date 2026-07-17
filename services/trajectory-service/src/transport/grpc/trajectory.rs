@@ -1,7 +1,7 @@
 use tonic::{Request, Response, Status};
 
-use crate::astro::look_angles::LookAnglesComputation;
-use crate::astro::position::PositionComputation;
+use crate::astro::propagation::look_angles::LookAnglesComputation;
+use crate::astro::propagation::position::PositionComputation;
 use crate::transport::grpc::service::TrajectoryGrpcServer;
 use crate::transport::grpc::service::trajectory_grpc::{
     ObserverTrajectoryRequest, ObserverTrajectoryResponse, TrajectoryRequest, TrajectoryResponse,
@@ -33,11 +33,12 @@ impl TrajectoryGrpcServer {
         let compute = mask.map_or_else(PositionComputation::default, PositionComputation::from);
 
         let (trajectory, metadata) = self
-            .trajectory_service
+            .trajectory
             .get_trajectory(identifier, range, sampling, &compute)
             .await?;
 
         let response = TrajectoryResponse::from_trajectory(&trajectory, metadata, req.units)?;
+
         Ok(Response::new(response))
     }
 
@@ -71,7 +72,7 @@ impl TrajectoryGrpcServer {
         let compute = mask.map_or_else(LookAnglesComputation::default, LookAnglesComputation::from);
 
         let (observer_trajectory, metadata) = self
-            .trajectory_service
+            .trajectory
             .get_observer_trajectory(identifier, range, sampling, &observer, &compute)
             .await?;
 
@@ -80,6 +81,7 @@ impl TrajectoryGrpcServer {
             metadata,
             req.units,
         )?;
+
         Ok(Response::new(response))
     }
 }

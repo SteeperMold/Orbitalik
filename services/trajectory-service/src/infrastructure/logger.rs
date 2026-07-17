@@ -5,7 +5,11 @@ use crate::domain::errors::StartupError;
 pub fn init_logger(app_env: &str) -> Result<(), StartupError> {
     match app_env {
         "development" | "production" | "test" => {}
-        _ => return Err(StartupError::InvalidAppEnv(app_env.to_string())),
+        _ => {
+            return Err(StartupError::InvalidConfig(format!(
+                "invalid APP_ENV: {app_env}",
+            )));
+        }
     }
 
     let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| match app_env {

@@ -1,7 +1,6 @@
 use tonic::transport::Channel;
 
-use crate::astro::models::Tle;
-use crate::domain::models::SatelliteIdentifier;
+use crate::astro::models::{SatelliteIdentifier, Tle};
 use crate::transport::adapter::tle_client::tle_grpc::GetTleRequest;
 use crate::transport::grpc::converters::ToChrono;
 
