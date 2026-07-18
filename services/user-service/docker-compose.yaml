@@ -40,5 +40,5 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      tle-db-migrate:
+      user-db-migrate:
         condition: service_completed_successfully

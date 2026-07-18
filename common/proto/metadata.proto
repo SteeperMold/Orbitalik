@@ -6,19 +6,30 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "gen/metadatapb;metadatapb";
 
+// Сервис управления метаданными искусственных спутников
+// Предоставляет информацию о космических объектах и их характеристиках
 service SatelliteMetadataService {
+    // Получение информации о спутнике по идентификатору
     rpc GetSatelliteMetadata (GetMetadataRequest) returns (GetMetadataResponse);
+
+    // Получение списка спутников с фильтрацией и пагинацией
     rpc ListSatelliteMetadata (ListSatelliteMetadataRequest) returns (ListSatelliteMetadataResponse);
 }
 
+
+// Запрос на получение информации о спутнике
 message GetMetadataRequest {
     SatelliteIdentifier identifier = 1;
 }
 
+
+// Ответ с метаданными спутника
 message GetMetadataResponse {
     SatelliteMetadata metadata = 1;
 }
 
+
+// Запрос списка спутников
 message ListSatelliteMetadataRequest {
     optional ObjectType object_type = 1;
     optional MissionType mission_type = 2;
@@ -31,47 +42,75 @@ message ListSatelliteMetadataRequest {
     string page_token = 7;
 }
 
+
+// Ответ со списком спутников
 message ListSatelliteMetadataResponse {
     repeated SatelliteMetadata items = 1;
+
+    // Токен для получения следующей страницы результатов
     string next_page_token = 2;
+
+    // Общее количество найденных объектов
     uint32 total = 3;
 }
 
+
+// Идентификатор спутника
 message SatelliteIdentifier {
     oneof kind {
+        // Идентификатор объекта в каталоге NORAD
         uint32 norad_id = 1;
+
         string satellite_name = 2;
     }
 }
 
+
+// Основная информация об искусственном спутнике
 message SatelliteMetadata {
+    // Идентификатор объекта в каталоге NORAD
     uint32 norad_id = 1;
+
+    // Международный идентификатор COSPAR
     optional string cospar_id = 2;
 
     string name = 3;
+
     repeated string aliases = 4;
 
     ObjectType object_type = 5;
+
     MissionType mission_type = 6;
+
     OrbitRegime orbit_regime = 7;
 
+    // Организация, управляющая спутником
     optional string operator = 8;
+
+    // Владелец спутника
     optional string owner = 9;
+
     optional string constellation = 10;
 
     optional google.protobuf.Timestamp launch_date = 11;
+
     optional string launch_site = 12;
+
     optional string launch_vehicle = 13;
 
     OperationalStatus operational_status = 14;
 
     repeated Frequency frequencies = 15;
 
+    // Источники, из которых были получены данные
     repeated SourceAttribution sources = 16;
 
+    // Время последнего обновления информации
     google.protobuf.Timestamp updated_at = 17;
 }
 
+
+// Тип космического объекта
 enum ObjectType {
     OBJECT_TYPE_UNSPECIFIED = 0;
     OBJECT_TYPE_PAYLOAD = 1;
@@ -80,6 +119,8 @@ enum ObjectType {
     OBJECT_TYPE_UNKNOWN = 4;
 }
 
+
+// Назначение спутниковой миссии
 enum MissionType {
     MISSION_TYPE_UNSPECIFIED = 0;
     MISSION_TYPE_COMMUNICATIONS = 1;
@@ -91,6 +132,8 @@ enum MissionType {
     MISSION_TYPE_TECH_DEMO = 7;
 }
 
+
+// Тип орбиты
 enum OrbitRegime {
     ORBIT_REGIME_UNSPECIFIED = 0;
     ORBIT_REGIME_LEO = 1;
@@ -99,6 +142,8 @@ enum OrbitRegime {
     ORBIT_REGIME_HEO = 4;
 }
 
+
+// Статус эксплуатации спутника
 enum OperationalStatus {
     OPERATIONAL_STATUS_UNSPECIFIED = 0;
     OPERATIONAL_STATUS_ACTIVE = 1;
@@ -107,30 +152,53 @@ enum OperationalStatus {
     OPERATIONAL_STATUS_UNKNOWN = 4;
 }
 
+
+// Радиочастотные параметры спутника
 message Frequency {
     FrequencyDirection direction = 1;
+
     double frequency_mhz = 2;
+
     double bandwidth_khz = 3;
+
     string modulation = 4;
+
     string mode = 5;
 }
 
+
+// Направление радиоканала
 enum FrequencyDirection {
     FREQUENCY_DIRECTION_UNSPECIFIED = 0;
     FREQUENCY_DIRECTION_UPLINK = 1;
     FREQUENCY_DIRECTION_DOWNLINK = 2;
 }
 
+
+// Информация об источнике данных
 message SourceAttribution {
     Source source = 1;
+
+    // Идентификатор записи в исходном источнике
     string source_record_id = 2;
+
     google.protobuf.Timestamp fetched_at = 3;
 }
 
+
+// Источники спутниковых данных
 enum Source {
     SOURCE_UNSPECIFIED = 0;
+
+    // Каталог орбитальных данных CelesTrak
     SOURCE_CELESTRAK = 1;
+
+    // Каталог AMSAT
     SOURCE_AMSAT = 2;
+
+    // Каталог Union of Concerned Scientists
     SOURCE_UCS = 3;
+
+    // Данные, добавленные вручную
     SOURCE_MANUAL = 4;
 }

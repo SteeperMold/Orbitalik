@@ -5,17 +5,30 @@ package trajectory;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 
+// Сервис расчёта положения, траекторий и пролётов спутников
 service TrajectoryService {
+
+    // Получение положения спутника в заданный момент времени
     rpc GetPosition (PositionRequest) returns (PositionResponse);
+
+    // Получение параметров наблюдения спутника относительно наблюдателя
     rpc GetLookAngles (LookAnglesRequest) returns (LookAnglesResponse);
 
+    // Построение траектории движения спутника
     rpc GetTrajectory (TrajectoryRequest) returns (TrajectoryResponse);
+
+    // Построение траектории спутника относительно наблюдателя
     rpc GetObserverTrajectory (ObserverTrajectoryRequest) returns (ObserverTrajectoryResponse);
 
+    // Расчёт пролётов спутников за указанный период
     rpc GetPasses (PassPredictionRequest) returns (GetPassesResponse);
+
+    // Получение ближайших пролётов спутников
     rpc GetNextPasses (NextPassesRequest) returns (NextPassesResponse);
 }
 
+
+// Настройки единиц измерения
 message UnitSettings {
     enum DistanceUnit {
         DISTANCE_UNIT_UNSPECIFIED = 0;
@@ -23,92 +36,139 @@ message UnitSettings {
         DISTANCE_UNIT_KILOMETERS = 2;
         DISTANCE_UNIT_MILES = 3;
     }
+
     enum AngleUnit {
         ANGLE_UNIT_UNSPECIFIED = 0;
         ANGLE_UNIT_DEGREES = 1;
         ANGLE_UNIT_RADIANS = 2;
     }
+
     DistanceUnit distance_unit = 1;
     AngleUnit angle_unit = 2;
 }
 
+
+// Трёхмерный вектор
 message Vector3 {
     double x = 1;
     double y = 2;
     double z = 3;
 }
 
+
+// Геодезические координаты
 message GeodeticOutput {
     double lat = 1;
     double lon = 2;
     double alt = 3;
 }
 
+
+// Геодезические координаты наблюдателя
 message GeodeticInput {
     oneof lat {
         double lat_deg = 1;
         double lat_rad = 2;
     }
+
     oneof lon {
         double lon_deg = 3;
         double lon_rad = 4;
     }
+
     oneof alt {
         double alt_m = 5;
         double alt_km = 6;
     }
 }
 
+
+// Идентификатор спутника
 message SatelliteIdentifier {
     oneof kind {
+        // Идентификатор объекта в каталоге NORAD
         uint32 norad_id = 1;
+
         string satellite_name = 2;
     }
 }
 
+
+// Временной диапазон вычислений
 message TimeRange {
     google.protobuf.Timestamp start = 1;
     google.protobuf.Timestamp end = 2;
 }
 
+
+// Параметры дискретизации вычислений
 message SamplingOptions {
+    // Интервал между вычислениями в секундах
     uint32 step_seconds = 1;
 }
 
+
+// Метаданные выполненного расчёта
 message TrajectoryComputationMetadata {
     string propagation_model = 1;
+
     google.protobuf.Timestamp computation_time = 2;
+
     uint32 norad_id = 3;
+
     string satellite_name = 4;
+
+    // Эпоха использованного TLE
     google.protobuf.Timestamp tle_epoch = 5;
+
     UnitSettings units = 6;
 }
 
+
+// Запрос положения спутника
 message PositionRequest {
     SatelliteIdentifier identifier = 1;
+
     google.protobuf.Timestamp datetime = 2;
+
+    // Позволяет выбрать необходимые поля ответа
     google.protobuf.FieldMask output_mask = 3;
+
     UnitSettings units = 4;
 }
 
+
+// Ответ с положением спутника
 message PositionResponse {
     TrajectoryComputationMetadata metadata = 1;
 
     google.protobuf.Timestamp time = 2;
 
+    // Координаты в системе ECI
     optional Vector3 eci = 3;
+
+    // Координаты в системе ECEF
     optional Vector3 ecef = 4;
+
     optional GeodeticOutput geodetic = 5;
 }
 
+
+// Запрос параметров наблюдения
 message LookAnglesRequest {
     SatelliteIdentifier identifier = 1;
+
     google.protobuf.Timestamp datetime = 2;
+
     GeodeticInput observer = 3;
+
     google.protobuf.FieldMask output_mask = 4;
+
     UnitSettings units = 5;
 }
 
+
+// Ответ с параметрами наблюдения
 message LookAnglesResponse {
     TrajectoryComputationMetadata metadata = 1;
 
@@ -119,6 +179,8 @@ message LookAnglesResponse {
     optional double range = 5;
 }
 
+
+// Состояние спутника в определённый момент времени
 message StateVector {
     google.protobuf.Timestamp datetime = 1;
 
@@ -131,25 +193,34 @@ message StateVector {
     optional GeodeticOutput geodetic = 6;
 }
 
+
+// Запрос построения траектории
 message TrajectoryRequest {
     SatelliteIdentifier identifier = 1;
 
     TimeRange range = 2;
+
     SamplingOptions sampling = 3;
 
     google.protobuf.FieldMask output_mask = 4;
+
     UnitSettings units = 5;
 }
 
+
+// Результат расчёта траектории
 message TrajectoryResponse {
     TrajectoryComputationMetadata metadata = 1;
 
     repeated StateVector states = 2;
 
     TimeRange range = 3;
+
     SamplingOptions sampling = 4;
 }
 
+
+// Точка траектории относительно наблюдателя
 message ObserverTrajectoryPoint {
     google.protobuf.Timestamp datetime = 1;
 
@@ -158,27 +229,36 @@ message ObserverTrajectoryPoint {
     optional double range = 4;
 }
 
+
+// Запрос траектории относительно наблюдателя
 message ObserverTrajectoryRequest {
     SatelliteIdentifier identifier = 1;
 
     TimeRange range = 2;
+
     SamplingOptions sampling = 3;
 
     GeodeticInput observer = 4;
 
     google.protobuf.FieldMask output_mask = 5;
+
     UnitSettings units = 6;
 }
 
+
+// Результат расчёта траектории относительно наблюдателя
 message ObserverTrajectoryResponse {
     TrajectoryComputationMetadata metadata = 1;
 
     repeated ObserverTrajectoryPoint points = 2;
 
     TimeRange range = 3;
+
     SamplingOptions sampling = 4;
 }
 
+
+// Запрос расчёта пролётов
 message PassPredictionRequest {
     repeated SatelliteIdentifier satellites = 1;
 
@@ -192,14 +272,18 @@ message PassPredictionRequest {
         double min_peak_elevation_deg = 5;
         double min_peak_elevation_rad = 6;
     }
+
     oneof min_elevation {
         double min_elevation_deg = 7;
         double min_elevation_rad = 8;
     }
 
+    // Ограничение количества найденных пролётов
     optional uint32 max_results = 9;
 }
 
+
+// Запрос ближайших пролётов
 message NextPassesRequest {
     repeated SatelliteIdentifier satellites = 1;
 
@@ -211,14 +295,18 @@ message NextPassesRequest {
         double min_peak_elevation_deg = 4;
         double min_peak_elevation_rad = 5;
     }
+
     oneof min_elevation {
         double min_elevation_deg = 6;
         double min_elevation_rad = 7;
     }
 
+    // Количество ближайших пролётов
     uint32 count = 8;
 }
 
+
+// Результат расчёта пролётов
 message GetPassesResponse {
     PassesComputationMetadata metadata = 1;
 
@@ -227,45 +315,62 @@ message GetPassesResponse {
     TimeRange range = 3;
 }
 
+
+// Ответ с ближайшими пролётами
 message NextPassesResponse {
     PassesComputationMetadata metadata = 1;
 
     repeated Pass passes = 2;
 }
 
+
+// Информация о пролёте спутника
 message Pass {
     SatelliteIdentifier satellite = 1;
 
-    // acquisition of signal (rise above min elevation)
+    // Момент появления спутника над горизонтом
     google.protobuf.Timestamp aos = 2;
+
     double aos_azimuth = 3;
 
-    // maximum elevation point
+    // Момент достижения максимальной высоты
     google.protobuf.Timestamp max_elevation_time = 4;
+
     double max_elevation = 5;
+
     double max_elevation_azimuth = 6;
 
-    // loss of signal (drop below min elevation)
+    // Момент ухода спутника за горизонт
     google.protobuf.Timestamp los = 7;
+
     double los_azimuth = 8;
 
+    // Продолжительность пролёта
     uint32 duration_seconds = 9;
 }
 
+
+// Метаданные расчёта пролётов
 message PassesComputationMetadata {
     string propagation_model = 1;
 
     google.protobuf.Timestamp computation_time = 2;
 
     repeated uint32 norad_ids = 3;
+
     repeated string satellite_names = 4;
 
+    // Эпоха использованного TLE
     google.protobuf.Timestamp tle_epoch = 5;
 
     UnitSettings units = 6;
 
+    // Количество обработанных спутников
     uint32 satellites_evaluated = 7;
+
+    // Количество найденных пролётов
     uint32 passes_found = 8;
 
+    // Время вычисления в миллисекундах
     uint32 computation_ms = 9;
 }

@@ -5,19 +5,39 @@ package notification;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
+// Сервис управления подписками на пролёты спутников и устройствами уведомлений
 service NotificationService {
+
+  // Создание новой подписки
   rpc CreateSubscription (CreateSubscriptionRequest) returns (Subscription);
+
+  // Получение подписки по идентификатору
   rpc GetSubscription (GetSubscriptionRequest) returns (Subscription);
+
+  // Получение списка подписок пользователя
   rpc ListSubscriptions (ListSubscriptionsRequest) returns (ListSubscriptionsResponse);
+
+  // Обновление параметров подписки
   rpc UpdateSubscription (UpdateSubscriptionRequest) returns (Subscription);
+
+  // Удаление подписки
   rpc DeleteSubscription (DeleteSubscriptionRequest) returns (google.protobuf.Empty);
+
+  // Включение или отключение подписки
   rpc SetSubscriptionStatus (SetSubscriptionStatusRequest) returns (Subscription);
 
+  // Регистрация устройства для получения уведомлений
   rpc RegisterDevice (RegisterDeviceRequest) returns (Device);
+
+  // Получение списка устройств пользователя
   rpc ListDevices (ListDevicesRequest) returns (ListDevicesResponse);
+
+  // Удаление устройства
   rpc DeleteDevice (DeleteDeviceRequest) returns (google.protobuf.Empty);
 }
 
+
+// Подписка на уведомления о пролётах спутника
 message Subscription {
   uint32 id = 1;
 
@@ -25,21 +45,26 @@ message Subscription {
 
   SatelliteIdentifier satellite = 3;
 
+  // Координаты наблюдателя
   GeodeticInput observer = 4;
 
   bool enabled = 5;
 
-  // notify n seconds before aos (acquisition of signal)
+  // За сколько секунд до начала пролёта отправить уведомление
   uint32 notify_before_seconds = 6;
 
-  // filtering constraints
+  // Минимальная максимальная высота пролёта
   optional double min_peak_elevation_deg = 7;
+
+  // Минимальная высота спутника над горизонтом
   optional double min_elevation_deg = 8;
 
   google.protobuf.Timestamp created_at = 11;
   google.protobuf.Timestamp updated_at = 12;
 }
 
+
+// Запрос на создание подписки
 message CreateSubscriptionRequest {
   uint32 user_id = 1;
 
@@ -53,53 +78,76 @@ message CreateSubscriptionRequest {
     double min_peak_elevation_deg = 5;
     double min_peak_elevation_rad = 6;
   }
+
   oneof min_elevation {
     double min_elevation_deg = 7;
     double min_elevation_rad = 8;
   }
 }
 
+
+// Запрос на получение подписки
 message GetSubscriptionRequest {
   uint32 id = 1;
 }
 
+
+// Запрос списка подписок пользователя
 message ListSubscriptionsRequest {
   uint32 user_id = 1;
 
   optional bool enabled = 2;
 
   uint32 page_size = 3;
+
+  // Токен следующей страницы результатов
   optional string page_token = 4;
 }
 
+
+// Ответ со списком подписок
 message ListSubscriptionsResponse {
   repeated Subscription subscriptions = 1;
+
   string next_page_token = 2;
 }
 
+
+// Запрос на изменение параметров подписки
 message UpdateSubscriptionRequest {
   uint32 id = 1;
 
   optional bool enabled = 2;
+
   optional uint32 notify_before_seconds = 3;
+
   optional double min_peak_elevation_deg = 4;
+
   optional double min_elevation_deg = 5;
 }
 
+
+// Запрос на удаление подписки
 message DeleteSubscriptionRequest {
   uint32 id = 1;
 }
 
+
+// Запрос на изменение статуса подписки
 message SetSubscriptionStatusRequest {
   uint32 id = 1;
+
   bool enabled = 2;
 }
 
+
+// Устройство для получения уведомлений
 message Device {
   uint32 id = 1;
 
   uint32 user_id = 2;
 
+  // Тип устройства или канала доставки уведомлений
   enum DeviceType {
     DEVICE_TYPE_UNSPECIFIED = 0;
     DEVICE_TYPE_WEB_PUSH = 1;
@@ -110,13 +158,16 @@ message Device {
 
   DeviceType type = 3;
 
-  string address = 4; // token, email, webhook url
+  // Адрес доставки (токен, email или URL webhook)
+  string address = 4;
 
   bool enabled = 5;
 
   google.protobuf.Timestamp created_at = 6;
 }
 
+
+// Запрос на регистрацию устройства
 message RegisterDeviceRequest {
   uint32 user_id = 1;
 
@@ -125,34 +176,48 @@ message RegisterDeviceRequest {
   string address = 3;
 }
 
+
+// Запрос списка устройств пользователя
 message ListDevicesRequest {
   uint32 user_id = 1;
 }
 
+
+// Ответ со списком устройств
 message ListDevicesResponse {
   repeated Device devices = 1;
 }
 
+
+// Запрос на удаление устройства
 message DeleteDeviceRequest {
   uint32 id = 1;
 }
 
+
+// Идентификатор спутника
 message SatelliteIdentifier {
   oneof kind {
+    // Идентификатор объекта в каталоге NORAD
     uint32 norad_id = 1;
+
     string satellite_name = 2;
   }
 }
 
+
+// Географические координаты наблюдателя
 message GeodeticInput {
   oneof lat {
     double lat_deg = 1;
     double lat_rad = 2;
   }
+
   oneof lon {
     double lon_deg = 3;
     double lon_rad = 4;
   }
+
   oneof alt {
     double alt_m = 5;
     double alt_km = 6;

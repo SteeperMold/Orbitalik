@@ -1,0 +1,4556 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#common%2fproto%2fauth.proto">common/proto/auth.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#auth.v1.AuthResponse"><span class="badge">M</span>AuthResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.AuthUser"><span class="badge">M</span>AuthUser</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.ChangePasswordRequest"><span class="badge">M</span>ChangePasswordRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.ChangePasswordResponse"><span class="badge">M</span>ChangePasswordResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.LoginRequest"><span class="badge">M</span>LoginRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.LogoutRequest"><span class="badge">M</span>LogoutRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.LogoutResponse"><span class="badge">M</span>LogoutResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.RefreshTokenRequest"><span class="badge">M</span>RefreshTokenRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.RegisterRequest"><span class="badge">M</span>RegisterRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.TokenPair"><span class="badge">M</span>TokenPair</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.ValidateTokenRequest"><span class="badge">M</span>ValidateTokenRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.v1.ValidateTokenResponse"><span class="badge">M</span>ValidateTokenResponse</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#auth.v1.AuthService"><span class="badge">S</span>AuthService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#common%2fproto%2fmetadata.proto">common/proto/metadata.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#metadata.Frequency"><span class="badge">M</span>Frequency</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.GetMetadataRequest"><span class="badge">M</span>GetMetadataRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.GetMetadataResponse"><span class="badge">M</span>GetMetadataResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.ListSatelliteMetadataRequest"><span class="badge">M</span>ListSatelliteMetadataRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.ListSatelliteMetadataResponse"><span class="badge">M</span>ListSatelliteMetadataResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.SatelliteIdentifier"><span class="badge">M</span>SatelliteIdentifier</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.SatelliteMetadata"><span class="badge">M</span>SatelliteMetadata</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.SourceAttribution"><span class="badge">M</span>SourceAttribution</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#metadata.FrequencyDirection"><span class="badge">E</span>FrequencyDirection</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.MissionType"><span class="badge">E</span>MissionType</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.ObjectType"><span class="badge">E</span>ObjectType</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.OperationalStatus"><span class="badge">E</span>OperationalStatus</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.OrbitRegime"><span class="badge">E</span>OrbitRegime</a>
+                </li>
+              
+                <li>
+                  <a href="#metadata.Source"><span class="badge">E</span>Source</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#metadata.SatelliteMetadataService"><span class="badge">S</span>SatelliteMetadataService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#common%2fproto%2fnotification.proto">common/proto/notification.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#notification.CreateSubscriptionRequest"><span class="badge">M</span>CreateSubscriptionRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.DeleteDeviceRequest"><span class="badge">M</span>DeleteDeviceRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.DeleteSubscriptionRequest"><span class="badge">M</span>DeleteSubscriptionRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.Device"><span class="badge">M</span>Device</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.GeodeticInput"><span class="badge">M</span>GeodeticInput</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.GetSubscriptionRequest"><span class="badge">M</span>GetSubscriptionRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.ListDevicesRequest"><span class="badge">M</span>ListDevicesRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.ListDevicesResponse"><span class="badge">M</span>ListDevicesResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.ListSubscriptionsRequest"><span class="badge">M</span>ListSubscriptionsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.ListSubscriptionsResponse"><span class="badge">M</span>ListSubscriptionsResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.RegisterDeviceRequest"><span class="badge">M</span>RegisterDeviceRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.SatelliteIdentifier"><span class="badge">M</span>SatelliteIdentifier</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.SetSubscriptionStatusRequest"><span class="badge">M</span>SetSubscriptionStatusRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.Subscription"><span class="badge">M</span>Subscription</a>
+                </li>
+              
+                <li>
+                  <a href="#notification.UpdateSubscriptionRequest"><span class="badge">M</span>UpdateSubscriptionRequest</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#notification.Device.DeviceType"><span class="badge">E</span>Device.DeviceType</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#notification.NotificationService"><span class="badge">S</span>NotificationService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#common%2fproto%2ftle.proto">common/proto/tle.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#tle.GetTleRequest"><span class="badge">M</span>GetTleRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#tle.GetTleResponse"><span class="badge">M</span>GetTleResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#tle.ListTlesRequest"><span class="badge">M</span>ListTlesRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#tle.ListTlesResponse"><span class="badge">M</span>ListTlesResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#tle.SatelliteIdentifier"><span class="badge">M</span>SatelliteIdentifier</a>
+                </li>
+              
+                <li>
+                  <a href="#tle.Tle"><span class="badge">M</span>Tle</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#tle.TleService"><span class="badge">S</span>TleService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#common%2fproto%2ftrajectory.proto">common/proto/trajectory.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#trajectory.GeodeticInput"><span class="badge">M</span>GeodeticInput</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.GeodeticOutput"><span class="badge">M</span>GeodeticOutput</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.GetPassesResponse"><span class="badge">M</span>GetPassesResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.LookAnglesRequest"><span class="badge">M</span>LookAnglesRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.LookAnglesResponse"><span class="badge">M</span>LookAnglesResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.NextPassesRequest"><span class="badge">M</span>NextPassesRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.NextPassesResponse"><span class="badge">M</span>NextPassesResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.ObserverTrajectoryPoint"><span class="badge">M</span>ObserverTrajectoryPoint</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.ObserverTrajectoryRequest"><span class="badge">M</span>ObserverTrajectoryRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.ObserverTrajectoryResponse"><span class="badge">M</span>ObserverTrajectoryResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.Pass"><span class="badge">M</span>Pass</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.PassPredictionRequest"><span class="badge">M</span>PassPredictionRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.PassesComputationMetadata"><span class="badge">M</span>PassesComputationMetadata</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.PositionRequest"><span class="badge">M</span>PositionRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.PositionResponse"><span class="badge">M</span>PositionResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.SamplingOptions"><span class="badge">M</span>SamplingOptions</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.SatelliteIdentifier"><span class="badge">M</span>SatelliteIdentifier</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.StateVector"><span class="badge">M</span>StateVector</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.TimeRange"><span class="badge">M</span>TimeRange</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.TrajectoryComputationMetadata"><span class="badge">M</span>TrajectoryComputationMetadata</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.TrajectoryRequest"><span class="badge">M</span>TrajectoryRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.TrajectoryResponse"><span class="badge">M</span>TrajectoryResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.UnitSettings"><span class="badge">M</span>UnitSettings</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.Vector3"><span class="badge">M</span>Vector3</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#trajectory.UnitSettings.AngleUnit"><span class="badge">E</span>UnitSettings.AngleUnit</a>
+                </li>
+              
+                <li>
+                  <a href="#trajectory.UnitSettings.DistanceUnit"><span class="badge">E</span>UnitSettings.DistanceUnit</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#trajectory.TrajectoryService"><span class="badge">S</span>TrajectoryService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#common%2fproto%2fuser.proto">common/proto/user.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#user.CreateUserRequest"><span class="badge">M</span>CreateUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#user.CreateUserResponse"><span class="badge">M</span>CreateUserResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#user.DeleteUserRequest"><span class="badge">M</span>DeleteUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#user.DeleteUserResponse"><span class="badge">M</span>DeleteUserResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#user.GetUserByEmailRequest"><span class="badge">M</span>GetUserByEmailRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#user.GetUserByIdRequest"><span class="badge">M</span>GetUserByIdRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#user.GetUserResponse"><span class="badge">M</span>GetUserResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#user.UpdateUserRequest"><span class="badge">M</span>UpdateUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#user.UpdateUserResponse"><span class="badge">M</span>UpdateUserResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#user.User"><span class="badge">M</span>User</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#user.UserService"><span class="badge">S</span>UserService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="common/proto/auth.proto">common/proto/auth.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="auth.v1.AuthResponse">AuthResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#auth.v1.AuthUser">AuthUser</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tokens</td>
+                  <td><a href="#auth.v1.TokenPair">TokenPair</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.AuthUser">AuthUser</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>roles</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.ChangePasswordRequest">ChangePasswordRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>old_password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>new_password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.ChangePasswordResponse">ChangePasswordResponse</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="auth.v1.LoginRequest">LoginRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.LogoutRequest">LogoutRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>refresh_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.LogoutResponse">LogoutResponse</h3>
+        <p></p>
+
+        
+
+        
+      
+        <h3 id="auth.v1.RefreshTokenRequest">RefreshTokenRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>refresh_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.RegisterRequest">RegisterRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.TokenPair">TokenPair</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>access_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>refresh_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>expires_in_seconds</td>
+                  <td><a href="#int64">int64</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.ValidateTokenRequest">ValidateTokenRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>access_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.v1.ValidateTokenResponse">ValidateTokenResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>valid</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#auth.v1.AuthUser">AuthUser</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>expires_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="auth.v1.AuthService">AuthService</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Register</td>
+                <td><a href="#auth.v1.RegisterRequest">RegisterRequest</a></td>
+                <td><a href="#auth.v1.AuthResponse">AuthResponse</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Login</td>
+                <td><a href="#auth.v1.LoginRequest">LoginRequest</a></td>
+                <td><a href="#auth.v1.AuthResponse">AuthResponse</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>RefreshToken</td>
+                <td><a href="#auth.v1.RefreshTokenRequest">RefreshTokenRequest</a></td>
+                <td><a href="#auth.v1.AuthResponse">AuthResponse</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Logout</td>
+                <td><a href="#auth.v1.LogoutRequest">LogoutRequest</a></td>
+                <td><a href="#auth.v1.LogoutResponse">LogoutResponse</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ValidateToken</td>
+                <td><a href="#auth.v1.ValidateTokenRequest">ValidateTokenRequest</a></td>
+                <td><a href="#auth.v1.ValidateTokenResponse">ValidateTokenResponse</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ChangePassword</td>
+                <td><a href="#auth.v1.ChangePasswordRequest">ChangePasswordRequest</a></td>
+                <td><a href="#auth.v1.ChangePasswordResponse">ChangePasswordResponse</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="common/proto/metadata.proto">common/proto/metadata.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="metadata.Frequency">Frequency</h3>
+        <p>Радиочастотные параметры спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>direction</td>
+                  <td><a href="#metadata.FrequencyDirection">FrequencyDirection</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>frequency_mhz</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>bandwidth_khz</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>modulation</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mode</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.GetMetadataRequest">GetMetadataRequest</h3>
+        <p>Запрос на получение информации о спутнике</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>identifier</td>
+                  <td><a href="#metadata.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.GetMetadataResponse">GetMetadataResponse</h3>
+        <p>Ответ с метаданными спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#metadata.SatelliteMetadata">SatelliteMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.ListSatelliteMetadataRequest">ListSatelliteMetadataRequest</h3>
+        <p>Запрос списка спутников</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>object_type</td>
+                  <td><a href="#metadata.ObjectType">ObjectType</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mission_type</td>
+                  <td><a href="#metadata.MissionType">MissionType</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>operational_status</td>
+                  <td><a href="#metadata.OperationalStatus">OperationalStatus</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>orbit_regime</td>
+                  <td><a href="#metadata.OrbitRegime">OrbitRegime</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>constellation</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>page_size</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>page_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.ListSatelliteMetadataResponse">ListSatelliteMetadataResponse</h3>
+        <p>Ответ со списком спутников</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>items</td>
+                  <td><a href="#metadata.SatelliteMetadata">SatelliteMetadata</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>next_page_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Токен для получения следующей страницы результатов </p></td>
+                </tr>
+              
+                <tr>
+                  <td>total</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Общее количество найденных объектов </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.SatelliteIdentifier">SatelliteIdentifier</h3>
+        <p>Идентификатор спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Идентификатор объекта в каталоге NORAD </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.SatelliteMetadata">SatelliteMetadata</h3>
+        <p>Основная информация об искусственном спутнике</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Идентификатор объекта в каталоге NORAD </p></td>
+                </tr>
+              
+                <tr>
+                  <td>cospar_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p>Международный идентификатор COSPAR </p></td>
+                </tr>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>aliases</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>object_type</td>
+                  <td><a href="#metadata.ObjectType">ObjectType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mission_type</td>
+                  <td><a href="#metadata.MissionType">MissionType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>orbit_regime</td>
+                  <td><a href="#metadata.OrbitRegime">OrbitRegime</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>operator</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p>Организация, управляющая спутником </p></td>
+                </tr>
+              
+                <tr>
+                  <td>owner</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p>Владелец спутника </p></td>
+                </tr>
+              
+                <tr>
+                  <td>constellation</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>launch_date</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>launch_site</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>launch_vehicle</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>operational_status</td>
+                  <td><a href="#metadata.OperationalStatus">OperationalStatus</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>frequencies</td>
+                  <td><a href="#metadata.Frequency">Frequency</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sources</td>
+                  <td><a href="#metadata.SourceAttribution">SourceAttribution</a></td>
+                  <td>repeated</td>
+                  <td><p>Источники, из которых были получены данные </p></td>
+                </tr>
+              
+                <tr>
+                  <td>updated_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Время последнего обновления информации </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="metadata.SourceAttribution">SourceAttribution</h3>
+        <p>Информация об источнике данных</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>source</td>
+                  <td><a href="#metadata.Source">Source</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>source_record_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Идентификатор записи в исходном источнике </p></td>
+                </tr>
+              
+                <tr>
+                  <td>fetched_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="metadata.FrequencyDirection">FrequencyDirection</h3>
+        <p>Направление радиоканала</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>FREQUENCY_DIRECTION_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FREQUENCY_DIRECTION_UPLINK</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>FREQUENCY_DIRECTION_DOWNLINK</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="metadata.MissionType">MissionType</h3>
+        <p>Назначение спутниковой миссии</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>MISSION_TYPE_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_COMMUNICATIONS</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_EARTH_OBSERVATION</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_NAVIGATION</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_SCIENCE</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_WEATHER</td>
+                <td>5</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_AMATEUR</td>
+                <td>6</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>MISSION_TYPE_TECH_DEMO</td>
+                <td>7</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="metadata.ObjectType">ObjectType</h3>
+        <p>Тип космического объекта</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>OBJECT_TYPE_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OBJECT_TYPE_PAYLOAD</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OBJECT_TYPE_ROCKET_BODY</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OBJECT_TYPE_DEBRIS</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OBJECT_TYPE_UNKNOWN</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="metadata.OperationalStatus">OperationalStatus</h3>
+        <p>Статус эксплуатации спутника</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>OPERATIONAL_STATUS_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OPERATIONAL_STATUS_ACTIVE</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OPERATIONAL_STATUS_INACTIVE</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OPERATIONAL_STATUS_DECAYED</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OPERATIONAL_STATUS_UNKNOWN</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="metadata.OrbitRegime">OrbitRegime</h3>
+        <p>Тип орбиты</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>ORBIT_REGIME_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ORBIT_REGIME_LEO</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ORBIT_REGIME_MEO</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ORBIT_REGIME_GEO</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ORBIT_REGIME_HEO</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="metadata.Source">Source</h3>
+        <p>Источники спутниковых данных</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>SOURCE_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>SOURCE_CELESTRAK</td>
+                <td>1</td>
+                <td><p>Каталог орбитальных данных CelesTrak</p></td>
+              </tr>
+            
+              <tr>
+                <td>SOURCE_AMSAT</td>
+                <td>2</td>
+                <td><p>Каталог AMSAT</p></td>
+              </tr>
+            
+              <tr>
+                <td>SOURCE_UCS</td>
+                <td>3</td>
+                <td><p>Каталог Union of Concerned Scientists</p></td>
+              </tr>
+            
+              <tr>
+                <td>SOURCE_MANUAL</td>
+                <td>4</td>
+                <td><p>Данные, добавленные вручную</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="metadata.SatelliteMetadataService">SatelliteMetadataService</h3>
+        <p>Сервис управления метаданными искусственных спутников</p><p>Предоставляет информацию о космических объектах и их характеристиках</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetSatelliteMetadata</td>
+                <td><a href="#metadata.GetMetadataRequest">GetMetadataRequest</a></td>
+                <td><a href="#metadata.GetMetadataResponse">GetMetadataResponse</a></td>
+                <td><p>Получение информации о спутнике по идентификатору</p></td>
+              </tr>
+            
+              <tr>
+                <td>ListSatelliteMetadata</td>
+                <td><a href="#metadata.ListSatelliteMetadataRequest">ListSatelliteMetadataRequest</a></td>
+                <td><a href="#metadata.ListSatelliteMetadataResponse">ListSatelliteMetadataResponse</a></td>
+                <td><p>Получение списка спутников с фильтрацией и пагинацией</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="common/proto/notification.proto">common/proto/notification.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="notification.CreateSubscriptionRequest">CreateSubscriptionRequest</h3>
+        <p>Запрос на создание подписки</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite</td>
+                  <td><a href="#notification.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observer</td>
+                  <td><a href="#notification.GeodeticInput">GeodeticInput</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>notify_before_seconds</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.DeleteDeviceRequest">DeleteDeviceRequest</h3>
+        <p>Запрос на удаление устройства</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.DeleteSubscriptionRequest">DeleteSubscriptionRequest</h3>
+        <p>Запрос на удаление подписки</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.Device">Device</h3>
+        <p>Устройство для получения уведомлений</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#notification.Device.DeviceType">Device.DeviceType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>address</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Адрес доставки (токен, email или URL webhook) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>enabled</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>created_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.GeodeticInput">GeodeticInput</h3>
+        <p>Географические координаты наблюдателя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>lat_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lat_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lon_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lon_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_m</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_km</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.GetSubscriptionRequest">GetSubscriptionRequest</h3>
+        <p>Запрос на получение подписки</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.ListDevicesRequest">ListDevicesRequest</h3>
+        <p>Запрос списка устройств пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.ListDevicesResponse">ListDevicesResponse</h3>
+        <p>Ответ со списком устройств</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>devices</td>
+                  <td><a href="#notification.Device">Device</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.ListSubscriptionsRequest">ListSubscriptionsRequest</h3>
+        <p>Запрос списка подписок пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>enabled</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>page_size</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>page_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p>Токен следующей страницы результатов </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.ListSubscriptionsResponse">ListSubscriptionsResponse</h3>
+        <p>Ответ со списком подписок</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>subscriptions</td>
+                  <td><a href="#notification.Subscription">Subscription</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>next_page_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.RegisterDeviceRequest">RegisterDeviceRequest</h3>
+        <p>Запрос на регистрацию устройства</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#notification.Device.DeviceType">Device.DeviceType</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>address</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.SatelliteIdentifier">SatelliteIdentifier</h3>
+        <p>Идентификатор спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Идентификатор объекта в каталоге NORAD </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.SetSubscriptionStatusRequest">SetSubscriptionStatusRequest</h3>
+        <p>Запрос на изменение статуса подписки</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>enabled</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.Subscription">Subscription</h3>
+        <p>Подписка на уведомления о пролётах спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>user_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite</td>
+                  <td><a href="#notification.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observer</td>
+                  <td><a href="#notification.GeodeticInput">GeodeticInput</a></td>
+                  <td></td>
+                  <td><p>Координаты наблюдателя </p></td>
+                </tr>
+              
+                <tr>
+                  <td>enabled</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>notify_before_seconds</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>За сколько секунд до начала пролёта отправить уведомление </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p>Минимальная максимальная высота пролёта </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p>Минимальная высота спутника над горизонтом </p></td>
+                </tr>
+              
+                <tr>
+                  <td>created_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>updated_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="notification.UpdateSubscriptionRequest">UpdateSubscriptionRequest</h3>
+        <p>Запрос на изменение параметров подписки</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>enabled</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>notify_before_seconds</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="notification.Device.DeviceType">Device.DeviceType</h3>
+        <p>Тип устройства или канала доставки уведомлений</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>DEVICE_TYPE_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DEVICE_TYPE_WEB_PUSH</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DEVICE_TYPE_FCM</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DEVICE_TYPE_EMAIL</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DEVICE_TYPE_WEBHOOK</td>
+                <td>4</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="notification.NotificationService">NotificationService</h3>
+        <p>Сервис управления подписками на пролёты спутников и устройствами уведомлений</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CreateSubscription</td>
+                <td><a href="#notification.CreateSubscriptionRequest">CreateSubscriptionRequest</a></td>
+                <td><a href="#notification.Subscription">Subscription</a></td>
+                <td><p>Создание новой подписки</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSubscription</td>
+                <td><a href="#notification.GetSubscriptionRequest">GetSubscriptionRequest</a></td>
+                <td><a href="#notification.Subscription">Subscription</a></td>
+                <td><p>Получение подписки по идентификатору</p></td>
+              </tr>
+            
+              <tr>
+                <td>ListSubscriptions</td>
+                <td><a href="#notification.ListSubscriptionsRequest">ListSubscriptionsRequest</a></td>
+                <td><a href="#notification.ListSubscriptionsResponse">ListSubscriptionsResponse</a></td>
+                <td><p>Получение списка подписок пользователя</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateSubscription</td>
+                <td><a href="#notification.UpdateSubscriptionRequest">UpdateSubscriptionRequest</a></td>
+                <td><a href="#notification.Subscription">Subscription</a></td>
+                <td><p>Обновление параметров подписки</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteSubscription</td>
+                <td><a href="#notification.DeleteSubscriptionRequest">DeleteSubscriptionRequest</a></td>
+                <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
+                <td><p>Удаление подписки</p></td>
+              </tr>
+            
+              <tr>
+                <td>SetSubscriptionStatus</td>
+                <td><a href="#notification.SetSubscriptionStatusRequest">SetSubscriptionStatusRequest</a></td>
+                <td><a href="#notification.Subscription">Subscription</a></td>
+                <td><p>Включение или отключение подписки</p></td>
+              </tr>
+            
+              <tr>
+                <td>RegisterDevice</td>
+                <td><a href="#notification.RegisterDeviceRequest">RegisterDeviceRequest</a></td>
+                <td><a href="#notification.Device">Device</a></td>
+                <td><p>Регистрация устройства для получения уведомлений</p></td>
+              </tr>
+            
+              <tr>
+                <td>ListDevices</td>
+                <td><a href="#notification.ListDevicesRequest">ListDevicesRequest</a></td>
+                <td><a href="#notification.ListDevicesResponse">ListDevicesResponse</a></td>
+                <td><p>Получение списка устройств пользователя</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteDevice</td>
+                <td><a href="#notification.DeleteDeviceRequest">DeleteDeviceRequest</a></td>
+                <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
+                <td><p>Удаление устройства</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="common/proto/tle.proto">common/proto/tle.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="tle.GetTleRequest">GetTleRequest</h3>
+        <p>Запрос на получение TLE</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>identifier</td>
+                  <td><a href="#tle.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="tle.GetTleResponse">GetTleResponse</h3>
+        <p>Ответ с TLE спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tle</td>
+                  <td><a href="#tle.Tle">Tle</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="tle.ListTlesRequest">ListTlesRequest</h3>
+        <p>Запрос списка TLE</p>
+
+        
+
+        
+      
+        <h3 id="tle.ListTlesResponse">ListTlesResponse</h3>
+        <p>Ответ со списком TLE</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tles</td>
+                  <td><a href="#tle.Tle">Tle</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="tle.SatelliteIdentifier">SatelliteIdentifier</h3>
+        <p>Идентификатор спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Идентификатор объекта в каталоге NORAD </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="tle.Tle">Tle</h3>
+        <p>Двухстрочный набор орбитальных элементов спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Идентификатор объекта в каталоге NORAD </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>line1</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>line2</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>epoch</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Эпоха, к которой относятся орбитальные параметры </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="tle.TleService">TleService</h3>
+        <p>Сервис предоставления актуальных TLE спутников</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetTle</td>
+                <td><a href="#tle.GetTleRequest">GetTleRequest</a></td>
+                <td><a href="#tle.GetTleResponse">GetTleResponse</a></td>
+                <td><p>Получение TLE по идентификатору спутника</p></td>
+              </tr>
+            
+              <tr>
+                <td>ListTles</td>
+                <td><a href="#tle.ListTlesRequest">ListTlesRequest</a></td>
+                <td><a href="#tle.ListTlesResponse">ListTlesResponse</a></td>
+                <td><p>Получение списка всех доступных TLE</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="common/proto/trajectory.proto">common/proto/trajectory.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="trajectory.GeodeticInput">GeodeticInput</h3>
+        <p>Геодезические координаты наблюдателя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>lat_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lat_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lon_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lon_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_m</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt_km</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.GeodeticOutput">GeodeticOutput</h3>
+        <p>Геодезические координаты</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>lat</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lon</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alt</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.GetPassesResponse">GetPassesResponse</h3>
+        <p>Результат расчёта пролётов</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#trajectory.PassesComputationMetadata">PassesComputationMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>passes</td>
+                  <td><a href="#trajectory.Pass">Pass</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#trajectory.TimeRange">TimeRange</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.LookAnglesRequest">LookAnglesRequest</h3>
+        <p>Запрос параметров наблюдения</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>identifier</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>datetime</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observer</td>
+                  <td><a href="#trajectory.GeodeticInput">GeodeticInput</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>output_mask</td>
+                  <td><a href="#google.protobuf.FieldMask">google.protobuf.FieldMask</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.LookAnglesResponse">LookAnglesResponse</h3>
+        <p>Ответ с параметрами наблюдения</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#trajectory.TrajectoryComputationMetadata">TrajectoryComputationMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>azimuth</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>elevation</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.NextPassesRequest">NextPassesRequest</h3>
+        <p>Запрос ближайших пролётов</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>satellites</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observer</td>
+                  <td><a href="#trajectory.GeodeticInput">GeodeticInput</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>count</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Количество ближайших пролётов </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.NextPassesResponse">NextPassesResponse</h3>
+        <p>Ответ с ближайшими пролётами</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#trajectory.PassesComputationMetadata">PassesComputationMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>passes</td>
+                  <td><a href="#trajectory.Pass">Pass</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.ObserverTrajectoryPoint">ObserverTrajectoryPoint</h3>
+        <p>Точка траектории относительно наблюдателя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>datetime</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>azimuth</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>elevation</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#double">double</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.ObserverTrajectoryRequest">ObserverTrajectoryRequest</h3>
+        <p>Запрос траектории относительно наблюдателя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>identifier</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#trajectory.TimeRange">TimeRange</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sampling</td>
+                  <td><a href="#trajectory.SamplingOptions">SamplingOptions</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observer</td>
+                  <td><a href="#trajectory.GeodeticInput">GeodeticInput</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>output_mask</td>
+                  <td><a href="#google.protobuf.FieldMask">google.protobuf.FieldMask</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.ObserverTrajectoryResponse">ObserverTrajectoryResponse</h3>
+        <p>Результат расчёта траектории относительно наблюдателя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#trajectory.TrajectoryComputationMetadata">TrajectoryComputationMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>points</td>
+                  <td><a href="#trajectory.ObserverTrajectoryPoint">ObserverTrajectoryPoint</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#trajectory.TimeRange">TimeRange</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sampling</td>
+                  <td><a href="#trajectory.SamplingOptions">SamplingOptions</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.Pass">Pass</h3>
+        <p>Информация о пролёте спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>satellite</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>aos</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Момент появления спутника над горизонтом </p></td>
+                </tr>
+              
+                <tr>
+                  <td>aos_azimuth</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>max_elevation_time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Момент достижения максимальной высоты </p></td>
+                </tr>
+              
+                <tr>
+                  <td>max_elevation</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>max_elevation_azimuth</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>los</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Момент ухода спутника за горизонт </p></td>
+                </tr>
+              
+                <tr>
+                  <td>los_azimuth</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>duration_seconds</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Продолжительность пролёта </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.PassPredictionRequest">PassPredictionRequest</h3>
+        <p>Запрос расчёта пролётов</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>satellites</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#trajectory.TimeRange">TimeRange</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>observer</td>
+                  <td><a href="#trajectory.GeodeticInput">GeodeticInput</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_peak_elevation_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_deg</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>min_elevation_rad</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>max_results</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td>optional</td>
+                  <td><p>Ограничение количества найденных пролётов </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.PassesComputationMetadata">PassesComputationMetadata</h3>
+        <p>Метаданные расчёта пролётов</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>propagation_model</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>computation_time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>norad_ids</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_names</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tle_epoch</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Эпоха использованного TLE </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellites_evaluated</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Количество обработанных спутников </p></td>
+                </tr>
+              
+                <tr>
+                  <td>passes_found</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Количество найденных пролётов </p></td>
+                </tr>
+              
+                <tr>
+                  <td>computation_ms</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Время вычисления в миллисекундах </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.PositionRequest">PositionRequest</h3>
+        <p>Запрос положения спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>identifier</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>datetime</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>output_mask</td>
+                  <td><a href="#google.protobuf.FieldMask">google.protobuf.FieldMask</a></td>
+                  <td></td>
+                  <td><p>Позволяет выбрать необходимые поля ответа </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.PositionResponse">PositionResponse</h3>
+        <p>Ответ с положением спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#trajectory.TrajectoryComputationMetadata">TrajectoryComputationMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>eci</td>
+                  <td><a href="#trajectory.Vector3">Vector3</a></td>
+                  <td>optional</td>
+                  <td><p>Координаты в системе ECI </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ecef</td>
+                  <td><a href="#trajectory.Vector3">Vector3</a></td>
+                  <td>optional</td>
+                  <td><p>Координаты в системе ECEF </p></td>
+                </tr>
+              
+                <tr>
+                  <td>geodetic</td>
+                  <td><a href="#trajectory.GeodeticOutput">GeodeticOutput</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.SamplingOptions">SamplingOptions</h3>
+        <p>Параметры дискретизации вычислений</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>step_seconds</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Интервал между вычислениями в секундах </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.SatelliteIdentifier">SatelliteIdentifier</h3>
+        <p>Идентификатор спутника</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Идентификатор объекта в каталоге NORAD </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.StateVector">StateVector</h3>
+        <p>Состояние спутника в определённый момент времени</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>datetime</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>position_eci</td>
+                  <td><a href="#trajectory.Vector3">Vector3</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>velocity_eci</td>
+                  <td><a href="#trajectory.Vector3">Vector3</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>position_ecef</td>
+                  <td><a href="#trajectory.Vector3">Vector3</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>velocity_ecef</td>
+                  <td><a href="#trajectory.Vector3">Vector3</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>geodetic</td>
+                  <td><a href="#trajectory.GeodeticOutput">GeodeticOutput</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.TimeRange">TimeRange</h3>
+        <p>Временной диапазон вычислений</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>start</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>end</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.TrajectoryComputationMetadata">TrajectoryComputationMetadata</h3>
+        <p>Метаданные выполненного расчёта</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>propagation_model</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>computation_time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>norad_id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>satellite_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tle_epoch</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Эпоха использованного TLE </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.TrajectoryRequest">TrajectoryRequest</h3>
+        <p>Запрос построения траектории</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>identifier</td>
+                  <td><a href="#trajectory.SatelliteIdentifier">SatelliteIdentifier</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#trajectory.TimeRange">TimeRange</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sampling</td>
+                  <td><a href="#trajectory.SamplingOptions">SamplingOptions</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>output_mask</td>
+                  <td><a href="#google.protobuf.FieldMask">google.protobuf.FieldMask</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>units</td>
+                  <td><a href="#trajectory.UnitSettings">UnitSettings</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.TrajectoryResponse">TrajectoryResponse</h3>
+        <p>Результат расчёта траектории</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>metadata</td>
+                  <td><a href="#trajectory.TrajectoryComputationMetadata">TrajectoryComputationMetadata</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>states</td>
+                  <td><a href="#trajectory.StateVector">StateVector</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>range</td>
+                  <td><a href="#trajectory.TimeRange">TimeRange</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sampling</td>
+                  <td><a href="#trajectory.SamplingOptions">SamplingOptions</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.UnitSettings">UnitSettings</h3>
+        <p>Настройки единиц измерения</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>distance_unit</td>
+                  <td><a href="#trajectory.UnitSettings.DistanceUnit">UnitSettings.DistanceUnit</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>angle_unit</td>
+                  <td><a href="#trajectory.UnitSettings.AngleUnit">UnitSettings.AngleUnit</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="trajectory.Vector3">Vector3</h3>
+        <p>Трёхмерный вектор</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>x</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>y</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>z</td>
+                  <td><a href="#double">double</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="trajectory.UnitSettings.AngleUnit">UnitSettings.AngleUnit</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>ANGLE_UNIT_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ANGLE_UNIT_DEGREES</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ANGLE_UNIT_RADIANS</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="trajectory.UnitSettings.DistanceUnit">UnitSettings.DistanceUnit</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>DISTANCE_UNIT_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DISTANCE_UNIT_METERS</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DISTANCE_UNIT_KILOMETERS</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>DISTANCE_UNIT_MILES</td>
+                <td>3</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="trajectory.TrajectoryService">TrajectoryService</h3>
+        <p>Сервис расчёта положения, траекторий и пролётов спутников</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetPosition</td>
+                <td><a href="#trajectory.PositionRequest">PositionRequest</a></td>
+                <td><a href="#trajectory.PositionResponse">PositionResponse</a></td>
+                <td><p>Получение положения спутника в заданный момент времени</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetLookAngles</td>
+                <td><a href="#trajectory.LookAnglesRequest">LookAnglesRequest</a></td>
+                <td><a href="#trajectory.LookAnglesResponse">LookAnglesResponse</a></td>
+                <td><p>Получение параметров наблюдения спутника относительно наблюдателя</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetTrajectory</td>
+                <td><a href="#trajectory.TrajectoryRequest">TrajectoryRequest</a></td>
+                <td><a href="#trajectory.TrajectoryResponse">TrajectoryResponse</a></td>
+                <td><p>Построение траектории движения спутника</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetObserverTrajectory</td>
+                <td><a href="#trajectory.ObserverTrajectoryRequest">ObserverTrajectoryRequest</a></td>
+                <td><a href="#trajectory.ObserverTrajectoryResponse">ObserverTrajectoryResponse</a></td>
+                <td><p>Построение траектории спутника относительно наблюдателя</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetPasses</td>
+                <td><a href="#trajectory.PassPredictionRequest">PassPredictionRequest</a></td>
+                <td><a href="#trajectory.GetPassesResponse">GetPassesResponse</a></td>
+                <td><p>Расчёт пролётов спутников за указанный период</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetNextPasses</td>
+                <td><a href="#trajectory.NextPassesRequest">NextPassesRequest</a></td>
+                <td><a href="#trajectory.NextPassesResponse">NextPassesResponse</a></td>
+                <td><p>Получение ближайших пролётов спутников</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="common/proto/user.proto">common/proto/user.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="user.CreateUserRequest">CreateUserRequest</h3>
+        <p>Запрос на создание пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password_hash</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.CreateUserResponse">CreateUserResponse</h3>
+        <p>Ответ с созданным пользователем</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#user.User">User</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.DeleteUserRequest">DeleteUserRequest</h3>
+        <p>Запрос на удаление пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.DeleteUserResponse">DeleteUserResponse</h3>
+        <p>Ответ на удаление пользователя</p>
+
+        
+
+        
+      
+        <h3 id="user.GetUserByEmailRequest">GetUserByEmailRequest</h3>
+        <p>Запрос пользователя по электронной почте</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.GetUserByIdRequest">GetUserByIdRequest</h3>
+        <p>Запрос пользователя по идентификатору</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.GetUserResponse">GetUserResponse</h3>
+        <p>Ответ с данными пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#user.User">User</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.UpdateUserRequest">UpdateUserRequest</h3>
+        <p>Запрос на обновление пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password_hash</td>
+                  <td><a href="#string">string</a></td>
+                  <td>optional</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.UpdateUserResponse">UpdateUserResponse</h3>
+        <p>Ответ с обновлёнными данными пользователя</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#user.User">User</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="user.User">User</h3>
+        <p>Информация о пользователе</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>username</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password_hash</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Хэш пароля пользователя </p></td>
+                </tr>
+              
+                <tr>
+                  <td>created_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>updated_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="user.UserService">UserService</h3>
+        <p>Сервис управления пользователями</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CreateUser</td>
+                <td><a href="#user.CreateUserRequest">CreateUserRequest</a></td>
+                <td><a href="#user.CreateUserResponse">CreateUserResponse</a></td>
+                <td><p>Создание нового пользователя</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetUserById</td>
+                <td><a href="#user.GetUserByIdRequest">GetUserByIdRequest</a></td>
+                <td><a href="#user.GetUserResponse">GetUserResponse</a></td>
+                <td><p>Получение пользователя по идентификатору</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetUserByEmail</td>
+                <td><a href="#user.GetUserByEmailRequest">GetUserByEmailRequest</a></td>
+                <td><a href="#user.GetUserResponse">GetUserResponse</a></td>
+                <td><p>Получение пользователя по адресу электронной почты</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateUser</td>
+                <td><a href="#user.UpdateUserRequest">UpdateUserRequest</a></td>
+                <td><a href="#user.UpdateUserResponse">UpdateUserResponse</a></td>
+                <td><p>Обновление данных пользователя</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteUser</td>
+                <td><a href="#user.DeleteUserRequest">DeleteUserRequest</a></td>
+                <td><a href="#user.DeleteUserResponse">DeleteUserResponse</a></td>
+                <td><p>Удаление пользователя</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++</td><td>Java</td><td>Python</td><td>Go</td><td>C#</td><td>PHP</td><td>Ruby</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+            <td>float64</td>
+            <td>double</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+            <td>float32</td>
+            <td>float</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+            <td>bool</td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>TrueClass/FalseClass</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+            <td>string</td>
+            <td>string</td>
+            <td>string</td>
+            <td>String (UTF-8)</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+            <td>[]byte</td>
+            <td>ByteString</td>
+            <td>string</td>
+            <td>String (ASCII-8BIT)</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+

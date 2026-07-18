@@ -125,16 +125,16 @@ func toProtoUser(u *models.User) *userpb.User {
 func toGRPCError(err error) error {
 	switch {
 	case errors.Is(err, domain.ErrUserNotFound):
-		return status.Error(codes.NotFound, err.Error())
+		return status.Error(codes.NotFound, "User not found")
 
 	case errors.Is(err, domain.ErrUserAlreadyExists):
-		return status.Error(codes.AlreadyExists, err.Error())
+		return status.Error(codes.AlreadyExists, "User already exists")
 
 	case errors.Is(err, domain.ErrEmailRequired):
-		return status.Error(codes.InvalidArgument, err.Error())
+		return status.Error(codes.InvalidArgument, "No email")
 
 	case errors.Is(err, domain.ErrUsernameRequired):
-		return status.Error(codes.InvalidArgument, err.Error())
+		return status.Error(codes.InvalidArgument, "No username")
 
 	default:
 		return status.Error(codes.Internal, "internal server error")
