@@ -3,7 +3,9 @@ package db
 import "context"
 
 // Result is the return type of Exec queries
-type Result interface{}
+type Result interface {
+	RowsAffected() int64
+}
 
 // Rows abstracts a result set returned by Query
 type Rows interface {
