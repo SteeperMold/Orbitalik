@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"log"
 	"time"
 
@@ -10,17 +11,8 @@ import (
 
 type Config struct {
 	AppEnv string
-	DB     *DBConfig
+	DB     *postgres.Config
 	Redis  *RedisConfig
-}
-
-type DBConfig struct {
-	Host              string
-	Port              string
-	Name              string
-	User              string
-	Password          string
-	ConnectionTimeout time.Duration
 }
 
 type RedisConfig struct {
@@ -43,7 +35,7 @@ func NewConfig() *Config {
 	return &Config{
 		AppEnv: config.GetEnv("APP_ENV", "development"),
 
-		DB: &DBConfig{
+		DB: &postgres.Config{
 			Host:              config.GetEnv("DB_HOST", "postgres"),
 			Port:              config.GetEnv("DB_PORT", "5432"),
 			Name:              config.GetEnv("DB_NAME", "metadata_db"),

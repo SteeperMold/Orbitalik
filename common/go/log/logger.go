@@ -3,6 +3,7 @@ package log
 type Logger interface {
 	Info(msg string, fields ...Field)
 	Error(msg string, fields ...Field)
+	Sync() error
 }
 
 type Field struct {

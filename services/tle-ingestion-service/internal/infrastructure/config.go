@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/common/go/config"
+	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/joho/godotenv"
 )
 
@@ -20,16 +21,7 @@ type Config struct {
 	TLECleanupInterval time.Duration
 	TLERetentionPeriod time.Duration
 	TLECleanupTimeout  time.Duration
-	DB                 *DBConfig
-}
-
-type DBConfig struct {
-	Host              string
-	Port              string
-	Name              string
-	User              string
-	Password          string
-	ConnectionTimeout time.Duration
+	DB                 *postgres.Config
 }
 
 func NewConfig() *Config {
@@ -51,7 +43,7 @@ func NewConfig() *Config {
 		TLERetentionPeriod: config.GetEnvAsDuration("TLE_RETENTION_PERIOD", 31*24*time.Hour),
 		TLECleanupTimeout:  config.GetEnvAsDuration("TLE_CLEANUP_TIMEOUT", 5*time.Minute),
 
-		DB: &DBConfig{
+		DB: &postgres.Config{
 			Host:              config.GetEnv("DB_HOST", "metadata-service"),
 			Port:              config.GetEnv("DB_PORT", "5432"),
 			Name:              config.GetEnv("DB_NAME", "metadata_db"),

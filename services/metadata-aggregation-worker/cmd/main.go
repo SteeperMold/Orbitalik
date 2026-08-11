@@ -18,16 +18,6 @@ import (
 func main() {
 	cfg := infra.NewConfig()
 
-	pgxPool := infra.NewSQLDatabase(cfg.DB)
-	defer infra.CloseDBConnection(pgxPool)
-	db := postgres.NewDB(pgxPool)
-
-	rdb := infra.NewRedisClient(cfg.Redis)
-
-	zapLog := infra.NewLogger(cfg.AppEnv)
-	defer infra.LoggerSync(zapLog)
-	logger := applog.New(zapLog)
-
 	ctx, cancel := context.WithCancel(context.Background())
 
 	sigs := make(chan os.Signal, 1)
@@ -36,6 +26,20 @@ func main() {
 		<-sigs
 		cancel()
 	}()
+
+	db, err := postgres.OpenConn(ctx, cfg.DB)
+	if err != nil {
+		log.Fatalf("failed to open postgres conn: %v", err)
+	}
+	defer db.Close()
+
+	rdb := infra.NewRedisClient(cfg.Redis)
+
+	logger, err := applog.NewLogger(cfg.AppEnv)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v", err)
+	}
+	defer logger.Sync()
 
 	rawRepo := repository.NewRawMetadataRepository(db)
 	metaRepo := repository.NewMetadataRepository(db)

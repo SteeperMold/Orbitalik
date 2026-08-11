@@ -36,4 +36,5 @@ type Conn interface {
 	Exec(ctx context.Context, query string, args ...any) (Result, error)
 	Begin(ctx context.Context) (Tx, error)
 	Ping(ctx context.Context) error
+	Close()
 }

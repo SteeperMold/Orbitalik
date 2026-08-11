@@ -17,10 +17,6 @@ type DB struct {
 	pool *pgxpool.Pool
 }
 
-func NewDB(pool *pgxpool.Pool) db.Conn {
-	return &DB{pool: pool}
-}
-
 func (p *DB) Query(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 	rows, err := p.pool.Query(ctx, sql, args...)
 	if err != nil {
@@ -48,6 +44,10 @@ func (p *DB) Begin(ctx context.Context) (db.Tx, error) {
 
 func (p *DB) Ping(ctx context.Context) error {
 	return p.pool.Ping(ctx)
+}
+
+func (p *DB) Close() {
+	p.pool.Close()
 }
 
 type Rows struct {

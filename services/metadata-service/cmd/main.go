@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	applog "github.com/SteeperMold/Orbitalik/common/go/log/zap"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/bootstrap"
@@ -10,18 +12,22 @@ import (
 func main() {
 	cfg := infra.NewConfig()
 
-	pgxPool := infra.NewSQLDatabase(cfg.DB)
-	defer infra.CloseDBConnection(pgxPool)
-	db := postgres.NewDB(pgxPool)
+	ctx, cancel := bootstrap.SignalContext()
+	defer cancel()
+
+	db, err := postgres.OpenConn(ctx, cfg.DB)
+	if err != nil {
+		log.Fatalf("failed to open postgres conn: %v", err)
+	}
+	defer db.Close()
 
 	rdb := infra.NewRedisClient(cfg.Redis)
 
-	zapLog := infra.NewLogger(cfg.AppEnv)
-	defer infra.LoggerSync(zapLog)
-	logger := applog.New(zapLog)
-
-	ctx, cancel := bootstrap.SignalContext()
-	defer cancel()
+	logger, err := applog.NewLogger(cfg.AppEnv)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v", err)
+	}
+	defer logger.Sync()
 
 	go bootstrap.StartSchedulers(ctx, cfg, db, rdb, logger)
 	go bootstrap.StartHTTPServer(cfg, db, logger)

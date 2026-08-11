@@ -11,16 +11,16 @@ type Logger struct {
 	l *zap.Logger
 }
 
-func New(l *zap.Logger) *Logger {
-	return &Logger{l: l}
-}
-
 func (z *Logger) Info(msg string, fields ...log.Field) {
 	z.l.Info(msg, toZap(fields)...)
 }
 
 func (z *Logger) Error(msg string, fields ...log.Field) {
 	z.l.Error(msg, toZap(fields)...)
+}
+
+func (z *Logger) Sync() error {
+	return z.l.Sync()
 }
 
 func toZap(fields []log.Field) []zap.Field {

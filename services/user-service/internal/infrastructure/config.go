@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/common/go/config"
+	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/joho/godotenv"
 )
 
@@ -13,16 +14,7 @@ type Config struct {
 	HTTPPort       string
 	GRPCPort       string
 	ContextTimeout time.Duration
-	DB             *DBConfig
-}
-
-type DBConfig struct {
-	Host              string
-	Port              string
-	Name              string
-	User              string
-	Password          string
-	ConnectionTimeout time.Duration
+	DB             *postgres.Config
 }
 
 func NewConfig() *Config {
@@ -37,7 +29,7 @@ func NewConfig() *Config {
 		GRPCPort:       config.GetEnv("GRPC_PORT", "50055"),
 		ContextTimeout: config.GetEnvAsDuration("CONTEXT_TIMEOUT", 10*time.Second),
 
-		DB: &DBConfig{
+		DB: &postgres.Config{
 			Host:              config.GetEnv("DB_HOST", "user-service"),
 			Port:              config.GetEnv("DB_PORT", "5432"),
 			Name:              config.GetEnv("DB_NAME", "user_db"),

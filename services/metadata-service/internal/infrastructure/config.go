@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/common/go/config"
+	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/joho/godotenv"
 )
 
@@ -17,20 +18,11 @@ type Config struct {
 	IngestionTimeout  time.Duration
 	MaxPageSize       int
 	DefaultPageSize   int
-	DB                *DBConfig
+	DB                *postgres.Config
 	Redis             *RedisConfig
 	UCS               *UCSConfig
 	Celestrak         *CelestrakConfig
 	SatNOGS           *SatNOGSConfig
-}
-
-type DBConfig struct {
-	Host              string
-	Port              string
-	Name              string
-	User              string
-	Password          string
-	ConnectionTimeout time.Duration
 }
 
 type RedisConfig struct {
@@ -79,7 +71,7 @@ func NewConfig() *Config {
 		MaxPageSize:       config.GetEnvAsInt("MAX_PAGE_SIZE", 500),
 		DefaultPageSize:   config.GetEnvAsInt("DEFAULT_PAGE_SIZE", 50),
 
-		DB: &DBConfig{
+		DB: &postgres.Config{
 			Host:              config.GetEnv("DB_HOST", "postgres"),
 			Port:              config.GetEnv("DB_PORT", "5432"),
 			Name:              config.GetEnv("DB_NAME", "metadata_db"),
