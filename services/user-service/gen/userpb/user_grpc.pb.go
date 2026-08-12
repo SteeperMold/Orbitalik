@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	UserService_CreateUser_FullMethodName     = "/user.UserService/CreateUser"
-	UserService_GetUserById_FullMethodName    = "/user.UserService/GetUserById"
+	UserService_GetUserById_FullMethodName    = "/user.UserService/GetUserByID"
 	UserService_GetUserByEmail_FullMethodName = "/user.UserService/GetUserByEmail"
 	UserService_UpdateUser_FullMethodName     = "/user.UserService/UpdateUser"
 	UserService_DeleteUser_FullMethodName     = "/user.UserService/DeleteUser"
@@ -29,11 +29,18 @@ const (
 // UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Сервис управления пользователями
 type UserServiceClient interface {
+	// Создание нового пользователя
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	// Получение пользователя по идентификатору
 	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	// Получение пользователя по адресу электронной почты
 	GetUserByEmail(ctx context.Context, in *GetUserByEmailRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	// Обновление данных пользователя
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
+	// Удаление пользователя
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
 }
 
@@ -98,11 +105,18 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReques
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
+//
+// Сервис управления пользователями
 type UserServiceServer interface {
+	// Создание нового пользователя
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	// Получение пользователя по идентификатору
 	GetUserById(context.Context, *GetUserByIdRequest) (*GetUserResponse, error)
+	// Получение пользователя по адресу электронной почты
 	GetUserByEmail(context.Context, *GetUserByEmailRequest) (*GetUserResponse, error)
+	// Обновление данных пользователя
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
+	// Удаление пользователя
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -118,7 +132,7 @@ func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserReq
 	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserById(context.Context, *GetUserByIdRequest) (*GetUserResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetUserById not implemented")
+	return nil, status.Error(codes.Unimplemented, "method GetUserByID not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserByEmail(context.Context, *GetUserByEmailRequest) (*GetUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserByEmail not implemented")
@@ -252,7 +266,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_CreateUser_Handler,
 		},
 		{
-			MethodName: "GetUserById",
+			MethodName: "GetUserByID",
 			Handler:    _UserService_GetUserById_Handler,
 		},
 		{

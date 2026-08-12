@@ -1,9 +1,7 @@
 github.com/Masterminds/squirrel v1.5.4 h1:uUcX/aBc8O7Fg9kaISIUsHXdKuqehiXAMQTYX8afzqM=
 github.com/Masterminds/squirrel v1.5.4/go.mod h1:NNaOrjSoIDfDA40n7sr2tPNZRfjzjA400rg+riTZj10=
-github.com/SteeperMold/Orbitalik/common/go v0.4.0 h1:N5pzsSYI6MUEJ3h7LvGBtFJQZzjs6FWMiicqpZS9hws=
-github.com/SteeperMold/Orbitalik/common/go v0.4.0/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
-github.com/SteeperMold/Orbitalik/common/go v0.5.0 h1:Mbgfk21Wcw3zWjWgyU3UaU/IBkqH4hxN6I0W+VJpMkI=
-github.com/SteeperMold/Orbitalik/common/go v0.5.0/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
+github.com/SteeperMold/Orbitalik/common/go v0.6.1 h1:jf8rgBVCWDR86IwVBoWR9xnt30Ray4sNprUfspDk8bE=
+github.com/SteeperMold/Orbitalik/common/go v0.6.1/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=

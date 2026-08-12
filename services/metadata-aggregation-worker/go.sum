@@ -1,7 +1,7 @@
 github.com/Masterminds/squirrel v1.5.4 h1:uUcX/aBc8O7Fg9kaISIUsHXdKuqehiXAMQTYX8afzqM=
 github.com/Masterminds/squirrel v1.5.4/go.mod h1:NNaOrjSoIDfDA40n7sr2tPNZRfjzjA400rg+riTZj10=
-github.com/SteeperMold/Orbitalik/common/go v0.4.0 h1:N5pzsSYI6MUEJ3h7LvGBtFJQZzjs6FWMiicqpZS9hws=
-github.com/SteeperMold/Orbitalik/common/go v0.4.0/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
+github.com/SteeperMold/Orbitalik/common/go v0.6.1 h1:jf8rgBVCWDR86IwVBoWR9xnt30Ray4sNprUfspDk8bE=
+github.com/SteeperMold/Orbitalik/common/go v0.6.1/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
