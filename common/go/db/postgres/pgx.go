@@ -17,6 +17,10 @@ type DB struct {
 	pool *pgxpool.Pool
 }
 
+func NewConn(pool *pgxpool.Pool) db.Conn {
+	return &DB{pool: pool}
+}
+
 func (p *DB) Query(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 	rows, err := p.pool.Query(ctx, sql, args...)
 	if err != nil {
