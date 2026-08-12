@@ -30,24 +30,16 @@ message User {
     uint32 id = 1;
 
     string email = 2;
-
     string username = 3;
 
-    // Хэш пароля пользователя
-    string password_hash = 4;
-
     google.protobuf.Timestamp created_at = 5;
-
     google.protobuf.Timestamp updated_at = 6;
 }
 
 // Запрос на создание пользователя
 message CreateUserRequest {
     string email = 1;
-
     string username = 2;
-
-    string password_hash = 3;
 }
 
 // Ответ с созданным пользователем
@@ -76,10 +68,7 @@ message UpdateUserRequest {
     uint32 id = 1;
 
     optional string email = 2;
-
     optional string username = 3;
-
-    optional string password_hash = 4;
 }
 
 // Ответ с обновлёнными данными пользователя

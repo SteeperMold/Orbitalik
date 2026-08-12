@@ -33,9 +33,8 @@ func (s *UserServiceServer) CreateUser(
 ) (*userpb.CreateUserResponse, error) {
 
 	user, err := s.service.CreateUser(ctx, &domain.CreateUserParams{
-		Email:        req.GetEmail(),
-		Username:     req.GetUsername(),
-		PasswordHash: req.GetPasswordHash(),
+		Email:    req.GetEmail(),
+		Username: req.GetUsername(),
 	})
 	if err != nil {
 		return nil, toGRPCError(err)
@@ -85,10 +84,6 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *userpb.UpdateUs
 		params.Username = req.GetUsername()
 	}
 
-	if req.PasswordHash != nil {
-		params.PasswordHash = req.GetPasswordHash()
-	}
-
 	user, err := s.service.UpdateUser(ctx, &params)
 	if err != nil {
 		return nil, toGRPCError(err)
@@ -113,12 +108,11 @@ func toProtoUser(u *models.User) *userpb.User {
 	}
 
 	return &userpb.User{
-		Id:           uint32(u.ID),
-		Email:        u.Email,
-		Username:     u.Username,
-		PasswordHash: u.PasswordHash,
-		CreatedAt:    timestamppb.New(u.CreatedAt),
-		UpdatedAt:    timestamppb.New(u.UpdatedAt),
+		Id:        uint32(u.ID),
+		Email:     u.Email,
+		Username:  u.Username,
+		CreatedAt: timestamppb.New(u.CreatedAt),
+		UpdatedAt: timestamppb.New(u.UpdatedAt),
 	}
 }
 
