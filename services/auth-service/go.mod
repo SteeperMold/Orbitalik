@@ -4,8 +4,7 @@ go 1.26.4
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/SteeperMold/Orbitalik/common/go v0.5.1
-	github.com/go-testfixtures/testfixtures/v3 v3.19.0
+	github.com/SteeperMold/Orbitalik/common/go v0.6.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/gorilla/mux v1.8.1
@@ -40,7 +39,6 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/goccy/go-yaml v1.18.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
