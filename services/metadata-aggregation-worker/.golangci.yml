@@ -1,0 +1,54 @@
+version: "2"
+
+run:
+  timeout: 2m
+  build-tags:
+    - integration
+
+output:
+  formats:
+    text:
+      colors: true
+      print-issued-lines: true
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - errorlint
+    - nilerr
+    - bodyclose
+    - contextcheck
+    - gocyclo
+    - revive
+    - gosec
+
+  settings:
+    gocyclo:
+      min-complexity: 15
+
+    revive:
+      severity: warning
+      rules:
+        - name: var-naming
+        - name: indent-error-flow
+        - name: error-naming
+        - name: blank-imports
+        - name: context-as-argument
+
+  exclusions:
+    rules:
+      - linters:
+          - revive
+        text: "exported .* should have comment or be unexported"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

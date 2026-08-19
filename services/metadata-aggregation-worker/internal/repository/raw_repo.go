@@ -45,7 +45,9 @@ func (r *RawMetadataRepository) GetByNoradID(ctx context.Context, noradID int) (
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows db.Rows) {
+		_ = rows.Close()
+	}(rows)
 
 	var result []models.SatelliteIngestRecord
 

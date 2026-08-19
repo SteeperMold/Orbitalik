@@ -59,7 +59,10 @@ func (r *MetadataRepository) ListSatellites(
 ) (items []*models.SatelliteMetadata, nextPageToken string, total uint32, err error) {
 
 	if filter == nil {
-		filter = &models.ListFilter{}
+		filter = &models.ListFilter{
+			// some default page size for protection
+			PageSize: 50,
+		}
 	}
 
 	offset, err := parsePageToken(filter.PageToken)
@@ -69,11 +72,10 @@ func (r *MetadataRepository) ListSatellites(
 
 	where := buildListWhere(filter)
 
-	total64, err := r.countList(ctx, where)
+	total, err = r.countList(ctx, where)
 	if err != nil {
 		return nil, "", 0, err
 	}
-	total = uint32(total64)
 
 	q := r.psql.
 		Select(metadataSelectColumns()...).
@@ -95,7 +97,9 @@ func (r *MetadataRepository) ListSatellites(
 	if err != nil {
 		return nil, "", 0, err
 	}
-	defer rows.Close()
+	defer func(rows db.Rows) {
+		err = rows.Close()
+	}(rows)
 
 	items = make([]*models.SatelliteMetadata, 0, filter.PageSize)
 	for rows.Next() {
@@ -119,7 +123,7 @@ func (r *MetadataRepository) ListSatellites(
 	return items, nextPageToken, total, nil
 }
 
-func (r *MetadataRepository) countList(ctx context.Context, where []sq.Sqlizer) (uint64, error) {
+func (r *MetadataRepository) countList(ctx context.Context, where []sq.Sqlizer) (uint32, error) {
 	q := r.psql.
 		Select("COUNT(*)").
 		From("satellite_metadata")
@@ -133,7 +137,7 @@ func (r *MetadataRepository) countList(ctx context.Context, where []sq.Sqlizer) 
 		return 0, err
 	}
 
-	var total uint64
+	var total uint32
 	if err := r.db.QueryRow(ctx, sqlQ, args...).Scan(&total); err != nil {
 		return 0, err
 	}

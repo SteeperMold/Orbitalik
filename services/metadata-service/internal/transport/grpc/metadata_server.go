@@ -40,6 +40,13 @@ func (s *MetadataServer) GetSatelliteMetadata(
 	req *metadatapb.GetMetadataRequest,
 ) (*metadatapb.GetMetadataResponse, error) {
 
+	if req == nil || req.Identifier == nil {
+		return nil, status.Error(
+			codes.InvalidArgument,
+			"either norad_id or name must be set",
+		)
+	}
+
 	var (
 		metadata   *models.SatelliteMetadata
 		err        error

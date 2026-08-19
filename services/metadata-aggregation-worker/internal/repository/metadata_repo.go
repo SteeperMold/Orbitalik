@@ -32,7 +32,7 @@ func (r *MetadataRepository) Upsert(ctx context.Context, meta *models.SatelliteM
 		meta.Frequencies = []models.Frequency{}
 	}
 	if meta.Sources == nil {
-		meta.Sources = []models.SourceAttribution{}
+		meta.Sources = []models.FieldSource{}
 	}
 
 	freqJSON, err := json.Marshal(meta.Frequencies)

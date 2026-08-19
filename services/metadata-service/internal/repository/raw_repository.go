@@ -33,18 +33,19 @@ func (r *RawMetadataRepository) SaveRawBatch(ctx context.Context, data []*models
 		return err
 	}
 
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback(ctx)
+			return
+		}
+
+		err = tx.Commit(ctx)
+	}()
+
 	pgxTx, ok := tx.(postgres.CopyFromTx)
 	if !ok {
 		return errors.New("CopyFrom not supported")
 	}
-
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback(ctx)
-		} else {
-			err = tx.Commit(ctx)
-		}
-	}()
 
 	_, err = pgxTx.CopyFrom(
 		ctx,
@@ -52,9 +53,6 @@ func (r *RawMetadataRepository) SaveRawBatch(ctx context.Context, data []*models
 		[]string{"norad_id", "cospar_id", "source", "payload", "fetched_at"},
 		newRawMetadataCopySource(data),
 	)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }

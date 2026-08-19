@@ -32,10 +32,7 @@ func (s *Service) RebuildSatellite(ctx context.Context, noradID int) error {
 		return err
 	}
 
-	meta, err := Aggregate(records)
-	if err != nil {
-		return err
-	}
+	meta := Aggregate(records)
 
 	if meta == nil {
 		return nil

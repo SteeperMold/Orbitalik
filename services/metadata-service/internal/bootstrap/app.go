@@ -94,6 +94,7 @@ func StartGRPCServer(cfg *infrastructure.Config, db db.Conn, logger applog.Logge
 	grpcServer := transportGrpc.NewServer(logger)
 	metadatapb.RegisterSatelliteMetadataServiceServer(
 		grpcServer,
+		//nolint:gosec // Configuration is expected to contain valid uint32-sized values
 		transportGrpc.NewMetadataServer(
 			metadataService,
 			logger,

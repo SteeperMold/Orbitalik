@@ -19,7 +19,7 @@ func NewMapper() *Mapper {
 func (m *Mapper) Map(r ingestion.Row) (json.RawMessage, error) {
 	now := time.Now()
 
-	noradID, err := strconv.Atoi(r["norad_id"])
+	noradID, err := strconv.Atoi(strings.TrimSpace(r["norad_id"]))
 	if err != nil {
 		return nil, err
 	}
@@ -27,11 +27,6 @@ func (m *Mapper) Map(r ingestion.Row) (json.RawMessage, error) {
 	meta := &models.SatelliteMetadataPartial{
 		NoradID:   noradID,
 		FetchedAt: now,
-		Source: models.SourceAttribution{
-			Source:         models.SourceCelestrak,
-			SourceRecordID: r["norad_id"],
-			FetchedAt:      now,
-		},
 	}
 
 	if v := strings.TrimSpace(r["cospar_id"]); v != "" {

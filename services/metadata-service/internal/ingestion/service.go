@@ -110,8 +110,8 @@ func (s *Service) ingestSource(ctx context.Context, src MetadataSource) error {
 
 func toIngestRecord(src *SatelliteSourceRecord) (*models.SatelliteIngestRecord, error) {
 	var payload struct {
-		NoradID  int
-		CosparID *string
+		NoradID  int     `json:"norad_id"`
+		CosparID *string `json:"cospar_id"`
 	}
 
 	if err := json.Unmarshal(src.Raw, &payload); err != nil {

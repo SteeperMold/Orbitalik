@@ -4,14 +4,21 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"time"
+)
+
+const (
+	baseBackoff = time.Second
+	maxBackoff  = 30 * time.Second
 )
 
 type Client struct {
 	client    *http.Client
 	sourceURL string
 	retries   int
+	rng       *rand.Rand
 }
 
 func NewClient(url string, timeout time.Duration, retries int) *Client {
@@ -21,13 +28,15 @@ func NewClient(url string, timeout time.Duration, retries int) *Client {
 		},
 		sourceURL: url,
 		retries:   retries,
+		//nolint:gosec // math/rand is used only for non-security backoff jitter.
+		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
 func (c *Client) Fetch(ctx context.Context) (io.ReadCloser, error) {
 	var lastErr error
 
-	for attempt := 1; attempt <= c.retries; attempt++ {
+	for attempt := 0; attempt <= c.retries; attempt++ {
 		body, err := c.fetchOnce(ctx)
 		if err == nil {
 			return body, nil
@@ -38,7 +47,7 @@ func (c *Client) Fetch(ctx context.Context) (io.ReadCloser, error) {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
-		case <-time.After(time.Duration(attempt) * time.Second):
+		case <-time.After(c.backoff(attempt)):
 		}
 	}
 
@@ -65,9 +74,22 @@ func (c *Client) fetchOnce(ctx context.Context) (io.ReadCloser, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
 	return resp.Body, nil
+}
+
+func (c *Client) backoff(attempt int) time.Duration {
+	delay := baseBackoff * time.Duration(1<<attempt)
+
+	if delay > maxBackoff {
+		delay = maxBackoff
+	}
+
+	minDelay := delay / 2
+	jitter := time.Duration(c.rng.Int63n(int64(delay-minDelay) + 1))
+
+	return minDelay + jitter
 }

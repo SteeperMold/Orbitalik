@@ -2,7 +2,6 @@ package aggregation
 
 import (
 	"encoding/json"
-	"sort"
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/metadata-aggregation-worker/internal/models"
@@ -13,9 +12,9 @@ type item struct {
 	rec  models.SatelliteIngestRecord
 }
 
-func Aggregate(records []models.SatelliteIngestRecord) (*models.SatelliteMetadata, error) {
+func Aggregate(records []models.SatelliteIngestRecord) *models.SatelliteMetadata {
 	if len(records) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	var items []item
@@ -29,10 +28,10 @@ func Aggregate(records []models.SatelliteIngestRecord) (*models.SatelliteMetadat
 	}
 
 	if len(items) == 0 {
-		return nil, nil
+		return nil
 	}
 
-	return mergeItems(items), nil
+	return mergeItems(items)
 }
 
 func decodePayload(r models.SatelliteIngestRecord) (*models.SatelliteMetadataPartial, error) {
@@ -43,10 +42,14 @@ func decodePayload(r models.SatelliteIngestRecord) (*models.SatelliteMetadataPar
 	return &m, nil
 }
 
-// the less the more priority
+// higher number means more priority
 var fieldPriority = map[string]map[models.Source]int{
 	"name": {
 		models.SourceUCS:       2,
+		models.SourceCelestrak: 1,
+	},
+	"cospar_id": {
+		models.SourceUCS:       1, // freshness wins
 		models.SourceCelestrak: 1,
 	},
 	"operator": {
@@ -65,22 +68,42 @@ var fieldPriority = map[string]map[models.Source]int{
 		models.SourceUCS:       2,
 		models.SourceCelestrak: 1,
 	},
+	"launch_date": {
+		models.SourceUCS:       2,
+		models.SourceCelestrak: 1,
+	},
+	"launch_site": {
+		models.SourceUCS:       2,
+		models.SourceCelestrak: 1,
+	},
+	"launch_vehicle": {
+		models.SourceUCS:       2,
+		models.SourceCelestrak: 1,
+	},
+	"owner": {
+		models.SourceUCS:       2,
+		models.SourceCelestrak: 1,
+	},
+	"constellation": {
+		models.SourceUCS:       2,
+		models.SourceCelestrak: 1,
+	},
 }
 
 func pickBest[T any](
 	items []item,
 	field string,
 	extract func(*models.SatelliteMetadataPartial) (T, bool),
-) (T, bool) {
+) (bestVal T, bestItem *item, found bool) {
 
 	var (
-		bestVal T
-		found   bool
 		bestPri = -1
 		bestTs  time.Time
 	)
 
-	for _, it := range items {
+	for i := range items {
+		it := &items[i]
+
 		val, ok := extract(it.meta)
 		if !ok {
 			continue
@@ -90,121 +113,59 @@ func pickBest[T any](
 
 		if !found || pri > bestPri || (pri == bestPri && it.rec.FetchedAt.After(bestTs)) {
 			bestVal = val
+			bestItem = it
 			bestPri = pri
 			bestTs = it.rec.FetchedAt
 			found = true
 		}
 	}
 
-	return bestVal, found
+	return bestVal, bestItem, found
 }
 
 func mergeItems(items []item) *models.SatelliteMetadata {
 	out := &models.SatelliteMetadata{
-		NoradID:  items[0].meta.NoradID,
-		CosparID: items[0].meta.CosparID,
+		NoradID: items[0].meta.NoradID,
 	}
 
-	if v, ok := pickBest(items, "name",
-		func(m *models.SatelliteMetadataPartial) (string, bool) {
-			if m.Name != nil && *m.Name != "" {
-				return *m.Name, true
-			}
-			return "", false
-		},
-	); ok {
-		out.Name = v
-	}
-
-	if v, ok := pickBest(items, "operator",
-		func(m *models.SatelliteMetadataPartial) (*string, bool) {
-			if m.Operator != nil {
-				return m.Operator, true
-			}
-			return nil, false
-		},
-	); ok {
-		out.Operator = v
-	}
-
-	if v, ok := pickBest(items, "orbit_regime",
-		func(m *models.SatelliteMetadataPartial) (models.OrbitRegime, bool) {
-			if m.OrbitRegime != nil {
-				return *m.OrbitRegime, true
-			}
-			return models.OrbitRegimeUnspecified, false
-		},
-	); ok {
-		out.OrbitRegime = v
-	}
-
-	if v, ok := pickBest(items, "object_type",
-		func(m *models.SatelliteMetadataPartial) (models.ObjectType, bool) {
-			if m.ObjectType != nil {
-				return *m.ObjectType, true
-			}
-			return models.ObjectTypeUnspecified, false
-		},
-	); ok {
-		out.ObjectType = v
-	}
-
-	if v, ok := pickBest(items, "operational_status",
-		func(m *models.SatelliteMetadataPartial) (models.OperationalStatus, bool) {
-			if m.OperationalStatus != nil {
-				return *m.OperationalStatus, true
-			}
-			return models.OperationalStatusUnspecified, false
-		},
-	); ok {
-		out.OperationalStatus = v
-	}
-
-	sortByFreshness(items)
-
-	for _, it := range items {
-		m := it.meta
-
-		if out.LaunchDate == nil && m.LaunchDate != nil {
-			out.LaunchDate = m.LaunchDate
-		}
-
-		if out.LaunchSite == nil && m.LaunchSite != nil {
-			out.LaunchSite = m.LaunchSite
-		}
-
-		if out.LaunchVehicle == nil && m.LaunchVehicle != nil {
-			out.LaunchVehicle = m.LaunchVehicle
-		}
-
-		if out.Owner == nil && m.Owner != nil {
-			out.Owner = m.Owner
-		}
-
-		if out.Constellation == nil && m.Constellation != nil {
-			out.Constellation = m.Constellation
-		}
-	}
+	mergeName(out, items)
+	mergeCosparID(out, items)
+	mergeOperator(out, items)
+	mergeOrbitRegime(out, items)
+	mergeObjectType(out, items)
+	mergeOperationalStatus(out, items)
+	mergeLaunchDate(out, items)
+	mergeLaunchSite(out, items)
+	mergeLaunchVehicle(out, items)
+	mergeOwner(out, items)
+	mergeConstellation(out, items)
 
 	for _, it := range items {
 		out.Aliases = uniqueAppend(out.Aliases, it.meta.Aliases)
 		out.Frequencies = mergeFrequencies(out.Frequencies, it.meta.Frequencies)
+	}
 
-		out.Sources = append(out.Sources, models.SourceAttribution{
-			Source:    it.rec.Source,
-			FetchedAt: it.rec.FetchedAt,
+	if sources := sourcesForField(items, func(m *models.SatelliteMetadataPartial) bool {
+		return len(m.Aliases) > 0
+	}); len(sources) > 0 {
+		out.Sources = append(out.Sources, models.FieldSource{
+			Field:   "aliases",
+			Sources: sources,
+		})
+	}
+
+	if sources := sourcesForField(items, func(m *models.SatelliteMetadataPartial) bool {
+		return len(m.Frequencies) > 0
+	}); len(sources) > 0 {
+		out.Sources = append(out.Sources, models.FieldSource{
+			Field:   "frequencies",
+			Sources: sources,
 		})
 	}
 
 	out.UpdatedAt = time.Now()
 
 	return out
-}
-
-func sortByFreshness(items []item) {
-	sort.Slice(items, func(i, j int) bool {
-		return items[i].rec.FetchedAt.After(items[j].rec.FetchedAt)
-	})
 }
 
 func uniqueAppend(dst, src []string) []string {
@@ -215,14 +176,38 @@ func uniqueAppend(dst, src []string) []string {
 	}
 
 	for _, v := range src {
-		if _, ok := set[v]; !ok {
-			dst = append(dst, v)
+		if _, ok := set[v]; ok {
+			continue
 		}
+
+		dst = append(dst, v)
+		set[v] = struct{}{}
 	}
 
 	return dst
 }
 
+// TODO: merge frequencies properly
 func mergeFrequencies(dst, src []models.Frequency) []models.Frequency {
 	return append(dst, src...)
+}
+
+func sourcesForField(items []item, hasValue func(*models.SatelliteMetadataPartial) bool) []models.Source {
+	seen := make(map[models.Source]struct{})
+	var sources []models.Source
+
+	for _, it := range items {
+		if !hasValue(it.meta) {
+			continue
+		}
+
+		if _, ok := seen[it.rec.Source]; ok {
+			continue
+		}
+
+		seen[it.rec.Source] = struct{}{}
+		sources = append(sources, it.rec.Source)
+	}
+
+	return sources
 }

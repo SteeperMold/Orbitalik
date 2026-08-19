@@ -2,6 +2,7 @@ package celestrak
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
@@ -29,7 +30,9 @@ func (s *Source) StreamBatch(ctx context.Context, fn func([]*ingestion.Satellite
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+	defer func(reader io.ReadCloser) {
+		err = reader.Close()
+	}(reader)
 
 	now := time.Now()
 	batch := make([]*ingestion.SatelliteSourceRecord, 0, s.batchSize)
