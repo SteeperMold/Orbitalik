@@ -6,8 +6,8 @@ use uom::si::f64::{Angle, Length};
 use uom::si::length::{kilometer, meter, mile};
 
 use crate::astro::coords::ecef::Ecef;
-use crate::astro::coords::eci::Eci;
 use crate::astro::coords::geodetic::Geodetic;
+use crate::astro::coords::teme::Teme;
 use crate::astro::models::{LookAngles, ObserverTrajectory, Pass, SatellitePosition, Trajectory};
 use crate::astro::models::{Sampling, SatelliteIdentifier, TimeRange};
 use crate::astro::propagation::look_angles::LookAnglesComputation;
@@ -15,9 +15,9 @@ use crate::astro::propagation::position::PositionComputation;
 use crate::domain::errors::TimestampConversionError;
 use crate::domain::models::{PassesComputationMetadata, TrajectoryComputationMetadata};
 use crate::transport::adapter::tle_client::tle_grpc;
-use crate::transport::grpc::service::trajectory_grpc;
-use crate::transport::grpc::service::trajectory_grpc::unit_settings::{AngleUnit, DistanceUnit};
-use crate::transport::grpc::service::trajectory_grpc::{
+use crate::transport::grpc::server::trajectory_grpc;
+use crate::transport::grpc::server::trajectory_grpc::unit_settings::{AngleUnit, DistanceUnit};
+use crate::transport::grpc::server::trajectory_grpc::{
     GeodeticInput, GeodeticOutput, UnitSettings, Vector3, geodetic_input,
 };
 
@@ -90,7 +90,7 @@ impl From<&FieldMask> for PositionComputation {
     fn from(mask: &FieldMask) -> Self {
         let has = |prefix: &str| mask.paths.iter().any(|p| p.starts_with(prefix));
         Self {
-            eci: has("eci"),
+            teme: has("eci"),
             ecef: has("ecef"),
             geodetic: has("geodetic"),
         }
@@ -219,7 +219,7 @@ pub trait HasXYZ {
     fn z(&self) -> Length;
 }
 
-impl HasXYZ for Eci {
+impl HasXYZ for Teme {
     fn x(&self) -> Length {
         self.x
     }
@@ -392,8 +392,8 @@ impl trajectory_grpc::StateVector {
     ) -> Result<Self, Status> {
         Ok(Self {
             datetime: Some(position.time.to_proto_timestamp()?),
-            position_eci: Vector3::from_xyz(position.eci.as_ref(), units)?,
-            velocity_eci: None,
+            position_teme: Vector3::from_xyz(position.teme.as_ref(), units)?,
+            velocity_teme: None,
             position_ecef: Vector3::from_xyz(position.ecef.as_ref(), units)?,
             velocity_ecef: None,
             geodetic: GeodeticOutput::from_geodetic(position.geodetic.as_ref(), units)?,
@@ -426,7 +426,7 @@ impl trajectory_grpc::PositionResponse {
         Ok(Self {
             time: Some(position.time.to_proto_timestamp()?),
             metadata: trajectory_grpc::TrajectoryComputationMetadata::with_units(metadata, units)?,
-            eci: Vector3::from_xyz(position.eci.as_ref(), units)?,
+            teme: Vector3::from_xyz(position.teme.as_ref(), units)?,
             ecef: Vector3::from_xyz(position.ecef.as_ref(), units)?,
             geodetic: GeodeticOutput::from_geodetic(position.geodetic.as_ref(), units)?,
         })

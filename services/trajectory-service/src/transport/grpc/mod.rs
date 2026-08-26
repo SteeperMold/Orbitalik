@@ -1,7 +1,6 @@
 pub mod converters;
 pub mod interceptors;
+pub mod passes;
 pub mod position;
 pub mod server;
-pub mod service;
 pub mod trajectory;
-mod passes;

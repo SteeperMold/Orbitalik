@@ -26,4 +26,3 @@ pub struct PassesComputationMetadata {
 
     pub computation_ms: u32,
 }
-

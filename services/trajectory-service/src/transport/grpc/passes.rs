@@ -3,14 +3,20 @@ use uom::si::angle::{degree, radian};
 use uom::si::f64::Angle;
 
 use crate::astro::models::SatelliteIdentifier;
+use crate::domain::passes::PassesServiceApi;
 use crate::service::passes::{GetPassesOptions, NextPassesOptions};
-use crate::transport::grpc::service::trajectory_grpc::{
-    next_passes_request, pass_prediction_request, GetPassesResponse, NextPassesRequest,
-    NextPassesResponse, PassPredictionRequest,
+use crate::transport::grpc::server::TrajectoryGrpcServer;
+use crate::transport::grpc::server::trajectory_grpc::{
+    GetPassesResponse, NextPassesRequest, NextPassesResponse, PassPredictionRequest,
+    next_passes_request, pass_prediction_request,
 };
-use crate::transport::grpc::service::TrajectoryGrpcServer;
 
-impl TrajectoryGrpcServer {
+impl<P, T, Pa> TrajectoryGrpcServer<P, T, Pa>
+where
+    P: Sync,
+    T: Sync,
+    Pa: PassesServiceApi,
+{
     pub async fn handle_get_passes(
         &self,
         request: Request<PassPredictionRequest>,
@@ -28,7 +34,7 @@ impl TrajectoryGrpcServer {
             .ok_or_else(|| Status::invalid_argument("Missing range"))?
             .try_into()?;
 
-        let observer = &req
+        let observer = req
             .observer
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;
@@ -82,7 +88,7 @@ impl TrajectoryGrpcServer {
             .map(std::convert::TryInto::try_into)
             .collect::<Result<_, _>>()?;
 
-        let observer = &req
+        let observer = req
             .observer
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;

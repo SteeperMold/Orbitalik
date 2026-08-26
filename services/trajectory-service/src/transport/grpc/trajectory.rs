@@ -2,12 +2,18 @@ use tonic::{Request, Response, Status};
 
 use crate::astro::propagation::look_angles::LookAnglesComputation;
 use crate::astro::propagation::position::PositionComputation;
-use crate::transport::grpc::service::TrajectoryGrpcServer;
-use crate::transport::grpc::service::trajectory_grpc::{
+use crate::domain::trajectory::TrajectoryServiceApi;
+use crate::transport::grpc::server::TrajectoryGrpcServer;
+use crate::transport::grpc::server::trajectory_grpc::{
     ObserverTrajectoryRequest, ObserverTrajectoryResponse, TrajectoryRequest, TrajectoryResponse,
 };
 
-impl TrajectoryGrpcServer {
+impl<P, T, Pa> TrajectoryGrpcServer<P, T, Pa>
+where
+    P: Sync,
+    T: TrajectoryServiceApi,
+    Pa: Sync,
+{
     pub async fn handle_get_trajectory(
         &self,
         request: Request<TrajectoryRequest>,
