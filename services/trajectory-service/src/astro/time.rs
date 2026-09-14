@@ -49,7 +49,7 @@ fn datetime_to_julian(datetime: &DateTime<Utc>) -> f64 {
 
     let hour = f64::from(datetime.hour());
     let min = f64::from(datetime.minute());
-    let sec = f64::from(datetime.second());
+    let sec = f64::from(datetime.second()) + f64::from(datetime.nanosecond()) / 1_000_000_000.0;
 
     // adjust months so jan/feb are treated as months 13/14 of previous year
     let (yy, mm) = if month <= 2 {
@@ -99,11 +99,180 @@ fn gmst_seconds(t: f64) -> Time {
 /// Normalize an angle in radians to the range [0, 2π).
 fn normalize_angle(angle: Angle) -> Angle {
     let wrapped = angle.get::<radian>() % TWO_PI;
-    if wrapped < 0.0 {
+
+    let wrapped = if wrapped < 0.0 {
         wrapped + TWO_PI
     } else {
         wrapped
     };
 
     Angle::new::<radian>(wrapped)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::test_utils::assert_close;
+    use super::*;
+
+    use chrono::TimeZone;
+
+    #[allow(clippy::expect_used)]
+    fn utc(year: i32, month: u32, day: u32, hour: u32, minute: u32, seconds: u32) -> DateTime<Utc> {
+        Utc.with_ymd_and_hms(year, month, day, hour, minute, seconds)
+            .single()
+            .expect("tests must have avalid UTC datetime")
+    }
+
+    #[test]
+    fn julian_date_j2000() {
+        // J2000.0 = 2000-01-01 12:00:00 UTC
+        let datetime = utc(2000, 1, 1, 12, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_451_545.0, 1e-9);
+    }
+
+    #[test]
+    fn julian_date_j2000_midnight() {
+        let datetime = utc(2000, 1, 1, 0, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_451_544.5, 1e-9);
+    }
+
+    #[test]
+    fn julian_date_1999() {
+        let datetime = utc(1999, 1, 1, 0, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_451_179.5, 1e-9);
+    }
+
+    #[test]
+    fn julian_date_1987() {
+        let datetime = utc(1987, 1, 27, 0, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_446_822.5, 1e-9);
+    }
+
+    #[test]
+    fn julian_date_with_fractional_day() {
+        // 1987-06-19 12:00 UTC = 2446966.0
+        let datetime = utc(1987, 6, 19, 12, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_446_966.0, 1e-9);
+    }
+
+    #[test]
+    fn julian_date_handles_february() {
+        // tests the month <= 2 branch
+        let datetime = utc(1988, 1, 27, 0, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_447_187.5, 1e-9);
+    }
+
+    #[test]
+    fn julian_date_handles_leap_year() {
+        let datetime = utc(1988, 6, 19, 12, 0, 0);
+
+        let jd = datetime_to_julian(&datetime);
+
+        assert_close(jd, 2_447_332.0, 1e-9);
+    }
+
+    #[test]
+    fn gmst_at_j2000() {
+        // at J2000, T=0, so the polynomial reduces to GMST_BASE
+        let result = gmst_seconds(0.0);
+
+        assert_close(result.get::<second>(), GMST_BASE, 1e-9);
+    }
+
+    #[test]
+    fn normalize_angle_leaves_normal_angle_unchanged() {
+        let angle = Angle::new::<radian>(1.0);
+
+        let result = normalize_angle(angle);
+
+        assert_close(result.get::<radian>(), 1.0, 1e-12);
+    }
+
+    #[test]
+    fn normalize_angle_wraps_angle_above_two_pi() {
+        let angle = Angle::new::<radian>(TWO_PI + 1.0);
+
+        let result = normalize_angle(angle);
+
+        assert_close(result.get::<radian>(), 1.0, 1e-12);
+    }
+
+    #[test]
+    fn normalize_angle_wraps_multiple_revolutions() {
+        let angle = Angle::new::<radian>(3.0 * TWO_PI + 1.5);
+
+        let result = normalize_angle(angle);
+
+        assert_close(result.get::<radian>(), 1.5, 1e-12);
+    }
+
+    #[test]
+    fn normalize_angle_wraps_negative_angle() {
+        let angle = Angle::new::<radian>(-1.0);
+
+        let result = normalize_angle(angle);
+
+        assert_close(result.get::<radian>(), TWO_PI - 1.0, 1e-12);
+    }
+
+    #[test]
+    fn normalize_angle_wraps_negative_multiple_revolutions() {
+        let angle = Angle::new::<radian>(-3.0 * TWO_PI - 1.5);
+
+        let result = normalize_angle(angle);
+
+        assert_close(result.get::<radian>(), TWO_PI - 1.5, 1e-12);
+    }
+
+    #[test]
+    fn normalize_angle_zero() {
+        let angle = Angle::new::<radian>(0.0);
+
+        let result = normalize_angle(angle);
+
+        assert_close(result.get::<radian>(), 0.0, 1e-12);
+    }
+
+    #[test]
+    fn gst_at_j2000() {
+        // IAU 1982 GMST polynomial at J2000.0:
+        //
+        // GMST = 67310.54841 seconds
+        //      = 280.460618375 degrees
+        //      = approximately 4.8949612127 radians
+        let datetime = utc(2000, 1, 1, 12, 0, 0);
+
+        let result = utc_to_gst(datetime);
+
+        assert_close(result.get::<radian>(), 4.894_961_212_823_059, 1e-9);
+    }
+
+    #[test]
+    fn gst_is_normalized() {
+        let datetime = utc(2000, 1, 1, 12, 0, 0);
+
+        let result = utc_to_gst(datetime);
+        let radians = result.get::<radian>();
+
+        assert!(radians >= 0.0);
+        assert!(radians < TWO_PI);
+    }
 }

@@ -1,9 +1,9 @@
+use chrono::{DateTime, Utc};
 use std::fmt;
 use std::fmt::Formatter;
-use chrono::{DateTime, Utc};
 use uom::si::f64::{Angle, Length};
 
-use crate::astro::coords::{ecef::Ecef, eci::Eci, geodetic::Geodetic};
+use crate::astro::coords::{ecef::Ecef, geodetic::Geodetic, teme::Teme};
 use crate::astro::errors::{SamplingError, TimeRangeError};
 
 pub struct Tle {
@@ -17,7 +17,7 @@ pub struct Tle {
 pub struct SatellitePosition {
     pub time: DateTime<Utc>,
 
-    pub eci: Option<Eci>,
+    pub teme: Option<Teme>,
     pub ecef: Option<Ecef>,
     pub geodetic: Option<Geodetic>,
 }
@@ -64,8 +64,7 @@ pub struct Pass {
     pub duration_seconds: u32,
 }
 
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SatelliteIdentifier {
     NoradId(u32),
     Name(String),
@@ -108,5 +107,64 @@ impl Sampling {
         }
 
         Ok(Self { step_seconds })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{DateTime, Utc};
+
+    #[allow(clippy::unwrap_used)]
+    fn dt(value: &str) -> DateTime<Utc> {
+        value.parse().unwrap()
+    }
+
+    #[allow(clippy::unwrap_used)]
+    #[test]
+    fn time_range_accepts_start_before_end() {
+        let start = dt("2026-01-01T00:00:00Z");
+        let end = dt("2026-01-02T00:00:00Z");
+
+        let range = TimeRange::new(start, end).unwrap();
+
+        assert_eq!(range.start, start);
+        assert_eq!(range.end, end);
+    }
+
+    #[allow(clippy::unwrap_used)]
+    #[test]
+    fn time_range_accepts_equal_start_and_end() {
+        let time = dt("2026-01-01T00:00:00Z");
+
+        let range = TimeRange::new(time, time).unwrap();
+
+        assert_eq!(range.start, time);
+        assert_eq!(range.end, time);
+    }
+
+    #[test]
+    fn time_range_rejects_start_after_end() {
+        let start = dt("2026-01-02T00:00:00Z");
+        let end = dt("2026-01-01T00:00:00Z");
+
+        let result = TimeRange::new(start, end);
+
+        assert!(matches!(result, Err(TimeRangeError::InvalidOrder)));
+    }
+
+    #[allow(clippy::unwrap_used)]
+    #[test]
+    fn sampling_accepts_positive_step() {
+        let sampling = Sampling::new(60).unwrap();
+
+        assert_eq!(sampling.step_seconds, 60);
+    }
+
+    #[test]
+    fn sampling_rejects_zero_step() {
+        let result = Sampling::new(0);
+
+        assert!(matches!(result, Err(SamplingError::InvalidStep)));
     }
 }

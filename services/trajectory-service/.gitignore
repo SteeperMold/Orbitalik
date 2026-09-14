@@ -21,4 +21,6 @@ target/
 *~
 .DS_Store
 
+venv
+
 /proto/
