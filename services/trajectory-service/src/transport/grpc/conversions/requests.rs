@@ -158,3 +158,39 @@ impl IntoAngle for trajectory_grpc::next_passes_request::MinPeakElevation {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use uom::si::angle::{degree, radian};
+
+    use crate::transport::grpc::server::trajectory_grpc::{
+        next_passes_request, pass_prediction_request,
+    };
+
+    #[test]
+    fn into_angle_converts_degrees_and_radians() {
+        let degrees = pass_prediction_request::MinElevation::MinElevationDeg(45.0).into_angle();
+
+        let radians = pass_prediction_request::MinElevation::MinElevationRad(std::f64::consts::PI)
+            .into_angle();
+
+        assert_eq!(degrees.get::<degree>(), 45.0);
+        assert_eq!(radians.get::<radian>(), std::f64::consts::PI);
+    }
+
+    #[test]
+    fn all_angle_oneofs_convert() {
+        let values = [
+            pass_prediction_request::MinElevation::MinElevationDeg(10.0).into_angle(),
+            pass_prediction_request::MinPeakElevation::MinPeakElevationRad(0.5).into_angle(),
+            next_passes_request::MinElevation::MinElevationDeg(20.0).into_angle(),
+            next_passes_request::MinPeakElevation::MinPeakElevationRad(1.0).into_angle(),
+        ];
+
+        assert_eq!(values[0].get::<degree>(), 10.0);
+        assert_eq!(values[1].get::<radian>(), 0.5);
+        assert_eq!(values[2].get::<degree>(), 20.0);
+        assert_eq!(values[3].get::<radian>(), 1.0);
+    }
+}

@@ -58,3 +58,52 @@ impl UnitContext {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::models::UnitContext;
+    use crate::transport::grpc::server::trajectory_grpc::UnitSettings;
+
+    fn valid_units() -> UnitSettings {
+        UnitSettings {
+            distance_unit: DistanceUnit::Meters as i32,
+            angle_unit: AngleUnit::Degrees as i32,
+        }
+    }
+
+    #[test]
+    fn unit_context_accepts_valid_units() {
+        let context = UnitContext::try_from(Some(valid_units())).unwrap();
+
+        assert_eq!(context.distance, DistanceUnit::Meters);
+        assert_eq!(context.angle, AngleUnit::Degrees);
+    }
+
+    #[test]
+    fn unit_context_rejects_missing_units() {
+        let result = UnitContext::try_from(None);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn unit_context_rejects_unspecified_distance() {
+        let units = UnitSettings {
+            distance_unit: DistanceUnit::Unspecified as i32,
+            angle_unit: AngleUnit::Degrees as i32,
+        };
+
+        assert!(UnitContext::try_from(Some(units)).is_err());
+    }
+
+    #[test]
+    fn unit_context_rejects_unspecified_angle() {
+        let units = UnitSettings {
+            distance_unit: DistanceUnit::Meters as i32,
+            angle_unit: AngleUnit::Unspecified as i32,
+        };
+
+        assert!(UnitContext::try_from(Some(units)).is_err());
+    }
+}
