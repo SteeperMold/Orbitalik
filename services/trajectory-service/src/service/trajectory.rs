@@ -94,7 +94,7 @@ mod tests {
     use mockall::predicate::function;
     use uom::si::angle::{Angle, degree};
     use uom::si::length::kilometer;
-    
+
     use crate::astro::test_utils::{test_datetime, test_tle};
     use crate::domain::tle_provider::MockTleProvider;
 

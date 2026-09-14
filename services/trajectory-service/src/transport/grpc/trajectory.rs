@@ -2,6 +2,7 @@ use tonic::{Request, Response, Status};
 
 use crate::astro::propagation::look_angles::LookAnglesComputation;
 use crate::astro::propagation::position::PositionComputation;
+use crate::domain::models::UnitContext;
 use crate::domain::trajectory::TrajectoryServiceApi;
 use crate::transport::grpc::server::TrajectoryGrpcServer;
 use crate::transport::grpc::server::trajectory_grpc::{
@@ -35,6 +36,8 @@ where
             .ok_or_else(|| Status::invalid_argument("Missing sampling"))?
             .try_into()?;
 
+        let unit_context = UnitContext::try_from(req.units)?;
+
         let mask = req.output_mask.as_ref();
         let compute = mask.map_or_else(PositionComputation::default, PositionComputation::from);
 
@@ -43,7 +46,7 @@ where
             .get_trajectory(identifier, range, sampling, &compute)
             .await?;
 
-        let response = TrajectoryResponse::from_trajectory(&trajectory, metadata, req.units)?;
+        let response = TrajectoryResponse::build(&trajectory, metadata, &unit_context)?;
 
         Ok(Response::new(response))
     }
@@ -74,6 +77,8 @@ where
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;
 
+        let unit_context = UnitContext::try_from(req.units)?;
+
         let mask = req.output_mask.as_ref();
         let compute = mask.map_or_else(LookAnglesComputation::default, LookAnglesComputation::from);
 
@@ -82,10 +87,10 @@ where
             .get_observer_trajectory(identifier, range, sampling, &observer, &compute)
             .await?;
 
-        let response = ObserverTrajectoryResponse::from_observer_trajectory(
+        let response = ObserverTrajectoryResponse::build(
             &observer_trajectory,
             metadata,
-            req.units,
+            &unit_context,
         )?;
 
         Ok(Response::new(response))

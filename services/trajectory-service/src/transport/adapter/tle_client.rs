@@ -4,7 +4,7 @@ use tonic::transport::Channel;
 use crate::astro::models::{SatelliteIdentifier, Tle};
 use crate::domain::tle_provider::TleProvider;
 use crate::transport::adapter::tle_client::tle_grpc::GetTleRequest;
-use crate::transport::grpc::converters::ToChrono;
+use crate::transport::grpc::conversions::timestamp::ToChrono;
 use tle_grpc::tle_service_client::TleServiceClient;
 
 pub mod tle_grpc {

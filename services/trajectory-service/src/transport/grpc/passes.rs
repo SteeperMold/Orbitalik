@@ -1,14 +1,15 @@
 use tonic::{Request, Response, Status};
-use uom::si::angle::{degree, radian};
+use uom::si::angle::degree;
 use uom::si::f64::Angle;
 
 use crate::astro::models::SatelliteIdentifier;
+use crate::domain::models::UnitContext;
 use crate::domain::passes::PassesServiceApi;
 use crate::service::passes::{GetPassesOptions, NextPassesOptions};
+use crate::transport::grpc::conversions::requests::IntoAngle;
 use crate::transport::grpc::server::TrajectoryGrpcServer;
 use crate::transport::grpc::server::trajectory_grpc::{
     GetPassesResponse, NextPassesRequest, NextPassesResponse, PassPredictionRequest,
-    next_passes_request, pass_prediction_request,
 };
 
 impl<P, T, Pa> TrajectoryGrpcServer<P, T, Pa>
@@ -26,7 +27,7 @@ where
         let satellites: Vec<SatelliteIdentifier> = req
             .satellites
             .into_iter()
-            .map(std::convert::TryInto::try_into)
+            .map(TryInto::try_into)
             .collect::<Result<_, _>>()?;
 
         let range = req
@@ -39,24 +40,15 @@ where
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;
 
-        let min_elevation = match req.min_elevation {
-            Some(pass_prediction_request::MinElevation::MinElevationDeg(v)) => {
-                Angle::new::<degree>(v)
-            }
-            Some(pass_prediction_request::MinElevation::MinElevationRad(v)) => {
-                Angle::new::<radian>(v)
-            }
-            None => Angle::new::<degree>(0.0),
-        };
-        let min_peak_elevation = match req.min_peak_elevation {
-            Some(pass_prediction_request::MinPeakElevation::MinPeakElevationDeg(v)) => {
-                Angle::new::<degree>(v)
-            }
-            Some(pass_prediction_request::MinPeakElevation::MinPeakElevationRad(v)) => {
-                Angle::new::<radian>(v)
-            }
-            None => Angle::new::<degree>(0.0),
-        };
+        let unit_context = UnitContext::try_from(req.units)?;
+
+        let min_elevation = req
+            .min_elevation
+            .map_or_else(|| Angle::new::<degree>(0.0), IntoAngle::into_angle);
+
+        let min_peak_elevation = req
+            .min_elevation
+            .map_or_else(|| Angle::new::<degree>(0.0), IntoAngle::into_angle);
 
         let prediction_options = GetPassesOptions {
             range,
@@ -71,7 +63,7 @@ where
             .get_passes(satellites, &prediction_options)
             .await?;
 
-        let response = GetPassesResponse::from_passes(&passes, metadata, range, req.units)?;
+        let response = GetPassesResponse::build(&passes, metadata, range, &unit_context)?;
 
         Ok(Response::new(response))
     }
@@ -85,7 +77,7 @@ where
         let satellites: Vec<SatelliteIdentifier> = req
             .satellites
             .into_iter()
-            .map(std::convert::TryInto::try_into)
+            .map(TryInto::try_into)
             .collect::<Result<_, _>>()?;
 
         let observer = req
@@ -93,20 +85,15 @@ where
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;
 
-        let min_elevation = match req.min_elevation {
-            Some(next_passes_request::MinElevation::MinElevationDeg(v)) => Angle::new::<degree>(v),
-            Some(next_passes_request::MinElevation::MinElevationRad(v)) => Angle::new::<radian>(v),
-            None => Angle::new::<degree>(0.0),
-        };
-        let min_peak_elevation = match req.min_peak_elevation {
-            Some(next_passes_request::MinPeakElevation::MinPeakElevationDeg(v)) => {
-                Angle::new::<degree>(v)
-            }
-            Some(next_passes_request::MinPeakElevation::MinPeakElevationRad(v)) => {
-                Angle::new::<radian>(v)
-            }
-            None => Angle::new::<degree>(0.0),
-        };
+        let unit_context = UnitContext::try_from(req.units)?;
+
+        let min_elevation = req
+            .min_elevation
+            .map_or_else(|| Angle::new::<degree>(0.0), IntoAngle::into_angle);
+
+        let min_peak_elevation = req
+            .min_elevation
+            .map_or_else(|| Angle::new::<degree>(0.0), IntoAngle::into_angle);
 
         let prediction_options = NextPassesOptions {
             observer,
@@ -120,7 +107,7 @@ where
             .next_passes(satellites, &prediction_options)
             .await?;
 
-        let response = NextPassesResponse::from_passes(&passes, metadata, req.units)?;
+        let response = NextPassesResponse::build(&passes, metadata, &unit_context)?;
 
         Ok(Response::new(response))
     }

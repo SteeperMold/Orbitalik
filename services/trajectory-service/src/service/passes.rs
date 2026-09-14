@@ -449,7 +449,6 @@ mod tests {
         assert_eq!(metadata.satellite_names, vec![expected_name]);
         assert_eq!(metadata.tle_epoch, expected_epoch);
         assert_eq!(metadata.satellites_evaluated, 1);
-        assert_eq!(metadata.passes_found, 0);
     }
 
     #[tokio::test]

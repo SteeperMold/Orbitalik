@@ -2,8 +2,9 @@ use tonic::{Request, Response, Status};
 
 use crate::astro::propagation::look_angles::LookAnglesComputation;
 use crate::astro::propagation::position::PositionComputation;
+use crate::domain::models::UnitContext;
 use crate::domain::position::PositionServiceApi;
-use crate::transport::grpc::converters::ToChrono;
+use crate::transport::grpc::conversions::timestamp::ToChrono;
 use crate::transport::grpc::server::TrajectoryGrpcServer;
 use crate::transport::grpc::server::trajectory_grpc::{
     LookAnglesRequest, LookAnglesResponse, PositionRequest, PositionResponse,
@@ -32,6 +33,8 @@ where
             .to_chrono()
             .map_err(|_| Status::invalid_argument("Invalid datetime"))?;
 
+        let unit_context = UnitContext::try_from(req.units)?;
+
         let mask = req.output_mask.as_ref();
         let compute = mask.map_or_else(PositionComputation::default, PositionComputation::from);
 
@@ -40,7 +43,7 @@ where
             .get_position(identifier, datetime, &compute)
             .await?;
 
-        let response = PositionResponse::from_position(&position, metadata, req.units)?;
+        let response = PositionResponse::build(&position, metadata, &unit_context)?;
         Ok(Response::new(response))
     }
 
@@ -67,6 +70,8 @@ where
             .ok_or_else(|| Status::invalid_argument("Missing observer"))?
             .try_into()?;
 
+        let unit_context = UnitContext::try_from(req.units)?;
+
         let mask = req.output_mask.as_ref();
         let compute = mask.map_or_else(LookAnglesComputation::default, LookAnglesComputation::from);
 
@@ -75,7 +80,7 @@ where
             .get_look_angles(identifier, datetime, &observer, &compute)
             .await?;
 
-        let response = LookAnglesResponse::from_look_angles(&look_angles, metadata, req.units)?;
+        let response = LookAnglesResponse::build(&look_angles, metadata, &unit_context)?;
         Ok(Response::new(response))
     }
 }
@@ -370,7 +375,7 @@ mod tests {
 
         position
             .expect_get_position()
-            .times(1)
+            .times(0)
             .returning(|_, _, _| Ok((valid_position(), valid_metadata())));
 
         let server = test_server(position);
@@ -389,6 +394,7 @@ mod tests {
 
         assert_eq!(error.code(), Code::InvalidArgument);
     }
+
     #[tokio::test]
     async fn get_look_angles_rejects_missing_identifier() {
         let mut position = MockPositionServiceApi::new();

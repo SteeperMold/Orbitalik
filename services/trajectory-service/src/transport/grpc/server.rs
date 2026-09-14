@@ -1,5 +1,7 @@
 use tonic::{Request, Response, Status, transport::Server};
 
+use crate::domain::passes::PassesServiceApi;
+use crate::domain::trajectory::TrajectoryServiceApi;
 use crate::{
     domain::{errors::GrpcServerError, position::PositionServiceApi},
     service::passes::PassesService,
@@ -19,8 +21,6 @@ use trajectory_grpc::{
     trajectory_service_server::TrajectoryService as TonicTrajectoryService,
     trajectory_service_server::TrajectoryServiceServer,
 };
-use crate::domain::passes::PassesServiceApi;
-use crate::domain::trajectory::TrajectoryServiceApi;
 
 pub mod trajectory_grpc {
     tonic::include_proto!("trajectory");
@@ -53,11 +53,7 @@ pub struct TrajectoryGrpcServer<P, T, Pa> {
 }
 
 impl<P, T, Pa> TrajectoryGrpcServer<P, T, Pa> {
-    pub const fn new(
-        position_service: P,
-        trajectory_service: T,
-        passes_service: Pa,
-    ) -> Self {
+    pub const fn new(position_service: P, trajectory_service: T, passes_service: Pa) -> Self {
         Self {
             position: position_service,
             trajectory: trajectory_service,
@@ -115,4 +111,3 @@ where
         self.handle_get_next_passes(request).await
     }
 }
-
