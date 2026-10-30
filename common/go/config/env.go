@@ -2,7 +2,9 @@ package config
 
 import (
 	"os"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -37,4 +39,19 @@ func GetEnvAsDuration(name string, defaultVal time.Duration) time.Duration {
 		return defaultVal
 	}
 	return dur
+}
+
+func GetEnvAsBool(name string, defaultVal bool) bool {
+	valueStr := GetEnv(name, "")
+	if valueStr == "" {
+		return defaultVal
+	}
+
+	truthyValues := []string{
+		"true",
+		"yes",
+		"1",
+	}
+
+	return slices.Contains(truthyValues, strings.ToLower(valueStr))
 }
