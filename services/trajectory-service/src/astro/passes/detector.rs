@@ -131,7 +131,7 @@ impl Propagator {
     }
 
     fn decrement_remaining(remaining: &AtomicUsize) -> Result<usize, usize> {
-        remaining.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
+        remaining.try_update(Ordering::Relaxed, Ordering::Relaxed, |x| {
             if x > 0 { Some(x - 1) } else { None }
         })
     }

@@ -51,7 +51,7 @@ func StartGRPCServer(cfg *infra.Config, db db.Conn, logger applog.Logger) {
 
 	userClient, err := client.NewUserClient(cfg.UserServiceAddress)
 	if err != nil {
-		log.Fatalf("failed to create user client: %s", err.Error())
+		log.Fatalf("failed to create user clients: %s", err.Error())
 	}
 	defer func(userClient *client.Client) {
 		_ = userClient.CloseConnection()
