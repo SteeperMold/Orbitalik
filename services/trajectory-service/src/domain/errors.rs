@@ -79,3 +79,15 @@ impl From<TimestampConversionError> for tonic::Status {
         Self::internal("Internal server error")
     }
 }
+
+#[derive(Debug, Error)]
+pub enum UnitConversionError {
+    #[error("Failed to convert into unpsecified units")]
+    UnitsUnspecified,
+}
+
+impl From<UnitConversionError> for tonic::Status {
+    fn from(_: UnitConversionError) -> Self {
+        Self::invalid_argument("Measurement units unspecified")
+    }
+}

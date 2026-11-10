@@ -12,7 +12,6 @@ dependencies = [
     "grpcio>=1.81.1",
     "grpcio-tools>=1.81.1",
     "httpx>=0.28.1",
-    "logging>=0.4.9.6",
     "prometheus-client>=0.25.0",
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",

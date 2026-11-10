@@ -9,14 +9,12 @@ import (
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/domain"
 )
 
-// HealthCheckHandler handles HTTP requests for system health checks.
 type HealthCheckHandler struct {
 	service        domain.HealthCheckService
 	logger         applog.Logger
 	contextTimeout time.Duration
 }
 
-// NewHealthHandler creates and returns a new HealthCheckHandler.
 func NewHealthHandler(s domain.HealthCheckService, logger applog.Logger, timeout time.Duration) *HealthCheckHandler {
 	return &HealthCheckHandler{
 		service:        s,
@@ -25,7 +23,6 @@ func NewHealthHandler(s domain.HealthCheckService, logger applog.Logger, timeout
 	}
 }
 
-// HealthCheck processes an HTTP GET request to verify the application's health.
 func (h *HealthCheckHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.contextTimeout)
 	defer cancel()

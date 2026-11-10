@@ -1,11 +1,11 @@
 package infrastructure
 
 import (
-	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"log"
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/common/go/config"
+	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/joho/godotenv"
 )
 
@@ -24,6 +24,7 @@ type RedisConfig struct {
 	ConsumerName            string
 	StreamsCount            int
 	StreamsBlock            time.Duration
+	RetryDelay              time.Duration
 }
 
 func NewConfig() *Config {
@@ -53,6 +54,7 @@ func NewConfig() *Config {
 			ConsumerName:            config.GetEnv("REDIS_CONSUMER_NAME", "worker-1"),
 			StreamsCount:            config.GetEnvAsInt("REDIS_STREAMS_COUNT", 10),
 			StreamsBlock:            config.GetEnvAsDuration("REDIS_STREAMS_BLOCK", 5*time.Second),
+			RetryDelay:              config.GetEnvAsDuration("REDIS_RETRY_DELAY", 1*time.Second),
 		},
 	}
 }

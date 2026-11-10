@@ -27,7 +27,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to create logger: %v", err)
 	}
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		log.Fatal(err)
+	}()
 
 	go bootstrap.StartSchedulers(ctx, cfg, db, rdb, logger)
 	go bootstrap.StartHTTPServer(cfg, db, logger)

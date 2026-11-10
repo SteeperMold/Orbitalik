@@ -22,12 +22,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Информация о пользователе
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
-	PasswordHash  string                 `protobuf:"bytes,4,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -85,13 +85,6 @@ func (x *User) GetUsername() string {
 	return ""
 }
 
-func (x *User) GetPasswordHash() string {
-	if x != nil {
-		return x.PasswordHash
-	}
-	return ""
-}
-
 func (x *User) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -106,11 +99,11 @@ func (x *User) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+// Запрос на создание пользователя
 type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	PasswordHash  string                 `protobuf:"bytes,3,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -159,13 +152,7 @@ func (x *CreateUserRequest) GetUsername() string {
 	return ""
 }
 
-func (x *CreateUserRequest) GetPasswordHash() string {
-	if x != nil {
-		return x.PasswordHash
-	}
-	return ""
-}
-
+// Ответ с созданным пользователем
 type CreateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
@@ -210,6 +197,7 @@ func (x *CreateUserResponse) GetUser() *User {
 	return nil
 }
 
+// Запрос пользователя по идентификатору
 type GetUserByIdRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -254,6 +242,7 @@ func (x *GetUserByIdRequest) GetId() uint32 {
 	return 0
 }
 
+// Запрос пользователя по электронной почте
 type GetUserByEmailRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
@@ -298,6 +287,7 @@ func (x *GetUserByEmailRequest) GetEmail() string {
 	return ""
 }
 
+// Ответ с данными пользователя
 type GetUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
@@ -342,12 +332,12 @@ func (x *GetUserResponse) GetUser() *User {
 	return nil
 }
 
+// Запрос на обновление пользователя
 type UpdateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Email         *string                `protobuf:"bytes,2,opt,name=email,proto3,oneof" json:"email,omitempty"`
 	Username      *string                `protobuf:"bytes,3,opt,name=username,proto3,oneof" json:"username,omitempty"`
-	PasswordHash  *string                `protobuf:"bytes,4,opt,name=password_hash,json=passwordHash,proto3,oneof" json:"password_hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -403,13 +393,7 @@ func (x *UpdateUserRequest) GetUsername() string {
 	return ""
 }
 
-func (x *UpdateUserRequest) GetPasswordHash() string {
-	if x != nil && x.PasswordHash != nil {
-		return *x.PasswordHash
-	}
-	return ""
-}
-
+// Ответ с обновлёнными данными пользователя
 type UpdateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
@@ -454,6 +438,7 @@ func (x *UpdateUserResponse) GetUser() *User {
 	return nil
 }
 
+// Запрос на удаление пользователя
 type DeleteUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -498,6 +483,7 @@ func (x *DeleteUserRequest) GetId() uint32 {
 	return 0
 }
 
+// Ответ на удаление пользователя
 type DeleteUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -539,20 +525,18 @@ var File_user_proto protoreflect.FileDescriptor
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x12\x04user\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe3\x01\n" +
+	"user.proto\x12\x04user\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x01\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
-	"\busername\x18\x03 \x01(\tR\busername\x12#\n" +
-	"\rpassword_hash\x18\x04 \x01(\tR\fpasswordHash\x129\n" +
+	"\busername\x18\x03 \x01(\tR\busername\x129\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"j\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"E\n" +
 	"\x11CreateUserRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername\x12#\n" +
-	"\rpassword_hash\x18\x03 \x01(\tR\fpasswordHash\"4\n" +
+	"\busername\x18\x02 \x01(\tR\busername\"4\n" +
 	"\x12CreateUserResponse\x12\x1e\n" +
 	"\x04user\x18\x01 \x01(\v2\n" +
 	".user.UserR\x04user\"$\n" +
@@ -562,15 +546,13 @@ const file_user_proto_rawDesc = "" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"1\n" +
 	"\x0fGetUserResponse\x12\x1e\n" +
 	"\x04user\x18\x01 \x01(\v2\n" +
-	".user.UserR\x04user\"\xb2\x01\n" +
+	".user.UserR\x04user\"v\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x19\n" +
 	"\x05email\x18\x02 \x01(\tH\x00R\x05email\x88\x01\x01\x12\x1f\n" +
-	"\busername\x18\x03 \x01(\tH\x01R\busername\x88\x01\x01\x12(\n" +
-	"\rpassword_hash\x18\x04 \x01(\tH\x02R\fpasswordHash\x88\x01\x01B\b\n" +
+	"\busername\x18\x03 \x01(\tH\x01R\busername\x88\x01\x01B\b\n" +
 	"\x06_emailB\v\n" +
-	"\t_usernameB\x10\n" +
-	"\x0e_password_hash\"4\n" +
+	"\t_username\"4\n" +
 	"\x12UpdateUserResponse\x12\x1e\n" +
 	"\x04user\x18\x01 \x01(\v2\n" +
 	".user.UserR\x04user\"#\n" +
@@ -620,12 +602,12 @@ var file_user_proto_depIdxs = []int32{
 	0,  // 3: user.GetUserResponse.user:type_name -> user.User
 	0,  // 4: user.UpdateUserResponse.user:type_name -> user.User
 	1,  // 5: user.UserService.CreateUser:input_type -> user.CreateUserRequest
-	3,  // 6: user.UserService.GetUserById:input_type -> user.GetUserByIdRequest
+	3,  // 6: user.UserService.GetUserByID:input_type -> user.GetUserByIdRequest
 	4,  // 7: user.UserService.GetUserByEmail:input_type -> user.GetUserByEmailRequest
 	6,  // 8: user.UserService.UpdateUser:input_type -> user.UpdateUserRequest
 	8,  // 9: user.UserService.DeleteUser:input_type -> user.DeleteUserRequest
 	2,  // 10: user.UserService.CreateUser:output_type -> user.CreateUserResponse
-	5,  // 11: user.UserService.GetUserById:output_type -> user.GetUserResponse
+	5,  // 11: user.UserService.GetUserByID:output_type -> user.GetUserResponse
 	5,  // 12: user.UserService.GetUserByEmail:output_type -> user.GetUserResponse
 	7,  // 13: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
 	9,  // 14: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse

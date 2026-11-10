@@ -46,7 +46,9 @@ func (s *Source) StreamBatch(ctx context.Context, fn func([]*ingestion.Satellite
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err = f.Close()
+	}(f)
 
 	now := time.Now()
 	batch := make([]*ingestion.SatelliteSourceRecord, 0, s.batchSize)
@@ -60,6 +62,7 @@ func (s *Source) StreamBatch(ctx context.Context, fn func([]*ingestion.Satellite
 
 		raw, err := s.mapper.Map(row)
 		if err != nil {
+			//nolint:nilerr // invalid rows are intentionally skipped
 			return nil
 		}
 

@@ -5,6 +5,8 @@ package trajectory;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 
+option go_package = "gen/trajectorypb;trajectorypb";
+
 // Сервис расчёта положения, траекторий и пролётов спутников
 service TrajectoryService {
 
@@ -144,8 +146,8 @@ message PositionResponse {
 
     google.protobuf.Timestamp time = 2;
 
-    // Координаты в системе ECI
-    optional Vector3 eci = 3;
+    // Координаты в системе TEME
+    optional Vector3 teme = 3;
 
     // Координаты в системе ECEF
     optional Vector3 ecef = 4;
@@ -184,8 +186,8 @@ message LookAnglesResponse {
 message StateVector {
     google.protobuf.Timestamp datetime = 1;
 
-    optional Vector3 position_eci = 2;
-    optional Vector3 velocity_eci = 3;
+    optional Vector3 position_teme = 2;
+    optional Vector3 velocity_teme = 3;
 
     optional Vector3 position_ecef = 4;
     optional Vector3 velocity_ecef = 5;

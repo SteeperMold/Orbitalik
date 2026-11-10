@@ -11,7 +11,7 @@ import (
 )
 
 type Worker struct {
-	rdb          *redis.Client
+	rdb          RedisClient
 	aggregator   Aggregator
 	logger       applog.Logger
 	consumerName string
@@ -20,10 +20,11 @@ type Worker struct {
 	dirtySet     string
 	streamsCount int64
 	streamsBlock time.Duration
+	retryDelay   time.Duration
 }
 
 func New(
-	rdb *redis.Client,
+	rdb RedisClient,
 	aggregator Aggregator,
 	logger applog.Logger,
 	consumerName,
@@ -32,6 +33,7 @@ func New(
 	dirtySet string,
 	streamsCount int64,
 	streamsBlock time.Duration,
+	retryDelay time.Duration,
 ) *Worker {
 
 	return &Worker{
@@ -44,6 +46,7 @@ func New(
 		dirtySet:     dirtySet,
 		streamsCount: streamsCount,
 		streamsBlock: streamsBlock,
+		retryDelay:   retryDelay,
 	}
 }
 
@@ -87,7 +90,10 @@ func (w *Worker) Run(ctx context.Context) error {
 				applog.NewErrorField(err),
 			)
 
-			time.Sleep(time.Second)
+			if err := sleep(ctx, w.retryDelay); err != nil {
+				return err
+			}
+
 			continue
 		}
 
@@ -102,5 +108,17 @@ func (w *Worker) Run(ctx context.Context) error {
 				}
 			}
 		}
+	}
+}
+
+func sleep(ctx context.Context, d time.Duration) error {
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
 	}
 }

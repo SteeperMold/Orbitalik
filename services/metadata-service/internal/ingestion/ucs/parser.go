@@ -23,6 +23,9 @@ func (p *Parser) Stream(r io.Reader, fn func(ingestion.Row) error) error {
 	reader.FieldsPerRecord = -1
 
 	header, err := reader.Read()
+	if err == io.EOF {
+		return nil
+	}
 	if err != nil {
 		return err
 	}

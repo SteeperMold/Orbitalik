@@ -32,6 +32,7 @@ func (m *DirtyMarker) MarkDirty(ctx context.Context, noradIDs []int) error {
 
 		norad := strconv.Itoa(id)
 
+		// redis set for deduplication
 		added, err := m.rdb.SAdd(ctx, m.setKey, norad).Result()
 		if err != nil {
 			return err

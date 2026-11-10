@@ -6,4 +6,6 @@ use (
 	./services/tle-ingestion-service
 	./services/metadata-aggregation-worker
 	./services/user-service
+	./services/auth-service
+	./services/api-gateway-service
 )

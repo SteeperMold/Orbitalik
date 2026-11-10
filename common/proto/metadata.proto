@@ -103,7 +103,7 @@ message SatelliteMetadata {
     repeated Frequency frequencies = 15;
 
     // Источники, из которых были получены данные
-    repeated SourceAttribution sources = 16;
+    repeated FieldSource sources = 16;
 
     // Время последнего обновления информации
     google.protobuf.Timestamp updated_at = 17;
@@ -174,17 +174,12 @@ enum FrequencyDirection {
     FREQUENCY_DIRECTION_DOWNLINK = 2;
 }
 
-
 // Информация об источнике данных
-message SourceAttribution {
-    Source source = 1;
-
-    // Идентификатор записи в исходном источнике
-    string source_record_id = 2;
-
+message FieldSource {
+    string field = 1;
+    repeated Source sources = 2;
     google.protobuf.Timestamp fetched_at = 3;
 }
-
 
 // Источники спутниковых данных
 enum Source {

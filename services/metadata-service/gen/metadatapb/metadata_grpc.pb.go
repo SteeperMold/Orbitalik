@@ -26,8 +26,13 @@ const (
 // SatelliteMetadataServiceClient is the client API for SatelliteMetadataService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Сервис управления метаданными искусственных спутников
+// Предоставляет информацию о космических объектах и их характеристиках
 type SatelliteMetadataServiceClient interface {
+	// Получение информации о спутнике по идентификатору
 	GetSatelliteMetadata(ctx context.Context, in *GetMetadataRequest, opts ...grpc.CallOption) (*GetMetadataResponse, error)
+	// Получение списка спутников с фильтрацией и пагинацией
 	ListSatelliteMetadata(ctx context.Context, in *ListSatelliteMetadataRequest, opts ...grpc.CallOption) (*ListSatelliteMetadataResponse, error)
 }
 
@@ -62,8 +67,13 @@ func (c *satelliteMetadataServiceClient) ListSatelliteMetadata(ctx context.Conte
 // SatelliteMetadataServiceServer is the server API for SatelliteMetadataService service.
 // All implementations must embed UnimplementedSatelliteMetadataServiceServer
 // for forward compatibility.
+//
+// Сервис управления метаданными искусственных спутников
+// Предоставляет информацию о космических объектах и их характеристиках
 type SatelliteMetadataServiceServer interface {
+	// Получение информации о спутнике по идентификатору
 	GetSatelliteMetadata(context.Context, *GetMetadataRequest) (*GetMetadataResponse, error)
+	// Получение списка спутников с фильтрацией и пагинацией
 	ListSatelliteMetadata(context.Context, *ListSatelliteMetadataRequest) (*ListSatelliteMetadataResponse, error)
 	mustEmbedUnimplementedSatelliteMetadataServiceServer()
 }

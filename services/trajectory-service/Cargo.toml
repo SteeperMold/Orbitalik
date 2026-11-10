@@ -5,6 +5,9 @@ edition = "2024"
 rust-version = "1.89.0"
 build = "build.rs"
 
+[features]
+grpc-test-server = []
+
 [dependencies]
 actix-web = "4.11.0"
 actix-web-prom = "0.10.0"
@@ -25,6 +28,11 @@ http = "1.3.1"
 rayon = "1.12.0"
 futures = "0.3.32"
 humantime = "2.3.0"
+async-trait = "0.1.89"
+
+[dev-dependencies]
+mockall = "0.15.0"
+tokio-stream = "0.1.17"
 
 [build-dependencies]
 tonic-prost-build = "0.14.1"

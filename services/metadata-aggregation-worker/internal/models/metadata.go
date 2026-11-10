@@ -42,36 +42,36 @@ type SatelliteMetadata struct {
 
 	Frequencies []Frequency
 
-	Sources []SourceAttribution
+	Sources []FieldSource
 
 	UpdatedAt time.Time
 }
 
 type SatelliteMetadataPartial struct {
-	NoradID  int
-	CosparID *string
+	NoradID  int     `json:"norad_id"`
+	CosparID *string `json:"cospar_id"`
 
-	Name    *string
-	Aliases []string
+	Name    *string  `json:"name"`
+	Aliases []string `json:"aliases"`
 
-	ObjectType  *ObjectType
-	MissionType *MissionType
-	OrbitRegime *OrbitRegime
+	ObjectType  *ObjectType  `json:"object_type"`
+	MissionType *MissionType `json:"mission_type"`
+	OrbitRegime *OrbitRegime `json:"orbit_regime"`
 
-	Operator      *string
-	Owner         *string
-	Constellation *string
+	Operator      *string `json:"operator"`
+	Owner         *string `json:"owner"`
+	Constellation *string `json:"constellation"`
 
-	LaunchDate    *time.Time
-	LaunchSite    *string
-	LaunchVehicle *string
+	LaunchDate    *time.Time `json:"launch_date"`
+	LaunchSite    *string    `json:"launch_site"`
+	LaunchVehicle *string    `json:"launch_vehicle"`
 
-	OperationalStatus *OperationalStatus
+	OperationalStatus *OperationalStatus `json:"operational_status"`
 
-	Frequencies []Frequency
+	Frequencies []Frequency `json:"frequencies"`
 
-	Source    SourceAttribution
-	FetchedAt time.Time
+	Sources   []FieldSource `json:"sources"`
+	FetchedAt time.Time     `json:"fetched_at"`
 }
 
 type Frequency struct {
@@ -82,10 +82,10 @@ type Frequency struct {
 	Mode         string // Beacon, Transponder, etc
 }
 
-type SourceAttribution struct {
-	Source         Source
-	SourceRecordID string
-	FetchedAt      time.Time
+type FieldSource struct {
+	Field     string
+	Sources   []Source
+	FetchedAt time.Time
 }
 
 type (

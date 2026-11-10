@@ -34,12 +34,6 @@ func (m *Mapper) Map(r ingestion.Row) (json.RawMessage, error) {
 
 		OperationalStatus: getPtr(models.OperationalStatusUnknown),
 		FetchedAt:         now,
-
-		Source: models.SourceAttribution{
-			Source:         models.SourceSatNOGS,
-			SourceRecordID: r["norad_id"],
-			FetchedAt:      now,
-		},
 	}
 
 	freqs := buildFrequencies(r)
@@ -49,7 +43,7 @@ func (m *Mapper) Map(r ingestion.Row) (json.RawMessage, error) {
 }
 
 func buildFrequencies(r ingestion.Row) []models.Frequency {
-	var out []models.Frequency
+	out := make([]models.Frequency, 0)
 
 	down := parseHz(r["downlink_low"])
 	up := parseHz(r["uplink_low"])

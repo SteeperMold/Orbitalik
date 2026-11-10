@@ -12,6 +12,7 @@ func toProtoSatelliteMetadata(m *models.SatelliteMetadata) *metadatapb.Satellite
 	}
 
 	pb := &metadatapb.SatelliteMetadata{
+		// #nosec G115 -- user.ID is a postgres INTEGER and fits in uint32
 		NoradId:  uint32(m.NoradID),
 		CosparId: m.CosparID,
 
@@ -135,30 +136,42 @@ func mapFrequencies(freqs []models.Frequency) []*metadatapb.Frequency {
 	return out
 }
 
-func mapSources(src []models.SourceAttribution) []*metadatapb.SourceAttribution {
-	out := make([]*metadatapb.SourceAttribution, 0, len(src))
+func mapSources(src []models.FieldSource) []*metadatapb.FieldSource {
+	out := make([]*metadatapb.FieldSource, 0, len(src))
 
 	for _, s := range src {
-		pb := &metadatapb.SourceAttribution{
-			SourceRecordId: s.SourceRecordID,
-			FetchedAt:      timestamppb.New(s.FetchedAt),
+		pb := &metadatapb.FieldSource{
+			Field:     s.Field,
+			FetchedAt: timestamppb.New(s.FetchedAt),
 		}
 
-		switch s.Source {
-		case models.SourceCelestrak:
-			pb.Source = metadatapb.Source_SOURCE_CELESTRAK
-		case models.SourceAMSAT:
-			pb.Source = metadatapb.Source_SOURCE_AMSAT
-		case models.SourceUCS:
-			pb.Source = metadatapb.Source_SOURCE_UCS
-		case models.SourceManual:
-			pb.Source = metadatapb.Source_SOURCE_MANUAL
-		default:
-			pb.Source = metadatapb.Source_SOURCE_UNSPECIFIED
+		pb.Sources = make([]metadatapb.Source, 0, len(s.Sources))
+
+		for _, source := range s.Sources {
+			pb.Sources = append(pb.Sources, mapSource(source))
 		}
 
 		out = append(out, pb)
 	}
 
 	return out
+}
+
+func mapSource(source models.Source) metadatapb.Source {
+	switch source {
+	case models.SourceCelestrak:
+		return metadatapb.Source_SOURCE_CELESTRAK
+
+	case models.SourceAMSAT:
+		return metadatapb.Source_SOURCE_AMSAT
+
+	case models.SourceUCS:
+		return metadatapb.Source_SOURCE_UCS
+
+	case models.SourceManual:
+		return metadatapb.Source_SOURCE_MANUAL
+
+	default:
+		return metadatapb.Source_SOURCE_UNSPECIFIED
+	}
 }

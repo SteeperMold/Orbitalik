@@ -1,0 +1,46 @@
+services:
+  auth-db-migrate:
+    image: migrate/migrate
+    networks:
+      - orbitalik-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./../../db/migrations/auth/:/migrations
+    env_file:
+      - .env
+    command: [
+      "-path",
+      "/migrations",
+      "-database",
+      "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable",
+      "up"
+    ]
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - orbitalik-net
+    volumes:
+      - ./keys:/keys:ro
+    ports:
+      - "50056:${GRPC_PORT}"
+    env_file:
+      - .env
+    labels:
+      prometheus.scrape: "true"
+      prometheus.port: "${HTTP_PORT}"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${HTTP_PORT}/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-db-migrate:
+        condition: service_completed_successfully

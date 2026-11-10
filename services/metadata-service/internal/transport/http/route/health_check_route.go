@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// NewHealthCheckRoute registers the /health endpoint on the provided router.
 func NewHealthCheckRoute(mux *mux.Router, db db.Conn, logger applog.Logger, timeout time.Duration) {
 	hs := service.NewHealthCheckService(db)
 	hh := handler.NewHealthHandler(hs, logger, timeout)

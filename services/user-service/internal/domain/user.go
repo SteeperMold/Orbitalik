@@ -7,16 +7,14 @@ import (
 )
 
 type CreateUserParams struct {
-	Email        string
-	Username     string
-	PasswordHash string
+	Email    string
+	Username string
 }
 
 type UpdateUserParams struct {
-	ID           int
-	Email        string
-	Username     string
-	PasswordHash string
+	ID       int
+	Email    string
+	Username string
 }
 
 type UserService interface {

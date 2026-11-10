@@ -24,7 +24,7 @@ func StartGRPCServer(cfg *infrastructure.Config, db db.Conn, logger applog.Logge
 		log.Fatal(err)
 	}
 
-	userRepo := repository.NewUserRepository(db, logger)
+	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo, logger)
 
 	grpcServer := transportGrpc.NewServer(logger)

@@ -3,6 +3,7 @@ package route
 import (
 	stdlog "log"
 	"net/http"
+	"time"
 
 	"github.com/SteeperMold/Orbitalik/common/go/db"
 	"github.com/SteeperMold/Orbitalik/common/go/http/middleware"
@@ -12,7 +13,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// Serve configures and starts the HTTP server with routing and middleware.
 func Serve(cfg *infrastructure.Config, db db.Conn, logger applog.Logger) {
 	r := mux.NewRouter()
 
@@ -21,5 +21,14 @@ func Serve(cfg *infrastructure.Config, db db.Conn, logger applog.Logger) {
 	r.Handle("/metrics", promhttp.Handler())
 	NewHealthCheckRoute(r, db, logger, cfg.ContextTimeout)
 
-	stdlog.Fatal(http.ListenAndServe(":"+cfg.HTTPPort, r))
+	server := &http.Server{
+		Addr:              ":" + cfg.HTTPPort,
+		Handler:           r,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
+	stdlog.Fatal(server.ListenAndServe())
 }

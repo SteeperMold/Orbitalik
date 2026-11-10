@@ -3,35 +3,32 @@ package repository
 import (
 	"context"
 	"errors"
-	applog "github.com/SteeperMold/Orbitalik/common/go/log"
-	"github.com/jackc/pgx/v5"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/SteeperMold/Orbitalik/common/go/db"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/models"
+	"github.com/jackc/pgx/v5"
 )
 
 type UserRepository struct {
-	db     db.Conn
-	sb     sq.StatementBuilderType
-	logger applog.Logger
+	db db.Conn
+	sb sq.StatementBuilderType
 }
 
-func NewUserRepository(db db.Conn, logger applog.Logger) *UserRepository {
+func NewUserRepository(db db.Conn) *UserRepository {
 	return &UserRepository{
-		db:     db,
-		sb:     sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
-		logger: logger,
+		db: db,
+		sb: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 	}
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, params *domain.CreateUserParams) (*models.User, error) {
 	query, args, err := r.sb.
 		Insert("users").
-		Columns("email", "username", "password_hash").
-		Values(params.Email, params.Username, params.PasswordHash).
-		Suffix("RETURNING id, email, username, password_hash, created_at, updated_at").
+		Columns("email", "username").
+		Values(params.Email, params.Username).
+		Suffix("RETURNING id, email, username, created_at, updated_at").
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -45,7 +42,6 @@ func (r *UserRepository) CreateUser(ctx context.Context, params *domain.CreateUs
 		&u.ID,
 		&u.Email,
 		&u.Username,
-		&u.PasswordHash,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)
@@ -59,7 +55,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, params *domain.CreateUs
 
 func (r *UserRepository) GetUserByID(ctx context.Context, id int) (*models.User, error) {
 	query, args, err := r.sb.
-		Select("id", "email", "username", "password_hash", "created_at", "updated_at").
+		Select("id", "email", "username", "created_at", "updated_at").
 		From("users").
 		Where(sq.Eq{"id": id}).
 		ToSql()
@@ -75,7 +71,6 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int) (*models.User,
 		&u.ID,
 		&u.Email,
 		&u.Username,
-		&u.PasswordHash,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)
@@ -92,7 +87,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int) (*models.User,
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	query, args, err := r.sb.
-		Select("id", "email", "username", "password_hash", "created_at", "updated_at").
+		Select("id", "email", "username", "created_at", "updated_at").
 		From("users").
 		Where(sq.Eq{"email": email}).
 		ToSql()
@@ -105,7 +100,6 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 		&u.ID,
 		&u.Email,
 		&u.Username,
-		&u.PasswordHash,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)
@@ -131,13 +125,9 @@ func (r *UserRepository) UpdateUser(ctx context.Context, params *domain.UpdateUs
 		builder = builder.Set("username", params.Username)
 	}
 
-	if params.PasswordHash != "" {
-		builder = builder.Set("password_hash", params.PasswordHash)
-	}
-
 	query, args, err := builder.
 		Where(sq.Eq{"id": params.ID}).
-		Suffix("RETURNING id, email, username, password_hash, created_at, updated_at").
+		Suffix("RETURNING id, email, username, created_at, updated_at").
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -151,7 +141,6 @@ func (r *UserRepository) UpdateUser(ctx context.Context, params *domain.UpdateUs
 		&u.ID,
 		&u.Email,
 		&u.Username,
-		&u.PasswordHash,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)

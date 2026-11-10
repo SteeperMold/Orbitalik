@@ -22,6 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Тип космического объекта
 type ObjectType int32
 
 const (
@@ -77,6 +78,7 @@ func (ObjectType) EnumDescriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{0}
 }
 
+// Назначение спутниковой миссии
 type MissionType int32
 
 const (
@@ -141,6 +143,7 @@ func (MissionType) EnumDescriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{1}
 }
 
+// Тип орбиты
 type OrbitRegime int32
 
 const (
@@ -196,6 +199,7 @@ func (OrbitRegime) EnumDescriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{2}
 }
 
+// Статус эксплуатации спутника
 type OperationalStatus int32
 
 const (
@@ -251,6 +255,7 @@ func (OperationalStatus) EnumDescriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{3}
 }
 
+// Направление радиоканала
 type FrequencyDirection int32
 
 const (
@@ -300,14 +305,19 @@ func (FrequencyDirection) EnumDescriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{4}
 }
 
+// Источники спутниковых данных
 type Source int32
 
 const (
 	Source_SOURCE_UNSPECIFIED Source = 0
-	Source_SOURCE_CELESTRAK   Source = 1
-	Source_SOURCE_AMSAT       Source = 2
-	Source_SOURCE_UCS         Source = 3
-	Source_SOURCE_MANUAL      Source = 4
+	// Каталог орбитальных данных CelesTrak
+	Source_SOURCE_CELESTRAK Source = 1
+	// Каталог AMSAT
+	Source_SOURCE_AMSAT Source = 2
+	// Каталог Union of Concerned Scientists
+	Source_SOURCE_UCS Source = 3
+	// Данные, добавленные вручную
+	Source_SOURCE_MANUAL Source = 4
 )
 
 // Enum value maps for Source.
@@ -355,6 +365,7 @@ func (Source) EnumDescriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{5}
 }
 
+// Запрос на получение информации о спутнике
 type GetMetadataRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Identifier    *SatelliteIdentifier   `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
@@ -399,6 +410,7 @@ func (x *GetMetadataRequest) GetIdentifier() *SatelliteIdentifier {
 	return nil
 }
 
+// Ответ с метаданными спутника
 type GetMetadataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Metadata      *SatelliteMetadata     `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
@@ -443,6 +455,7 @@ func (x *GetMetadataResponse) GetMetadata() *SatelliteMetadata {
 	return nil
 }
 
+// Запрос списка спутников
 type ListSatelliteMetadataRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	ObjectType        *ObjectType            `protobuf:"varint,1,opt,name=object_type,json=objectType,proto3,enum=metadata.ObjectType,oneof" json:"object_type,omitempty"`
@@ -535,11 +548,14 @@ func (x *ListSatelliteMetadataRequest) GetPageToken() string {
 	return ""
 }
 
+// Ответ со списком спутников
 type ListSatelliteMetadataResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Items         []*SatelliteMetadata   `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	Total         uint32                 `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Items []*SatelliteMetadata   `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	// Токен для получения следующей страницы результатов
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// Общее количество найденных объектов
+	Total         uint32 `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -595,6 +611,7 @@ func (x *ListSatelliteMetadataResponse) GetTotal() uint32 {
 	return 0
 }
 
+// Идентификатор спутника
 type SatelliteIdentifier struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Kind:
@@ -666,6 +683,7 @@ type isSatelliteIdentifier_Kind interface {
 }
 
 type SatelliteIdentifier_NoradId struct {
+	// Идентификатор объекта в каталоге NORAD
 	NoradId uint32 `protobuf:"varint,1,opt,name=norad_id,json=noradId,proto3,oneof"`
 }
 
@@ -677,16 +695,21 @@ func (*SatelliteIdentifier_NoradId) isSatelliteIdentifier_Kind() {}
 
 func (*SatelliteIdentifier_SatelliteName) isSatelliteIdentifier_Kind() {}
 
+// Основная информация об искусственном спутнике
 type SatelliteMetadata struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	NoradId           uint32                 `protobuf:"varint,1,opt,name=norad_id,json=noradId,proto3" json:"norad_id,omitempty"`
-	CosparId          *string                `protobuf:"bytes,2,opt,name=cospar_id,json=cosparId,proto3,oneof" json:"cospar_id,omitempty"`
-	Name              string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Aliases           []string               `protobuf:"bytes,4,rep,name=aliases,proto3" json:"aliases,omitempty"`
-	ObjectType        ObjectType             `protobuf:"varint,5,opt,name=object_type,json=objectType,proto3,enum=metadata.ObjectType" json:"object_type,omitempty"`
-	MissionType       MissionType            `protobuf:"varint,6,opt,name=mission_type,json=missionType,proto3,enum=metadata.MissionType" json:"mission_type,omitempty"`
-	OrbitRegime       OrbitRegime            `protobuf:"varint,7,opt,name=orbit_regime,json=orbitRegime,proto3,enum=metadata.OrbitRegime" json:"orbit_regime,omitempty"`
-	Operator          *string                `protobuf:"bytes,8,opt,name=operator,proto3,oneof" json:"operator,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Идентификатор объекта в каталоге NORAD
+	NoradId uint32 `protobuf:"varint,1,opt,name=norad_id,json=noradId,proto3" json:"norad_id,omitempty"`
+	// Международный идентификатор COSPAR
+	CosparId    *string     `protobuf:"bytes,2,opt,name=cospar_id,json=cosparId,proto3,oneof" json:"cospar_id,omitempty"`
+	Name        string      `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Aliases     []string    `protobuf:"bytes,4,rep,name=aliases,proto3" json:"aliases,omitempty"`
+	ObjectType  ObjectType  `protobuf:"varint,5,opt,name=object_type,json=objectType,proto3,enum=metadata.ObjectType" json:"object_type,omitempty"`
+	MissionType MissionType `protobuf:"varint,6,opt,name=mission_type,json=missionType,proto3,enum=metadata.MissionType" json:"mission_type,omitempty"`
+	OrbitRegime OrbitRegime `protobuf:"varint,7,opt,name=orbit_regime,json=orbitRegime,proto3,enum=metadata.OrbitRegime" json:"orbit_regime,omitempty"`
+	// Организация, управляющая спутником
+	Operator *string `protobuf:"bytes,8,opt,name=operator,proto3,oneof" json:"operator,omitempty"`
+	// Владелец спутника
 	Owner             *string                `protobuf:"bytes,9,opt,name=owner,proto3,oneof" json:"owner,omitempty"`
 	Constellation     *string                `protobuf:"bytes,10,opt,name=constellation,proto3,oneof" json:"constellation,omitempty"`
 	LaunchDate        *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=launch_date,json=launchDate,proto3,oneof" json:"launch_date,omitempty"`
@@ -694,10 +717,12 @@ type SatelliteMetadata struct {
 	LaunchVehicle     *string                `protobuf:"bytes,13,opt,name=launch_vehicle,json=launchVehicle,proto3,oneof" json:"launch_vehicle,omitempty"`
 	OperationalStatus OperationalStatus      `protobuf:"varint,14,opt,name=operational_status,json=operationalStatus,proto3,enum=metadata.OperationalStatus" json:"operational_status,omitempty"`
 	Frequencies       []*Frequency           `protobuf:"bytes,15,rep,name=frequencies,proto3" json:"frequencies,omitempty"`
-	Sources           []*SourceAttribution   `protobuf:"bytes,16,rep,name=sources,proto3" json:"sources,omitempty"`
-	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Источники, из которых были получены данные
+	Sources []*FieldSource `protobuf:"bytes,16,rep,name=sources,proto3" json:"sources,omitempty"`
+	// Время последнего обновления информации
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SatelliteMetadata) Reset() {
@@ -835,7 +860,7 @@ func (x *SatelliteMetadata) GetFrequencies() []*Frequency {
 	return nil
 }
 
-func (x *SatelliteMetadata) GetSources() []*SourceAttribution {
+func (x *SatelliteMetadata) GetSources() []*FieldSource {
 	if x != nil {
 		return x.Sources
 	}
@@ -849,6 +874,7 @@ func (x *SatelliteMetadata) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+// Радиочастотные параметры спутника
 type Frequency struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Direction     FrequencyDirection     `protobuf:"varint,1,opt,name=direction,proto3,enum=metadata.FrequencyDirection" json:"direction,omitempty"`
@@ -925,29 +951,30 @@ func (x *Frequency) GetMode() string {
 	return ""
 }
 
-type SourceAttribution struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Source         Source                 `protobuf:"varint,1,opt,name=source,proto3,enum=metadata.Source" json:"source,omitempty"`
-	SourceRecordId string                 `protobuf:"bytes,2,opt,name=source_record_id,json=sourceRecordId,proto3" json:"source_record_id,omitempty"`
-	FetchedAt      *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=fetched_at,json=fetchedAt,proto3" json:"fetched_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+// Информация об источнике данных
+type FieldSource struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+	Sources       []Source               `protobuf:"varint,2,rep,packed,name=sources,proto3,enum=metadata.Source" json:"sources,omitempty"`
+	FetchedAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=fetched_at,json=fetchedAt,proto3" json:"fetched_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SourceAttribution) Reset() {
-	*x = SourceAttribution{}
+func (x *FieldSource) Reset() {
+	*x = FieldSource{}
 	mi := &file_metadata_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SourceAttribution) String() string {
+func (x *FieldSource) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SourceAttribution) ProtoMessage() {}
+func (*FieldSource) ProtoMessage() {}
 
-func (x *SourceAttribution) ProtoReflect() protoreflect.Message {
+func (x *FieldSource) ProtoReflect() protoreflect.Message {
 	mi := &file_metadata_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -959,26 +986,26 @@ func (x *SourceAttribution) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SourceAttribution.ProtoReflect.Descriptor instead.
-func (*SourceAttribution) Descriptor() ([]byte, []int) {
+// Deprecated: Use FieldSource.ProtoReflect.Descriptor instead.
+func (*FieldSource) Descriptor() ([]byte, []int) {
 	return file_metadata_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *SourceAttribution) GetSource() Source {
+func (x *FieldSource) GetField() string {
 	if x != nil {
-		return x.Source
-	}
-	return Source_SOURCE_UNSPECIFIED
-}
-
-func (x *SourceAttribution) GetSourceRecordId() string {
-	if x != nil {
-		return x.SourceRecordId
+		return x.Field
 	}
 	return ""
 }
 
-func (x *SourceAttribution) GetFetchedAt() *timestamppb.Timestamp {
+func (x *FieldSource) GetSources() []Source {
+	if x != nil {
+		return x.Sources
+	}
+	return nil
+}
+
+func (x *FieldSource) GetFetchedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.FetchedAt
 	}
@@ -1018,7 +1045,7 @@ const file_metadata_proto_rawDesc = "" +
 	"\x13SatelliteIdentifier\x12\x1b\n" +
 	"\bnorad_id\x18\x01 \x01(\rH\x00R\anoradId\x12'\n" +
 	"\x0esatellite_name\x18\x02 \x01(\tH\x00R\rsatelliteNameB\x06\n" +
-	"\x04kind\"\x83\a\n" +
+	"\x04kind\"\xfd\x06\n" +
 	"\x11SatelliteMetadata\x12\x19\n" +
 	"\bnorad_id\x18\x01 \x01(\rR\anoradId\x12 \n" +
 	"\tcospar_id\x18\x02 \x01(\tH\x00R\bcosparId\x88\x01\x01\x12\x12\n" +
@@ -1038,8 +1065,8 @@ const file_metadata_proto_rawDesc = "" +
 	"launchSite\x88\x01\x01\x12*\n" +
 	"\x0elaunch_vehicle\x18\r \x01(\tH\x06R\rlaunchVehicle\x88\x01\x01\x12J\n" +
 	"\x12operational_status\x18\x0e \x01(\x0e2\x1b.metadata.OperationalStatusR\x11operationalStatus\x125\n" +
-	"\vfrequencies\x18\x0f \x03(\v2\x13.metadata.FrequencyR\vfrequencies\x125\n" +
-	"\asources\x18\x10 \x03(\v2\x1b.metadata.SourceAttributionR\asources\x129\n" +
+	"\vfrequencies\x18\x0f \x03(\v2\x13.metadata.FrequencyR\vfrequencies\x12/\n" +
+	"\asources\x18\x10 \x03(\v2\x15.metadata.FieldSourceR\asources\x129\n" +
 	"\n" +
 	"updated_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\f\n" +
 	"\n" +
@@ -1057,10 +1084,10 @@ const file_metadata_proto_rawDesc = "" +
 	"\n" +
 	"modulation\x18\x04 \x01(\tR\n" +
 	"modulation\x12\x12\n" +
-	"\x04mode\x18\x05 \x01(\tR\x04mode\"\xa2\x01\n" +
-	"\x11SourceAttribution\x12(\n" +
-	"\x06source\x18\x01 \x01(\x0e2\x10.metadata.SourceR\x06source\x12(\n" +
-	"\x10source_record_id\x18\x02 \x01(\tR\x0esourceRecordId\x129\n" +
+	"\x04mode\x18\x05 \x01(\tR\x04mode\"\x8a\x01\n" +
+	"\vFieldSource\x12\x14\n" +
+	"\x05field\x18\x01 \x01(\tR\x05field\x12*\n" +
+	"\asources\x18\x02 \x03(\x0e2\x10.metadata.SourceR\asources\x129\n" +
 	"\n" +
 	"fetched_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tfetchedAt*\x90\x01\n" +
 	"\n" +
@@ -1134,7 +1161,7 @@ var file_metadata_proto_goTypes = []any{
 	(*SatelliteIdentifier)(nil),           // 10: metadata.SatelliteIdentifier
 	(*SatelliteMetadata)(nil),             // 11: metadata.SatelliteMetadata
 	(*Frequency)(nil),                     // 12: metadata.Frequency
-	(*SourceAttribution)(nil),             // 13: metadata.SourceAttribution
+	(*FieldSource)(nil),                   // 13: metadata.FieldSource
 	(*timestamppb.Timestamp)(nil),         // 14: google.protobuf.Timestamp
 }
 var file_metadata_proto_depIdxs = []int32{
@@ -1151,11 +1178,11 @@ var file_metadata_proto_depIdxs = []int32{
 	14, // 10: metadata.SatelliteMetadata.launch_date:type_name -> google.protobuf.Timestamp
 	3,  // 11: metadata.SatelliteMetadata.operational_status:type_name -> metadata.OperationalStatus
 	12, // 12: metadata.SatelliteMetadata.frequencies:type_name -> metadata.Frequency
-	13, // 13: metadata.SatelliteMetadata.sources:type_name -> metadata.SourceAttribution
+	13, // 13: metadata.SatelliteMetadata.sources:type_name -> metadata.FieldSource
 	14, // 14: metadata.SatelliteMetadata.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 15: metadata.Frequency.direction:type_name -> metadata.FrequencyDirection
-	5,  // 16: metadata.SourceAttribution.source:type_name -> metadata.Source
-	14, // 17: metadata.SourceAttribution.fetched_at:type_name -> google.protobuf.Timestamp
+	5,  // 16: metadata.FieldSource.sources:type_name -> metadata.Source
+	14, // 17: metadata.FieldSource.fetched_at:type_name -> google.protobuf.Timestamp
 	6,  // 18: metadata.SatelliteMetadataService.GetSatelliteMetadata:input_type -> metadata.GetMetadataRequest
 	8,  // 19: metadata.SatelliteMetadataService.ListSatelliteMetadata:input_type -> metadata.ListSatelliteMetadataRequest
 	7,  // 20: metadata.SatelliteMetadataService.GetSatelliteMetadata:output_type -> metadata.GetMetadataResponse

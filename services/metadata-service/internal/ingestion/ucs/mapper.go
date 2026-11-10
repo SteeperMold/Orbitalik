@@ -2,11 +2,11 @@ package ucs
 
 import (
 	"encoding/json"
-	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/ingestion"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
 )
 
@@ -34,12 +34,6 @@ func (m *Mapper) Map(r ingestion.Row) (json.RawMessage, error) {
 
 		OperationalStatus: getPtr(models.OperationalStatusUnknown),
 		FetchedAt:         now,
-
-		Source: models.SourceAttribution{
-			Source:         models.SourceUCS,
-			SourceRecordID: clean(r["norad_id"]),
-			FetchedAt:      now,
-		},
 	}
 
 	meta.Operator = getPtr(r["operator"])
