@@ -26,6 +26,7 @@ func (s *tleCopySource) Values() ([]any, error) {
 	t := s.tles[s.idx-1]
 
 	return []any{
+		t.ID,
 		t.NoradID,
 		t.SatelliteName,
 		t.Line1,

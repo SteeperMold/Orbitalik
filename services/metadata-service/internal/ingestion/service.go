@@ -7,6 +7,7 @@ import (
 
 	applog "github.com/SteeperMold/Orbitalik/common/go/log"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
+	"github.com/google/uuid"
 )
 
 type MetadataSource interface {
@@ -120,7 +121,13 @@ func toIngestRecord(src *SatelliteSourceRecord) (*models.SatelliteIngestRecord, 
 
 	now := time.Now()
 
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	return &models.SatelliteIngestRecord{
+		ID:       id,
 		NoradID:  payload.NoradID,
 		CosparID: payload.CosparID,
 

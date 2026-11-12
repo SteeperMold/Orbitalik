@@ -8,6 +8,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	"github.com/SteeperMold/Orbitalik/common/go/db"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -37,7 +38,7 @@ func (r *CredentialsRepository) Create(ctx context.Context, cred *models.Credent
 	return err
 }
 
-func (r *CredentialsRepository) GetByUserID(ctx context.Context, userID int) (*models.Credentials, error) {
+func (r *CredentialsRepository) GetByUserID(ctx context.Context, userID uuid.UUID) (*models.Credentials, error) {
 	query, args, err := r.sb.
 		Select(
 			"user_id",
@@ -71,7 +72,7 @@ func (r *CredentialsRepository) GetByUserID(ctx context.Context, userID int) (*m
 	return &cred, nil
 }
 
-func (r *CredentialsRepository) UpdatePasswordHash(ctx context.Context, userID int, hash string) error {
+func (r *CredentialsRepository) UpdatePasswordHash(ctx context.Context, userID uuid.UUID, hash string) error {
 	query, args, err := r.sb.
 		Update("credentials").
 		Set("password_hash", hash).

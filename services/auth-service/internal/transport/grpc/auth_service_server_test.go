@@ -47,7 +47,7 @@ func TestAuthServiceServer_Register(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	assert.Equal(t, uint32(42), resp.User.Id)
+	assert.Equal(t, testUserID.String(), resp.User.Id)
 	assert.Equal(t, "test@example.com", resp.User.Email)
 	assert.Equal(t, "testuser", resp.User.Username)
 
@@ -193,7 +193,7 @@ func TestAuthServiceServer_Login(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	assert.Equal(t, uint32(42), resp.User.Id)
+	assert.Equal(t, testUserID.String(), resp.User.Id)
 	assert.Equal(t, "test@example.com", resp.User.Email)
 	assert.Equal(t, "testuser", resp.User.Username)
 
@@ -267,7 +267,7 @@ func TestAuthServiceServer_RefreshToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	assert.Equal(t, uint32(42), resp.User.Id)
+	assert.Equal(t, testUserID.String(), resp.User.Id)
 	assert.Equal(t, "new-access-token", resp.Tokens.AccessToken)
 	assert.Equal(t, "refresh-token-value", resp.Tokens.RefreshToken)
 
@@ -400,7 +400,7 @@ func TestAuthServiceServer_ValidateToken_Valid(t *testing.T) {
 	assert.True(t, resp.Valid)
 
 	require.NotNil(t, resp.User)
-	assert.Equal(t, uint32(42), resp.User.Id)
+	assert.Equal(t, testUserID.String(), resp.User.Id)
 	assert.Equal(t, "test@example.com", resp.User.Email)
 	assert.Equal(t, "testuser", resp.User.Username)
 

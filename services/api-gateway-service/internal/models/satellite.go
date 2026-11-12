@@ -1,7 +1,6 @@
 package models
 
 type Satellite struct {
-	ID                int64  `json:"id,omitempty"`
 	NoradID           int64  `json:"norad_id,omitempty"`
 	CosparID          string `json:"cospar_id,omitempty"`
 	Name              string `json:"name,omitempty"`

@@ -1,1 +1,1 @@
-DROP TABLE satellite_metadata;
+DROP TABLE IF EXISTS satellite_metadata;

@@ -6,6 +6,7 @@ compile-proto:
 		--proto_path=$(PROTO_DIR) \
 		--go_out=. \
 		--go-grpc_out=. \
+		$(PROTO_DIR)/auth.proto \
 		$(PROTO_DIR)/metadata.proto \
 		$(PROTO_DIR)/tle.proto \
 		$(PROTO_DIR)/trajectory.proto

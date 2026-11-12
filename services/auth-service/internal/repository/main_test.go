@@ -6,6 +6,7 @@ package repository_test
 import (
 	"context"
 	"database/sql"
+	"encoding/binary"
 	"errors"
 	"os"
 	"testing"
@@ -15,6 +16,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	migratepg "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -25,6 +27,17 @@ var (
 	testDB   *sql.DB
 	testConn db.Conn
 )
+
+// testUUID mirrors the deterministic legacy BIGINT -> UUIDv7 mapping used by
+// the database migrations.
+func testUUID(n uint64) uuid.UUID {
+	var raw [16]byte
+	binary.BigEndian.PutUint64(raw[7:15], n)
+	raw[6] = 0x70
+	raw[8] = (raw[8] & 0x3f) | 0x80
+
+	return uuid.UUID(raw)
+}
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()

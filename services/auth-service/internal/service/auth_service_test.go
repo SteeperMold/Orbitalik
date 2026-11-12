@@ -8,13 +8,16 @@ import (
 
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 var (
+	testUserID = uuid.MustParse("00000000-0000-7000-8000-00000000002a")
+
 	testUser = &models.User{
-		ID:       42,
+		ID:       testUserID,
 		Email:    "john@example.com",
 		Username: "john",
 	}
@@ -912,7 +915,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "token-hash").
 			Return(&models.StoredRefreshToken{
-				ID:        1,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-000000000001"),
 				UserID:    testUser.ID,
 				Hash:      "token-hash",
 				ExpiresAt: time.Now().Add(-time.Hour),
@@ -944,7 +947,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "token-hash").
 			Return(&models.StoredRefreshToken{
-				ID:        1,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-000000000001"),
 				UserID:    testUser.ID,
 				Hash:      "token-hash",
 				ExpiresAt: time.Now().Add(time.Hour),
@@ -978,7 +981,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "token-hash").
 			Return(&models.StoredRefreshToken{
-				ID:        1,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-000000000001"),
 				UserID:    testUser.ID,
 				ExpiresAt: time.Now().Add(time.Hour),
 			}, nil).
@@ -1008,7 +1011,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		ctx := context.Background()
 
 		oldToken := &models.StoredRefreshToken{
-			ID:        10,
+			ID:        uuid.MustParse("00000000-0000-7000-8000-00000000000a"),
 			UserID:    testUser.ID,
 			Hash:      "old-hash",
 			ExpiresAt: time.Now().Add(time.Hour),
@@ -1086,7 +1089,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "hash").
 			Return(&models.StoredRefreshToken{
-				ID:        1,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-000000000001"),
 				UserID:    testUser.ID,
 				ExpiresAt: time.Now().Add(time.Hour),
 			}, nil).
@@ -1131,7 +1134,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "hash").
 			Return(&models.StoredRefreshToken{
-				ID:        1,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-000000000001"),
 				UserID:    testUser.ID,
 				ExpiresAt: time.Now().Add(time.Hour),
 			}, nil).
@@ -1186,7 +1189,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "old-hash").
 			Return(&models.StoredRefreshToken{
-				ID:        1,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-000000000001"),
 				UserID:    testUser.ID,
 				ExpiresAt: time.Now().Add(time.Hour),
 			}, nil).
@@ -1208,7 +1211,12 @@ func TestAuthService_RefreshToken(t *testing.T) {
 			Once()
 
 		tokens.
-			On("Rotate", mock.Anything, 1, mock.Anything).
+			On(
+				"Rotate",
+				mock.Anything,
+				uuid.MustParse("00000000-0000-7000-8000-000000000001"),
+				mock.Anything,
+			).
 			Return(expectedErr).
 			Once()
 
@@ -1271,7 +1279,7 @@ func TestAuthService_Logout(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "hash").
 			Return(&models.StoredRefreshToken{
-				ID:        123,
+				ID:        uuid.MustParse("00000000-0000-7000-8000-00000000007b"),
 				RevokedAt: &revokedAt,
 			}, nil).
 			Once()
@@ -1297,12 +1305,16 @@ func TestAuthService_Logout(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "hash").
 			Return(&models.StoredRefreshToken{
-				ID: 123,
+				ID: uuid.MustParse("00000000-0000-7000-8000-00000000007b"),
 			}, nil).
 			Once()
 
 		tokens.
-			On("Revoke", mock.Anything, 123).
+			On(
+				"Revoke",
+				mock.Anything,
+				uuid.MustParse("00000000-0000-7000-8000-00000000007b"),
+			).
 			Return(nil).
 			Once()
 
@@ -1329,12 +1341,16 @@ func TestAuthService_Logout(t *testing.T) {
 		tokens.
 			On("GetByHash", mock.Anything, "hash").
 			Return(&models.StoredRefreshToken{
-				ID: 123,
+				ID: uuid.MustParse("00000000-0000-7000-8000-00000000007b"),
 			}, nil).
 			Once()
 
 		tokens.
-			On("Revoke", mock.Anything, 123).
+			On(
+				"Revoke",
+				mock.Anything,
+				uuid.MustParse("00000000-0000-7000-8000-00000000007b"),
+			).
 			Return(expectedErr).
 			Once()
 
@@ -1388,7 +1404,7 @@ func TestAuthService_ValidateToken(t *testing.T) {
 		expiresAt := time.Now().Add(time.Hour)
 
 		claims := &domain.AccessTokenClaims{
-			UserID:    42,
+			UserID:    testUserID,
 			ExpiresAt: expiresAt,
 		}
 
@@ -1398,7 +1414,7 @@ func TestAuthService_ValidateToken(t *testing.T) {
 			Once()
 
 		users.
-			On("GetByID", mock.Anything, 42).
+			On("GetByID", mock.Anything, testUserID).
 			Return(nil, domain.ErrUserNotFound).
 			Once()
 
@@ -1420,8 +1436,7 @@ func TestAuthService_ValidateToken(t *testing.T) {
 		expiresAt := time.Now().Add(time.Hour)
 
 		claims := &domain.AccessTokenClaims{
-			// #nosec G115 -- testUser.ID is 42 which fits in uint32
-			UserID:    uint32(testUser.ID),
+			UserID:    testUser.ID,
 			ExpiresAt: expiresAt,
 		}
 

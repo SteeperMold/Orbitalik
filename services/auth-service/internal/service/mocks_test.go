@@ -6,6 +6,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	"github.com/SteeperMold/Orbitalik/common/go/db"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -24,7 +25,7 @@ func (m *MockCredentialsRepository) Create(
 
 func (m *MockCredentialsRepository) GetByUserID(
 	ctx context.Context,
-	userID int,
+	userID uuid.UUID,
 ) (*models.Credentials, error) {
 
 	args := m.Called(ctx, userID)
@@ -39,7 +40,7 @@ func (m *MockCredentialsRepository) GetByUserID(
 
 func (m *MockCredentialsRepository) UpdatePasswordHash(
 	ctx context.Context,
-	userID int,
+	userID uuid.UUID,
 	hash string,
 ) error {
 
@@ -77,7 +78,7 @@ func (m *MockRefreshTokenRepository) GetByHash(
 
 func (m *MockRefreshTokenRepository) Rotate(
 	ctx context.Context,
-	oldID int,
+	oldID uuid.UUID,
 	newToken *models.StoredRefreshToken,
 ) error {
 
@@ -87,7 +88,7 @@ func (m *MockRefreshTokenRepository) Rotate(
 
 func (m *MockRefreshTokenRepository) Revoke(
 	ctx context.Context,
-	id int,
+	id uuid.UUID,
 ) error {
 
 	args := m.Called(ctx, id)
@@ -187,7 +188,7 @@ func (m *MockUserClient) GetByEmail(
 
 func (m *MockUserClient) GetByID(
 	ctx context.Context,
-	userID int,
+	userID uuid.UUID,
 ) (*models.User, error) {
 
 	args := m.Called(ctx, userID)

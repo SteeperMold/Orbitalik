@@ -40,7 +40,7 @@ func NewConfig() *Config {
 		UserServiceAddress: config.GetEnv("USER_SERVICE_ADDRESS", "user-service:50051"),
 
 		DB: &postgres.Config{
-			Host:              config.GetEnv("DB_HOST", "user-service"),
+			Host:              config.GetEnv("DB_HOST", "postgres"),
 			Port:              config.GetEnv("DB_PORT", "5432"),
 			Name:              config.GetEnv("DB_NAME", "auth_db"),
 			User:              config.GetEnv("DB_USER", "user"),

@@ -1,11 +1,13 @@
 import dataclasses
 import datetime as dt
+import uuid
 
 import sqlalchemy
 import sqlalchemy.dialects.postgresql as sqlalchemy_postgres
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from notification.domain import models
+from notification.domain.ids import new_uuid7
 from notification.infrastructure.db.models.notification_job import NotificationJobORM
 
 
@@ -52,7 +54,7 @@ class NotificationJobRepository:
             result = await session.execute(stmt)
             return [self._to_domain(j) for j in result.scalars().all()]
 
-    async def mark_sent(self, job_id: int) -> None:
+    async def mark_sent(self, job_id: uuid.UUID) -> None:
         async with self.session_factory() as session:
             stmt = (
                 sqlalchemy.update(NotificationJobORM)
@@ -66,7 +68,7 @@ class NotificationJobRepository:
             await session.execute(stmt)
             await session.commit()
 
-    async def mark_failed(self, job_id: int, error: str) -> None:
+    async def mark_failed(self, job_id: uuid.UUID, error: str) -> None:
         async with self.session_factory() as session:
             stmt = (
                 sqlalchemy.update(NotificationJobORM)

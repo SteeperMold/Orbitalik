@@ -11,6 +11,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/repository"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,7 +36,7 @@ func TestRefreshTokenRepository_Save(t *testing.T) {
 	expiresAt := time.Now().Add(24 * time.Hour).UTC()
 
 	token := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "hash-123",
 		ExpiresAt: expiresAt,
 	}
@@ -44,8 +45,8 @@ func TestRefreshTokenRepository_Save(t *testing.T) {
 	require.NoError(t, err)
 
 	var (
-		id          int
-		userID      int
+		id          uuid.UUID
+		userID      uuid.UUID
 		hash        string
 		expiresAtDB time.Time
 		revokedAt   *time.Time
@@ -96,13 +97,13 @@ func TestRefreshTokenRepository_Save_DuplicateHash(t *testing.T) {
 	expiresAt := time.Now().Add(24 * time.Hour)
 
 	first := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "duplicate-hash",
 		ExpiresAt: expiresAt,
 	}
 
 	second := &models.StoredRefreshToken{
-		UserID:    2,
+		UserID:    testUUID(2),
 		Hash:      "duplicate-hash",
 		ExpiresAt: expiresAt,
 	}
@@ -134,7 +135,7 @@ func TestRefreshTokenRepository_Save_AnyUserID(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	token := &models.StoredRefreshToken{
-		UserID:    999999,
+		UserID:    testUUID(999999),
 		Hash:      "hash-any-user",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -160,7 +161,7 @@ func TestRefreshTokenRepository_Save_DefaultTimestamps(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	err := repo.Save(ctx, &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "timestamp-hash",
 		ExpiresAt: time.Now().Add(time.Hour),
 	})
@@ -187,7 +188,7 @@ func TestRefreshTokenRepository_GetByHash(t *testing.T) {
 	expiresAt := time.Now().Add(24 * time.Hour).UTC()
 
 	token := &models.StoredRefreshToken{
-		UserID:    42,
+		UserID:    testUUID(42),
 		Hash:      "get-by-hash",
 		ExpiresAt: expiresAt,
 	}
@@ -233,12 +234,12 @@ func TestRefreshTokenRepository_GetByHash_ReturnsCorrectToken(t *testing.T) {
 
 	tokens := []*models.StoredRefreshToken{
 		{
-			UserID:    1,
+			UserID:    testUUID(1),
 			Hash:      "hash-user-1",
 			ExpiresAt: time.Now().Add(time.Hour),
 		},
 		{
-			UserID:    2,
+			UserID:    testUUID(2),
 			Hash:      "hash-user-2",
 			ExpiresAt: time.Now().Add(2 * time.Hour),
 		},
@@ -253,7 +254,7 @@ func TestRefreshTokenRepository_GetByHash_ReturnsCorrectToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, result)
 
-	assert.Equal(t, 2, result.UserID)
+	assert.Equal(t, testUUID(2), result.UserID)
 	assert.Equal(t, "hash-user-2", result.Hash)
 }
 
@@ -266,7 +267,7 @@ func TestRefreshTokenRepository_Revoke(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	token := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "revoke-hash",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -299,7 +300,7 @@ func TestRefreshTokenRepository_Revoke_NotFound(t *testing.T) {
 	ctx := context.Background()
 	repo := repository.NewRefreshTokenRepository(testConn)
 
-	err := repo.Revoke(ctx, 999999)
+	err := repo.Revoke(ctx, testUUID(999999))
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, domain.ErrTokenInvalid)
@@ -314,7 +315,7 @@ func TestRefreshTokenRepository_Revoke_AlreadyRevoked(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	token := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "already-revoked",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -341,13 +342,13 @@ func TestRefreshTokenRepository_Revoke_DoesNotChangeOtherTokens(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	first := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "revoke-first",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
 
 	second := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "revoke-second",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -377,7 +378,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	oldToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "old-refresh-hash",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -389,7 +390,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 	require.NotNil(t, oldSaved)
 
 	newToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "new-refresh-hash",
 		ExpiresAt: time.Now().Add(2 * time.Hour),
 	}
@@ -434,12 +435,12 @@ func TestRefreshTokenRepository_Rotate_NotFound(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	newToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "new-token-after-failed-rotation",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
 
-	err := repo.Rotate(ctx, 999999, newToken)
+	err := repo.Rotate(ctx, testUUID(999999), newToken)
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, domain.ErrTokenInvalid)
@@ -470,13 +471,13 @@ func TestRefreshTokenRepository_Rotate_DuplicateNewHashRollsBack(
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	oldToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "rotation-old-hash",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
 
 	existingToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "existing-hash",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -488,7 +489,7 @@ func TestRefreshTokenRepository_Rotate_DuplicateNewHashRollsBack(
 	require.NoError(t, err)
 
 	newToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      existingToken.Hash,
 		ExpiresAt: time.Now().Add(2 * time.Hour),
 	}
@@ -529,7 +530,7 @@ func TestRefreshTokenRepository_Rotate_DifferentUserID(t *testing.T) {
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	oldToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "old-user-token",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -540,7 +541,7 @@ func TestRefreshTokenRepository_Rotate_DifferentUserID(t *testing.T) {
 	require.NoError(t, err)
 
 	newToken := &models.StoredRefreshToken{
-		UserID:    2,
+		UserID:    testUUID(2),
 		Hash:      "new-user-token",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -553,7 +554,7 @@ func TestRefreshTokenRepository_Rotate_DifferentUserID(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, result)
 
-	assert.Equal(t, 2, result.UserID)
+	assert.Equal(t, testUUID(2), result.UserID)
 	assert.Equal(t, newToken.Hash, result.Hash)
 }
 
@@ -568,7 +569,7 @@ func TestRefreshTokenRepository_Rotate_AlreadyRevokedOldToken(
 	repo := repository.NewRefreshTokenRepository(testConn)
 
 	oldToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "already-revoked-old",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -581,7 +582,7 @@ func TestRefreshTokenRepository_Rotate_AlreadyRevokedOldToken(
 	require.NoError(t, repo.Revoke(ctx, oldSaved.ID))
 
 	newToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "should-not-be-created",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -624,7 +625,7 @@ func TestRefreshTokenRepository_FullLifecycle(t *testing.T) {
 
 	// Create old token.
 	oldToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "lifecycle-old",
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
@@ -643,7 +644,7 @@ func TestRefreshTokenRepository_FullLifecycle(t *testing.T) {
 
 	// Rotate.
 	newToken := &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "lifecycle-new",
 		ExpiresAt: time.Now().Add(2 * time.Hour),
 	}
@@ -692,7 +693,7 @@ func TestRefreshTokenRepository_Save_ContextCancellation(t *testing.T) {
 	cancel()
 
 	err := repo.Save(ctx, &models.StoredRefreshToken{
-		UserID:    1,
+		UserID:    testUUID(1),
 		Hash:      "cancelled-save",
 		ExpiresAt: time.Now().Add(time.Hour),
 	})
@@ -728,7 +729,7 @@ func TestRefreshTokenRepository_Revoke_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	err := repo.Revoke(ctx, 1)
+	err := repo.Revoke(ctx, testUUID(1))
 
 	require.Error(t, err)
 }
@@ -743,8 +744,8 @@ func TestRefreshTokenRepository_Rotate_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	err := repo.Rotate(ctx, 1, &models.StoredRefreshToken{
-		UserID:    1,
+	err := repo.Rotate(ctx, testUUID(1), &models.StoredRefreshToken{
+		UserID:    testUUID(1),
 		Hash:      "cancelled-rotation",
 		ExpiresAt: time.Now().Add(time.Hour),
 	})

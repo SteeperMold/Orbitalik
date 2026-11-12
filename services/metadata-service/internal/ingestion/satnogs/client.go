@@ -88,7 +88,7 @@ func (c *Client) fetchOnce(ctx context.Context, path string, target any) error {
 	}
 
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "orbitalik-satnogs-clients")
+	req.Header.Set("User-Agent", "orbitalik-satnogs-client")
 
 	resp, err := c.client.Do(req)
 	if err != nil {

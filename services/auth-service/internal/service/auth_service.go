@@ -296,7 +296,7 @@ func (s *AuthService) ValidateToken(
 		return nil, err
 	}
 
-	user, err := s.users.GetByID(ctx, int(claims.UserID))
+	user, err := s.users.GetByID(ctx, claims.UserID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return &domain.TokenValidationResult{Valid: false}, nil

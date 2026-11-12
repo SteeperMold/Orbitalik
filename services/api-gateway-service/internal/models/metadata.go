@@ -24,7 +24,7 @@ type SatelliteMetadata struct {
 	OperationalStatus string      `json:"operational_status"`
 	Frequencies       Frequencies `json:"frequencies,omitempty"`
 
-	Sources Sources
+	Sources Sources `json:"-"`
 
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS tle
 (
-    id             SERIAL PRIMARY KEY,
+    id             UUID PRIMARY KEY,
     norad_id       INT  NOT NULL,
     satellite_name TEXT NOT NULL,
     line1          TEXT NOT NULL,

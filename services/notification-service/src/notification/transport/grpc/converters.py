@@ -1,7 +1,14 @@
+import uuid
+
 from google.protobuf.timestamp_pb2 import Timestamp
 
 from notification.domain import command, models
+from notification.domain.ids import parse_uuid
 from notification.proto import notification_pb2 as pb2
+
+
+def parse_request_uuid(value: str, field: str) -> uuid.UUID:
+    return parse_uuid(value, field)
 
 
 def satellite_from_proto(satellite: pb2.SatelliteIdentifier) -> models.SatelliteIdentifier:
@@ -30,7 +37,7 @@ def create_subscription_command_from_request(
     request: pb2.CreateSubscriptionRequest,
 ) -> command.CreateSubscriptionCommand:
     return command.CreateSubscriptionCommand(
-        user_id=request.user_id,
+        user_id=parse_uuid(request.user_id, "user_id"),
         satellite=satellite_from_proto(request.satellite),
         observer=observer_from_proto(request.observer),
         notify_before_seconds=request.notify_before_seconds,
@@ -99,8 +106,8 @@ def subscription_to_proto(subscription: models.Subscription) -> pb2.Subscription
         observer.alt_km = subscription.observer.alt_km
 
     return pb2.Subscription(
-        id=subscription.id,
-        user_id=subscription.user_id,
+        id=str(subscription.id),
+        user_id=str(subscription.user_id),
         satellite=satellite,
         observer=observer,
         enabled=subscription.enabled,
@@ -118,8 +125,8 @@ def device_to_proto(device: models.Device) -> pb2.Device:
         ts.FromDatetime(device.created_at)
 
     return pb2.Device(
-        id=device.id,
-        user_id=device.user_id,
+        id=str(device.id) if device.id is not None else "",
+        user_id=str(device.user_id),
         type=device.type,
         address=device.address,
         enabled=device.enabled,

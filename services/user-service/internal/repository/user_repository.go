@@ -8,6 +8,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/common/go/db"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/models"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -24,10 +25,15 @@ func NewUserRepository(db db.Conn) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, params *domain.CreateUserParams) (*models.User, error) {
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	query, args, err := r.sb.
 		Insert("users").
-		Columns("email", "username").
-		Values(params.Email, params.Username).
+		Columns("id", "email", "username").
+		Values(id, params.Email, params.Username).
 		Suffix("RETURNING id, email, username, created_at, updated_at").
 		ToSql()
 	if err != nil {
@@ -53,7 +59,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, params *domain.CreateUs
 	return &u, nil
 }
 
-func (r *UserRepository) GetUserByID(ctx context.Context, id int) (*models.User, error) {
+func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	query, args, err := r.sb.
 		Select("id", "email", "username", "created_at", "updated_at").
 		From("users").
@@ -154,7 +160,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, params *domain.UpdateUs
 	return &u, nil
 }
 
-func (r *UserRepository) DeleteUser(ctx context.Context, id int) error {
+func (r *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	query, args, err := r.sb.
 		Delete("users").
 		Where(sq.Eq{"id": id}).

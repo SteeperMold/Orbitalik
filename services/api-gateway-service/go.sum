@@ -1,5 +1,3 @@
-github.com/SteeperMold/Orbitalik/common/go v0.6.1 h1:jf8rgBVCWDR86IwVBoWR9xnt30Ray4sNprUfspDk8bE=
-github.com/SteeperMold/Orbitalik/common/go v0.6.1/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
 github.com/SteeperMold/Orbitalik/common/go v0.6.2 h1:2m266VVzy2oUsQh6i5TbiQxiBDJLxPSS5r4c9xZeWNY=
 github.com/SteeperMold/Orbitalik/common/go v0.6.2/go.mod h1:PtpClXgsVmvK7WVlbJFijLqqgCXN5H+CDmf4aZruW3Y=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=

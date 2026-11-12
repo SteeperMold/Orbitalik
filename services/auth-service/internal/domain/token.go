@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
+	"github.com/google/uuid"
 )
 
 type RefreshTokenRepository interface {
 	Save(ctx context.Context, token *models.StoredRefreshToken) error
 	GetByHash(ctx context.Context, hash string) (*models.StoredRefreshToken, error)
-	Rotate(ctx context.Context, oldID int, newToken *models.StoredRefreshToken) error
-	Revoke(ctx context.Context, id int) error
+	Rotate(ctx context.Context, oldID uuid.UUID, newToken *models.StoredRefreshToken) error
+	Revoke(ctx context.Context, id uuid.UUID) error
 }
 
 type TokenManager interface {
@@ -22,7 +23,7 @@ type TokenManager interface {
 }
 
 type AccessTokenClaims struct {
-	UserID    uint32
+	UserID    uuid.UUID
 	ExpiresAt time.Time
 }
 

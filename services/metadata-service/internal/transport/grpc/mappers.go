@@ -12,7 +12,7 @@ func toProtoSatelliteMetadata(m *models.SatelliteMetadata) *metadatapb.Satellite
 	}
 
 	pb := &metadatapb.SatelliteMetadata{
-		// #nosec G115 -- user.ID is a postgres INTEGER and fits in uint32
+		// #nosec G115 -- NORAD IDs are external identifiers that fit in uint32
 		NoradId:  uint32(m.NoradID),
 		CosparId: m.CosparID,
 

@@ -15,7 +15,7 @@ service AuthService {
 }
 
 message AuthUser {
-    uint32 id = 1;
+    string id = 1;
     string email = 2;
     string username = 3;
 }
