@@ -39,9 +39,8 @@ service NotificationService {
 
 // Подписка на уведомления о пролётах спутника
 message Subscription {
-  uint32 id = 1;
-
-  uint32 user_id = 2;
+  string id = 1;
+  string user_id = 2;
 
   SatelliteIdentifier satellite = 3;
 
@@ -66,7 +65,7 @@ message Subscription {
 
 // Запрос на создание подписки
 message CreateSubscriptionRequest {
-  uint32 user_id = 1;
+  string user_id = 1;
 
   SatelliteIdentifier satellite = 2;
 
@@ -88,13 +87,13 @@ message CreateSubscriptionRequest {
 
 // Запрос на получение подписки
 message GetSubscriptionRequest {
-  uint32 id = 1;
+  string id = 1;
 }
 
 
 // Запрос списка подписок пользователя
 message ListSubscriptionsRequest {
-  uint32 user_id = 1;
+  string user_id = 1;
 
   optional bool enabled = 2;
 
@@ -115,7 +114,7 @@ message ListSubscriptionsResponse {
 
 // Запрос на изменение параметров подписки
 message UpdateSubscriptionRequest {
-  uint32 id = 1;
+  string id = 1;
 
   optional bool enabled = 2;
 
@@ -129,13 +128,13 @@ message UpdateSubscriptionRequest {
 
 // Запрос на удаление подписки
 message DeleteSubscriptionRequest {
-  uint32 id = 1;
+  string id = 1;
 }
 
 
 // Запрос на изменение статуса подписки
 message SetSubscriptionStatusRequest {
-  uint32 id = 1;
+  string id = 1;
 
   bool enabled = 2;
 }
@@ -143,9 +142,8 @@ message SetSubscriptionStatusRequest {
 
 // Устройство для получения уведомлений
 message Device {
-  uint32 id = 1;
-
-  uint32 user_id = 2;
+  string id = 1;
+  string user_id = 2;
 
   // Тип устройства или канала доставки уведомлений
   enum DeviceType {
@@ -169,7 +167,7 @@ message Device {
 
 // Запрос на регистрацию устройства
 message RegisterDeviceRequest {
-  uint32 user_id = 1;
+  string user_id = 1;
 
   Device.DeviceType type = 2;
 
@@ -179,7 +177,7 @@ message RegisterDeviceRequest {
 
 // Запрос списка устройств пользователя
 message ListDevicesRequest {
-  uint32 user_id = 1;
+  string user_id = 1;
 }
 
 
@@ -191,7 +189,7 @@ message ListDevicesResponse {
 
 // Запрос на удаление устройства
 message DeleteDeviceRequest {
-  uint32 id = 1;
+  string id = 1;
 }
 
 

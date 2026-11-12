@@ -1,9 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type TLE struct {
-	ID            int
+	ID            uuid.UUID
 	NoradID       int
 	SatelliteName string
 	Line1         string

@@ -8,6 +8,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/common/go/db"
 	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/SteeperMold/Orbitalik/satellite-metadata-service/internal/models"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -26,6 +27,16 @@ func NewRawMetadataRepository(db db.Conn) *RawMetadataRepository {
 func (r *RawMetadataRepository) SaveRawBatch(ctx context.Context, data []*models.SatelliteIngestRecord) error {
 	if len(data) == 0 {
 		return nil
+	}
+
+	for _, record := range data {
+		if record.ID == uuid.Nil {
+			id, err := uuid.NewV7()
+			if err != nil {
+				return err
+			}
+			record.ID = id
+		}
 	}
 
 	tx, err := r.db.Begin(ctx)
@@ -50,7 +61,7 @@ func (r *RawMetadataRepository) SaveRawBatch(ctx context.Context, data []*models
 	_, err = pgxTx.CopyFrom(
 		ctx,
 		pgx.Identifier{"satellite_metadata_raw"},
-		[]string{"norad_id", "cospar_id", "source", "payload", "fetched_at"},
+		[]string{"id", "norad_id", "cospar_id", "source", "payload", "fetched_at"},
 		newRawMetadataCopySource(data),
 	)
 

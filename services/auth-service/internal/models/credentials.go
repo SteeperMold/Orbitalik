@@ -1,9 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Credentials struct {
-	UserID       int
+	UserID       uuid.UUID
 	PasswordHash string
 
 	CreatedAt time.Time

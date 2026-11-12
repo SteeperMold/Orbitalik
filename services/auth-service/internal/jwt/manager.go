@@ -10,6 +10,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 const (
@@ -28,7 +29,7 @@ type TokenManager struct {
 type Claims struct {
 	jwt.RegisteredClaims
 
-	UserID uint32 `json:"user_id"`
+	UserID uuid.UUID `json:"user_id"`
 }
 
 func NewTokenManager(
@@ -51,8 +52,7 @@ func (m *TokenManager) GenerateAccessToken(user *models.User) (models.AccessToke
 	now := time.Now()
 
 	claims := Claims{
-		// #nosec G115 -- user.ID is a postgres INTEGER and fits in uint32
-		UserID: uint32(user.ID),
+		UserID: user.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.issuer,
 			Subject:   TokenTypeAccess,
@@ -97,6 +97,10 @@ func (m *TokenManager) ValidateAccessToken(tokenStr string) (*domain.AccessToken
 	}
 
 	if claims.Subject != TokenTypeAccess {
+		return nil, domain.ErrTokenInvalid
+	}
+
+	if claims.UserID == uuid.Nil {
 		return nil, domain.ErrTokenInvalid
 	}
 

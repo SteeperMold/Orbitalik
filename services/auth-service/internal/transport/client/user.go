@@ -2,10 +2,12 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/SteeperMold/Orbitalik/auth-service/gen/userpb"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -49,11 +51,7 @@ func (c *Client) CreateUser(ctx context.Context, email, username string) (*model
 		return nil, mapError(err)
 	}
 
-	return &models.User{
-		ID:       int(resp.User.Id),
-		Email:    resp.User.Email,
-		Username: resp.User.Username,
-	}, nil
+	return toDomainUser(resp.GetUser())
 }
 
 func (c *Client) GetByEmail(ctx context.Context, email string) (*models.User, error) {
@@ -66,19 +64,14 @@ func (c *Client) GetByEmail(ctx context.Context, email string) (*models.User, er
 		return nil, mapError(err)
 	}
 
-	return &models.User{
-		ID:       int(resp.User.Id),
-		Email:    resp.User.Email,
-		Username: resp.User.Username,
-	}, nil
+	return toDomainUser(resp.GetUser())
 }
 
-func (c *Client) GetByID(ctx context.Context, id int) (*models.User, error) {
+func (c *Client) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	resp, err := c.client.GetUserById(
 		ctx,
 		&userpb.GetUserByIdRequest{
-			// #nosec G115 -- user.ID is a postgres INTEGER and fits in uint32
-			Id: uint32(id),
+			Id: id.String(),
 		},
 	)
 
@@ -86,10 +79,23 @@ func (c *Client) GetByID(ctx context.Context, id int) (*models.User, error) {
 		return nil, mapError(err)
 	}
 
+	return toDomainUser(resp.GetUser())
+}
+
+func toDomainUser(user *userpb.User) (*models.User, error) {
+	if user == nil {
+		return nil, fmt.Errorf("user service returned an empty user")
+	}
+
+	id, err := uuid.Parse(user.GetId())
+	if err != nil {
+		return nil, fmt.Errorf("user service returned an invalid user id: %w", err)
+	}
+
 	return &models.User{
-		ID:       int(resp.User.Id),
-		Email:    resp.User.Email,
-		Username: resp.User.Username,
+		ID:       id,
+		Email:    user.GetEmail(),
+		Username: user.GetUsername(),
 	}, nil
 }
 

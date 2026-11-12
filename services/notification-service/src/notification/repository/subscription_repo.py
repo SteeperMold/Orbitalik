@@ -1,11 +1,13 @@
 import builtins
 import dataclasses
 import datetime as dt
+import uuid
 
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from notification.domain import command, models
+from notification.domain.ids import new_uuid7
 from notification.infrastructure.db.models.subscription import SubscriptionORM
 
 
@@ -18,6 +20,7 @@ class SubscriptionRepository:
             obs = cmd.observer
 
             orm = SubscriptionORM(
+                id=new_uuid7(),
                 user_id=cmd.user_id,
                 norad_id=cmd.satellite.norad_id,
                 satellite_name=cmd.satellite.satellite_name,
@@ -41,7 +44,7 @@ class SubscriptionRepository:
 
             return self._to_domain(orm)
 
-    async def get(self, subscription_id: int) -> models.Subscription | None:
+    async def get(self, subscription_id: uuid.UUID) -> models.Subscription | None:
         async with self.session_factory() as session:
             orm = await session.get(SubscriptionORM, subscription_id)
 
@@ -96,7 +99,7 @@ class SubscriptionRepository:
 
     async def update(
         self,
-        subscription_id: int,
+        subscription_id: uuid.UUID,
         cmd: command.UpdateSubscriptionCommand,
     ) -> models.Subscription:
         async with self.session_factory() as session:
@@ -122,7 +125,7 @@ class SubscriptionRepository:
 
             return self._to_domain(orm)
 
-    async def delete(self, subscription_id: int) -> bool:
+    async def delete(self, subscription_id: uuid.UUID) -> bool:
         async with self.session_factory() as session:
             orm = await session.get(SubscriptionORM, subscription_id)
 
@@ -136,7 +139,7 @@ class SubscriptionRepository:
 
     async def set_status(
         self,
-        subscription_id: int,
+        subscription_id: uuid.UUID,
         enabled: bool,
     ) -> models.Subscription | None:
         async with self.session_factory() as session:
@@ -154,7 +157,7 @@ class SubscriptionRepository:
 
     async def advance_schedule_until(
         self,
-        subscription_id: int,
+        subscription_id: uuid.UUID,
         new_value: dt.datetime,
     ) -> None:
         async with self.session_factory() as session:

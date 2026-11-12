@@ -14,12 +14,11 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-
 def upgrade() -> None:
     op.create_table(
         "subscriptions",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("user_id", sa.BigInteger(), nullable=False),
+        sa.Column("id", sa.Uuid(), primary_key=True),
+        sa.Column("user_id", sa.Uuid(), nullable=False),
         sa.Column("norad_id", sa.BigInteger(), nullable=True),
         sa.Column("satellite_name", sa.String(), nullable=True),
         sa.Column("observer_lat_deg", sa.Float(), nullable=True),

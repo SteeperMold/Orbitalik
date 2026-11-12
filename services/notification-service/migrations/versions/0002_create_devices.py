@@ -17,8 +17,8 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "devices",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("user_id", sa.BigInteger(), nullable=False, index=True),
+        sa.Column("id", sa.Uuid(), primary_key=True),
+        sa.Column("user_id", sa.Uuid(), nullable=False, index=True),
         sa.Column("type", sa.Integer(), nullable=False),  # enum stored as int
         sa.Column("address", sa.String(), nullable=False),
         sa.Column(

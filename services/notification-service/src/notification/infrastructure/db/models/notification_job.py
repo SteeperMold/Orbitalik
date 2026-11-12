@@ -1,7 +1,8 @@
 import datetime as dt
+import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, DateTime, Float, ForeignKey, Integer, SmallInteger, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, SmallInteger, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from notification.domain.models import NotificationJobStatus
@@ -14,10 +15,13 @@ if TYPE_CHECKING:
 class NotificationJobORM(Base):
     __tablename__ = "notification_jobs"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+    )
 
-    subscription_id: Mapped[int] = mapped_column(
-        BigInteger,
+    subscription_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
         ForeignKey("subscriptions.id", ondelete="CASCADE"),
         index=True,
     )
@@ -26,8 +30,8 @@ class NotificationJobORM(Base):
         back_populates="jobs",
     )
 
-    user_id: Mapped[int] = mapped_column(
-        BigInteger,
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
         index=True,
         nullable=False,
     )
@@ -38,7 +42,7 @@ class NotificationJobORM(Base):
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    norad_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    norad_id: Mapped[int | None] = mapped_column(nullable=True)
     satellite_name: Mapped[str | None] = mapped_column(String, nullable=True)
     aos: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True))
     los: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True))

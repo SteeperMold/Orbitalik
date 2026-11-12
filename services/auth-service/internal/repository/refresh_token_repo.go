@@ -8,6 +8,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	"github.com/SteeperMold/Orbitalik/common/go/db"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -24,10 +25,18 @@ func NewRefreshTokenRepository(db db.Conn) *RefreshTokenRepository {
 }
 
 func (r *RefreshTokenRepository) Save(ctx context.Context, token *models.StoredRefreshToken) error {
+	if token.ID == uuid.Nil {
+		id, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		token.ID = id
+	}
+
 	query, args, err := r.sb.
 		Insert("refresh_tokens").
-		Columns("user_id", "hash", "expires_at").
-		Values(token.UserID, token.Hash, token.ExpiresAt).
+		Columns("id", "user_id", "hash", "expires_at").
+		Values(token.ID, token.UserID, token.Hash, token.ExpiresAt).
 		ToSql()
 	if err != nil {
 		return err
@@ -76,7 +85,7 @@ func (r *RefreshTokenRepository) GetByHash(ctx context.Context, hash string) (*m
 	return &token, nil
 }
 
-func (r *RefreshTokenRepository) Revoke(ctx context.Context, id int) error {
+func (r *RefreshTokenRepository) Revoke(ctx context.Context, id uuid.UUID) error {
 	query, args, err := r.sb.
 		Update("refresh_tokens").
 		Set("revoked_at", sq.Expr("NOW()")).
@@ -99,7 +108,15 @@ func (r *RefreshTokenRepository) Revoke(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *RefreshTokenRepository) Rotate(ctx context.Context, oldID int, newToken *models.StoredRefreshToken) error {
+func (r *RefreshTokenRepository) Rotate(ctx context.Context, oldID uuid.UUID, newToken *models.StoredRefreshToken) error {
+	if newToken.ID == uuid.Nil {
+		id, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+		newToken.ID = id
+	}
+
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -110,8 +127,8 @@ func (r *RefreshTokenRepository) Rotate(ctx context.Context, oldID int, newToken
 
 	insertQuery, insertArgs, err := r.sb.
 		Insert("refresh_tokens").
-		Columns("user_id", "hash", "expires_at").
-		Values(newToken.UserID, newToken.Hash, newToken.ExpiresAt).
+		Columns("id", "user_id", "hash", "expires_at").
+		Values(newToken.ID, newToken.UserID, newToken.Hash, newToken.ExpiresAt).
 		ToSql()
 	if err != nil {
 		return err

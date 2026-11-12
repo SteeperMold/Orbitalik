@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    id            SERIAL PRIMARY KEY,
+    id            UUID PRIMARY KEY,
     email         TEXT        NOT NULL UNIQUE,
     username      TEXT        NOT NULL,
 

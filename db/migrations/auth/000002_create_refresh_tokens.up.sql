@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS refresh_tokens
 (
-    id         BIGSERIAL PRIMARY KEY,
+    id         UUID PRIMARY KEY,
 
-    user_id    INTEGER     NOT NULL,
+    user_id    UUID        NOT NULL,
 
     hash TEXT        NOT NULL UNIQUE,
 

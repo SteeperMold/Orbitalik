@@ -2,6 +2,7 @@ import base64
 import binascii
 import dataclasses
 import json
+import uuid
 
 from notification.domain import command, limits, models
 from notification.repository.subscription_repo import SubscriptionRepository
@@ -41,7 +42,7 @@ class SubscriptionService:
 
         return await self.repository.create(cmd)
 
-    async def get(self, subscription_id: int) -> models.Subscription:
+    async def get(self, subscription_id: uuid.UUID) -> models.Subscription:
         subscription = await self.repository.get(subscription_id)
 
         if subscription is None:
@@ -51,7 +52,7 @@ class SubscriptionService:
 
     async def list(
         self,
-        user_id: int,
+        user_id: uuid.UUID,
         enabled: bool | None,
         page_size: int,
         page_token: str | None,
@@ -76,7 +77,7 @@ class SubscriptionService:
 
     async def update(
         self,
-        subscription_id: int,
+        subscription_id: uuid.UUID,
         cmd: command.UpdateSubscriptionCommand,
     ) -> models.Subscription:
         if cmd.notify_before_seconds is not None and cmd.notify_before_seconds > limits.MAX_INT32:
@@ -87,7 +88,7 @@ class SubscriptionService:
 
         return await self.repository.update(subscription_id, cmd)
 
-    async def delete(self, subscription_id: int) -> None:
+    async def delete(self, subscription_id: uuid.UUID) -> None:
         deleted = await self.repository.delete(subscription_id)
 
         if not deleted:
@@ -95,7 +96,7 @@ class SubscriptionService:
 
     async def set_status(
         self,
-        subscription_id: int,
+        subscription_id: uuid.UUID,
         enabled: bool,
     ) -> models.Subscription:
         subscription = await self.repository.set_status(

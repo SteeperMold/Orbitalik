@@ -36,7 +36,9 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> pb2.Subscription:
         try:
-            subscription = await self.subscriptions.get(request.id)
+            subscription = await self.subscriptions.get(
+                converters.parse_request_uuid(request.id, "id")
+            )
 
             return converters.subscription_to_proto(subscription)
 
@@ -50,7 +52,7 @@ class NotificationServicer:
     ) -> pb2.ListSubscriptionsResponse:
         try:
             items, next_page_token = await self.subscriptions.list(
-                user_id=request.user_id,
+                user_id=converters.parse_request_uuid(request.user_id, "user_id"),
                 enabled=request.enabled if request.HasField("enabled") else None,
                 page_size=request.page_size,
                 page_token=request.page_token if request.HasField("page_token") else None,
@@ -73,7 +75,7 @@ class NotificationServicer:
             cmd = converters.update_subscription_command_from_request(request)
 
             subscription = await self.subscriptions.update(
-                subscription_id=request.id,
+                subscription_id=converters.parse_request_uuid(request.id, "id"),
                 cmd=cmd,
             )
 
@@ -88,7 +90,7 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> empty_pb2.Empty:
         try:
-            await self.subscriptions.delete(request.id)
+            await self.subscriptions.delete(converters.parse_request_uuid(request.id, "id"))
             return empty_pb2.Empty()
 
         except ValueError as e:
@@ -101,7 +103,7 @@ class NotificationServicer:
     ) -> pb2.Subscription:
         try:
             subscription = await self.subscriptions.set_status(
-                subscription_id=request.id,
+                subscription_id=converters.parse_request_uuid(request.id, "id"),
                 enabled=request.enabled,
             )
 
@@ -117,7 +119,7 @@ class NotificationServicer:
     ) -> pb2.Device:
         try:
             device = await self.devices.register(
-                user_id=request.user_id,
+                user_id=converters.parse_request_uuid(request.user_id, "user_id"),
                 device_type=request.type,
                 address=request.address,
             )
@@ -132,7 +134,9 @@ class NotificationServicer:
         request: pb2.ListDevicesRequest,
         context: grpc.aio.ServicerContext,
     ) -> pb2.ListDevicesResponse:
-        devices = await self.devices.list(user_id=request.user_id)
+        devices = await self.devices.list(
+            user_id=converters.parse_request_uuid(request.user_id, "user_id")
+        )
 
         return pb2.ListDevicesResponse(devices=[converters.device_to_proto(d) for d in devices])
 
@@ -142,7 +146,7 @@ class NotificationServicer:
         context: grpc.aio.ServicerContext,
     ) -> empty_pb2.Empty:
         try:
-            await self.devices.delete_device(request.id)
+            await self.devices.delete_device(converters.parse_request_uuid(request.id, "id"))
             return empty_pb2.Empty()
 
         except ValueError as e:

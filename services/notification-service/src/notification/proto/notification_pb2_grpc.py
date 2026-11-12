@@ -27,7 +27,8 @@ if _version_not_supported:
 
 
 class NotificationServiceStub:
-    """Missing associated documentation comment in .proto file."""
+    """Сервис управления подписками на пролёты спутников и устройствами уведомлений
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -83,58 +84,68 @@ class NotificationServiceStub:
 
 
 class NotificationServiceServicer:
-    """Missing associated documentation comment in .proto file."""
+    """Сервис управления подписками на пролёты спутников и устройствами уведомлений
+    """
 
     def CreateSubscription(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Создание новой подписки
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetSubscription(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Получение подписки по идентификатору
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListSubscriptions(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Получение списка подписок пользователя
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def UpdateSubscription(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Обновление параметров подписки
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def DeleteSubscription(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Удаление подписки
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def SetSubscriptionStatus(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Включение или отключение подписки
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def RegisterDevice(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Регистрация устройства для получения уведомлений
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListDevices(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Получение списка устройств пользователя
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def DeleteDevice(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Удаление устройства
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -196,7 +207,8 @@ def add_NotificationServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class NotificationService:
-    """Missing associated documentation comment in .proto file."""
+    """Сервис управления подписками на пролёты спутников и устройствами уведомлений
+    """
 
     @staticmethod
     def CreateSubscription(request,

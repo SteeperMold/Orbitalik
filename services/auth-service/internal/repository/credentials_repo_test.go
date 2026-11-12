@@ -10,6 +10,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/repository"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -32,7 +33,7 @@ func TestCredentialsRepository_Create(t *testing.T) {
 	repo := repository.NewCredentialsRepository(testConn)
 
 	cred := &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "hashed-password",
 	}
 
@@ -40,7 +41,7 @@ func TestCredentialsRepository_Create(t *testing.T) {
 	require.NoError(t, err)
 
 	var (
-		userID       int
+		userID       uuid.UUID
 		passwordHash string
 	)
 
@@ -69,14 +70,14 @@ func TestCredentialsRepository_Create_DuplicateUserID(t *testing.T) {
 	repo := repository.NewCredentialsRepository(testConn)
 
 	cred := &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "first-hash",
 	}
 
 	require.NoError(t, repo.Create(ctx, cred))
 
 	err := repo.Create(ctx, &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "second-hash",
 	})
 
@@ -90,7 +91,7 @@ func TestCredentialsRepository_Create_DuplicateUserID(t *testing.T) {
 		WHERE user_id = $1
 	`
 
-	err = testDB.QueryRow(query, 1).Scan(&passwordHash)
+	err = testDB.QueryRow(query, testUUID(1)).Scan(&passwordHash)
 
 	require.NoError(t, err)
 	assert.Equal(t, "first-hash", passwordHash)
@@ -105,7 +106,7 @@ func TestCredentialsRepository_Create_AnyUserID(t *testing.T) {
 	repo := repository.NewCredentialsRepository(testConn)
 
 	cred := &models.Credentials{
-		UserID:       999999,
+		UserID:       testUUID(999999),
 		PasswordHash: "hashed-password",
 	}
 
@@ -131,13 +132,13 @@ func TestCredentialsRepository_Create_DefaultTimestamps(t *testing.T) {
 	repo := repository.NewCredentialsRepository(testConn)
 
 	err := repo.Create(ctx, &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "hashed-password",
 	})
 
 	require.NoError(t, err)
 
-	result, err := repo.GetByUserID(ctx, 1)
+	result, err := repo.GetByUserID(ctx, testUUID(1))
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -155,7 +156,7 @@ func TestCredentialsRepository_GetByUserID(t *testing.T) {
 	repo := repository.NewCredentialsRepository(testConn)
 
 	cred := &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "hashed-password",
 	}
 
@@ -181,7 +182,7 @@ func TestCredentialsRepository_GetByUserID_NotFound(t *testing.T) {
 	ctx := context.Background()
 	repo := repository.NewCredentialsRepository(testConn)
 
-	result, err := repo.GetByUserID(ctx, 999999)
+	result, err := repo.GetByUserID(ctx, testUUID(999999))
 
 	assert.Nil(t, result)
 	require.Error(t, err)
@@ -199,11 +200,11 @@ func TestCredentialsRepository_GetByUserID_ReturnsCorrectUser(t *testing.T) {
 	// #nosec G101 -- test fixture values, not real credentials
 	credentials := []*models.Credentials{
 		{
-			UserID:       1,
+			UserID:       testUUID(1),
 			PasswordHash: "hash-user-1",
 		},
 		{
-			UserID:       2,
+			UserID:       testUUID(2),
 			PasswordHash: "hash-user-2",
 		},
 	}
@@ -212,12 +213,12 @@ func TestCredentialsRepository_GetByUserID_ReturnsCorrectUser(t *testing.T) {
 		require.NoError(t, repo.Create(ctx, cred))
 	}
 
-	result, err := repo.GetByUserID(ctx, 2)
+	result, err := repo.GetByUserID(ctx, testUUID(2))
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
 
-	assert.Equal(t, 2, result.UserID)
+	assert.Equal(t, testUUID(2), result.UserID)
 	assert.Equal(t, "hash-user-2", result.PasswordHash)
 }
 
@@ -230,7 +231,7 @@ func TestCredentialsRepository_UpdatePasswordHash(t *testing.T) {
 	repo := repository.NewCredentialsRepository(testConn)
 
 	cred := &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "old-password-hash",
 	}
 
@@ -271,7 +272,7 @@ func TestCredentialsRepository_UpdatePasswordHash_NotFound(t *testing.T) {
 
 	err := repo.UpdatePasswordHash(
 		ctx,
-		999999,
+		testUUID(999999),
 		"new-password-hash",
 	)
 
@@ -288,26 +289,26 @@ func TestCredentialsRepository_UpdatePasswordHash_CanUpdateMultipleTimes(t *test
 	repo := repository.NewCredentialsRepository(testConn)
 
 	require.NoError(t, repo.Create(ctx, &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "hash-1",
 	}))
 
 	require.NoError(
 		t,
-		repo.UpdatePasswordHash(ctx, 1, "hash-2"),
+		repo.UpdatePasswordHash(ctx, testUUID(1), "hash-2"),
 	)
 
 	require.NoError(
 		t,
-		repo.UpdatePasswordHash(ctx, 1, "hash-3"),
+		repo.UpdatePasswordHash(ctx, testUUID(1), "hash-3"),
 	)
 
-	result, err := repo.GetByUserID(ctx, 1)
+	result, err := repo.GetByUserID(ctx, testUUID(1))
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
 
-	assert.Equal(t, 1, result.UserID)
+	assert.Equal(t, testUUID(1), result.UserID)
 	assert.Equal(t, "hash-3", result.PasswordHash)
 }
 
@@ -319,7 +320,7 @@ func TestCredentialsRepository_FullLifecycle(t *testing.T) {
 	ctx := context.Background()
 	repo := repository.NewCredentialsRepository(testConn)
 
-	userID := 1
+	userID := testUUID(1)
 
 	// Create.
 	err := repo.Create(ctx, &models.Credentials{
@@ -369,7 +370,7 @@ func TestCredentialsRepository_ContextCancellation(t *testing.T) {
 	cancel()
 
 	err := repo.Create(ctx, &models.Credentials{
-		UserID:       1,
+		UserID:       testUUID(1),
 		PasswordHash: "hash",
 	})
 
@@ -386,7 +387,7 @@ func TestCredentialsRepository_GetByUserID_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	result, err := repo.GetByUserID(ctx, 1)
+	result, err := repo.GetByUserID(ctx, testUUID(1))
 
 	assert.Nil(t, result)
 	require.Error(t, err)
@@ -402,7 +403,7 @@ func TestCredentialsRepository_UpdatePasswordHash_ContextCancellation(t *testing
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	err := repo.UpdatePasswordHash(ctx, 1, "hash")
+	err := repo.UpdatePasswordHash(ctx, testUUID(1), "hash")
 
 	require.Error(t, err)
 }

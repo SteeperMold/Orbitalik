@@ -1,4 +1,5 @@
 import dataclasses
+import uuid
 
 from notification.domain import models
 from notification.repository.device_repo import DeviceRepository
@@ -10,11 +11,11 @@ class DeviceService:
 
     async def register(
         self,
-        user_id: int,
+        user_id: uuid.UUID,
         device_type: int,
         address: str,
     ) -> models.Device:
-        if user_id <= 0:
+        if user_id is None or user_id.int == 0:
             raise ValueError("invalid user_id")
 
         if device_type <= 0:
@@ -33,10 +34,10 @@ class DeviceService:
 
         return await self.repository.create(device)
 
-    async def list(self, user_id: int) -> list[models.Device]:
+    async def list(self, user_id: uuid.UUID) -> list[models.Device]:
         return await self.repository.list(user_id)
 
-    async def delete_device(self, device_id: int) -> None:
+    async def delete_device(self, device_id: uuid.UUID) -> None:
         return await self.repository.delete(device_id)
 
     @staticmethod

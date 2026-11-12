@@ -9,6 +9,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/common/go/db"
 	"github.com/SteeperMold/Orbitalik/common/go/db/postgres"
 	"github.com/SteeperMold/Orbitalik/tle-ingestion-service/internal/models"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -25,6 +26,16 @@ func NewTLERepository(db db.Conn) *TLERepository {
 }
 
 func (r *TLERepository) SaveBatch(ctx context.Context, tles []*models.TLE) error {
+	for _, tle := range tles {
+		if tle.ID == uuid.Nil {
+			id, err := uuid.NewV7()
+			if err != nil {
+				return err
+			}
+			tle.ID = id
+		}
+	}
+
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -46,6 +57,7 @@ func (r *TLERepository) SaveBatch(ctx context.Context, tles []*models.TLE) error
 	const tempTableQ = `
 		CREATE TEMP TABLE tle_stage
 		(
+			id UUID,
 			norad_id INT,
 			satellite_name TEXT,
 			line1 TEXT,
@@ -63,7 +75,7 @@ func (r *TLERepository) SaveBatch(ctx context.Context, tles []*models.TLE) error
 	_, err = pgxTx.CopyFrom(
 		ctx,
 		pgx.Identifier{"tle_stage"},
-		[]string{"norad_id", "satellite_name", "line1", "line2", "epoch"},
+		[]string{"id", "norad_id", "satellite_name", "line1", "line2", "epoch"},
 		newTLECopySource(tles),
 	)
 	if err != nil {
@@ -72,10 +84,10 @@ func (r *TLERepository) SaveBatch(ctx context.Context, tles []*models.TLE) error
 
 	insertQ, args, err := r.psql.
 		Insert("tle").
-		Columns("norad_id", "satellite_name", "line1", "line2", "epoch").
+		Columns("id", "norad_id", "satellite_name", "line1", "line2", "epoch").
 		Select(
 			r.psql.
-				Select("norad_id", "satellite_name", "line1", "line2", "epoch").
+				Select("id", "norad_id", "satellite_name", "line1", "line2", "epoch").
 				From("tle_stage"),
 		).
 		Suffix("ON CONFLICT (norad_id, epoch) DO NOTHING").

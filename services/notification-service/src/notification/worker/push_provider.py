@@ -71,8 +71,8 @@ class FilePushProvider:
     ) -> None:
         event = {
             "timestamp": dt.datetime.now(dt.UTC).isoformat(),
-            "device_id": device.id,
-            "user_id": device.user_id,
+            "device_id": str(device.id) if device.id is not None else None,
+            "user_id": str(device.user_id) if device.user_id is not None else None,
             "device_type": device.type,
             "address": device.address,
             "title": title,

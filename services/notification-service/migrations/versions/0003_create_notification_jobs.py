@@ -17,14 +17,14 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "notification_jobs",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
+        sa.Column("id", sa.Uuid(), primary_key=True),
         sa.Column(
             "subscription_id",
-            sa.BigInteger(),
+            sa.Uuid(),
             sa.ForeignKey("subscriptions.id", ondelete="CASCADE"),
             nullable=False,
         ),
-        sa.Column("user_id", sa.BigInteger(), nullable=False),
+        sa.Column("user_id", sa.Uuid(), nullable=False),
         sa.Column("status", sa.SmallInteger(), nullable=False, server_default="0"),  # pending
         sa.Column("scheduled_time", sa.DateTime(timezone=True), nullable=False),
         sa.Column("norad_id", sa.BigInteger(), nullable=True),

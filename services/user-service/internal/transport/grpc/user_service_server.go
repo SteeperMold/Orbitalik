@@ -8,6 +8,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/user-service/gen/userpb"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/models"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -50,7 +51,12 @@ func (s *UserServiceServer) GetUserById(
 	req *userpb.GetUserByIdRequest,
 ) (*userpb.GetUserResponse, error) {
 
-	user, err := s.service.GetUserByID(ctx, int(req.GetId()))
+	id, err := parseUserID(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.service.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
@@ -72,8 +78,13 @@ func (s *UserServiceServer) GetUserByEmail(ctx context.Context, req *userpb.GetU
 }
 
 func (s *UserServiceServer) UpdateUser(ctx context.Context, req *userpb.UpdateUserRequest) (*userpb.UpdateUserResponse, error) {
+	id, err := parseUserID(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
 	params := domain.UpdateUserParams{
-		ID: int(req.GetId()),
+		ID: id,
 	}
 
 	if req.Email != nil {
@@ -95,7 +106,12 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *userpb.UpdateUs
 }
 
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *userpb.DeleteUserRequest) (*userpb.DeleteUserResponse, error) {
-	if err := s.service.DeleteUser(ctx, int(req.GetId())); err != nil {
+	id, err := parseUserID(req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.service.DeleteUser(ctx, id); err != nil {
 		return nil, toGRPCError(err)
 	}
 
@@ -108,7 +124,7 @@ func toProtoUser(u *models.User) *userpb.User {
 	}
 
 	return &userpb.User{
-		Id:        uint32(u.ID),
+		Id:        u.ID.String(),
 		Email:     u.Email,
 		Username:  u.Username,
 		CreatedAt: timestamppb.New(u.CreatedAt),
@@ -133,4 +149,13 @@ func toGRPCError(err error) error {
 	default:
 		return status.Error(codes.Internal, "internal server error")
 	}
+}
+
+func parseUserID(raw string) (uuid.UUID, error) {
+	id, err := uuid.Parse(raw)
+	if err != nil {
+		return uuid.Nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+
+	return id, nil
 }

@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"errors"
-	applog "github.com/SteeperMold/Orbitalik/common/go/log"
 	"strings"
 
+	applog "github.com/SteeperMold/Orbitalik/common/go/log"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/user-service/internal/models"
+	"github.com/google/uuid"
 )
 
 type UserService struct {
@@ -45,7 +46,7 @@ func (s *UserService) CreateUser(ctx context.Context, params *domain.CreateUserP
 	return s.repo.CreateUser(ctx, params)
 }
 
-func (s *UserService) GetUserByID(ctx context.Context, id int) (*models.User, error) {
+func (s *UserService) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	return s.repo.GetUserByID(ctx, id)
 }
 
@@ -83,7 +84,7 @@ func (s *UserService) UpdateUser(ctx context.Context, params *domain.UpdateUserP
 	return s.repo.UpdateUser(ctx, params)
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, id int) error {
+func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
 		return err

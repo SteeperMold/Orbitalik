@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type AccessToken string
 
@@ -11,8 +15,8 @@ type RefreshToken struct {
 }
 
 type StoredRefreshToken struct {
-	ID        int
-	UserID    int
+	ID        uuid.UUID
+	UserID    uuid.UUID
 	Hash      string
 	ExpiresAt time.Time
 	CreatedAt time.Time

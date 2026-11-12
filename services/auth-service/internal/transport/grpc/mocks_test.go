@@ -8,8 +8,11 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	grpcserver "github.com/SteeperMold/Orbitalik/auth-service/internal/transport/grpc"
 	commonlog "github.com/SteeperMold/Orbitalik/common/go/log"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 )
+
+var testUserID = uuid.MustParse("00000000-0000-7000-8000-00000000002a")
 
 type mockAuthService struct {
 	mock.Mock
@@ -123,7 +126,7 @@ func newTestServer(
 
 func testUser() *models.User {
 	return &models.User{
-		ID:       42,
+		ID:       testUserID,
 		Email:    "test@example.com",
 		Username: "testuser",
 	}

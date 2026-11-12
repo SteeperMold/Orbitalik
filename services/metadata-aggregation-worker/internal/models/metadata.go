@@ -3,10 +3,12 @@ package models
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type SatelliteIngestRecord struct {
-	ID int64
+	ID uuid.UUID
 
 	NoradID  int
 	CosparID *string

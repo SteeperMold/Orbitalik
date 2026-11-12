@@ -1,7 +1,8 @@
 import datetime as dt
+import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, Integer, String
+from sqlalchemy import Boolean, DateTime, Float, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from notification.infrastructure.db.base import Base
@@ -14,11 +15,14 @@ if TYPE_CHECKING:
 class SubscriptionORM(Base):
     __tablename__ = "subscriptions"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+    )
 
-    user_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), index=True)
 
-    norad_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    norad_id: Mapped[int | None] = mapped_column(nullable=True)
     satellite_name: Mapped[str | None] = mapped_column(String, nullable=True)
 
     observer_lat_deg: Mapped[float | None] = mapped_column(Float, nullable=True)

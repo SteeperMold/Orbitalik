@@ -1,10 +1,12 @@
 import builtins
 import dataclasses
+import uuid
 
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from notification.domain import models
+from notification.domain.ids import new_uuid7
 from notification.infrastructure.db.models import DeviceORM
 
 
@@ -15,6 +17,7 @@ class DeviceRepository:
     async def create(self, device: models.Device) -> models.Device:
         async with self.session_factory() as session:
             orm = DeviceORM(
+                id=device.id or new_uuid7(),
                 user_id=device.user_id,
                 type=device.type,
                 address=device.address,
@@ -27,14 +30,14 @@ class DeviceRepository:
 
             return self._to_domain(orm)
 
-    async def list(self, user_id: int) -> list[models.Device]:
+    async def list(self, user_id: uuid.UUID) -> list[models.Device]:
         async with self.session_factory() as session:
             stmt = sqlalchemy.select(DeviceORM).where(DeviceORM.user_id == user_id)
             result = await session.execute(stmt)
 
             return [self._to_domain(row) for row in result.scalars().all()]
 
-    async def list_enabled(self, user_id: int) -> builtins.list[models.Device]:
+    async def list_enabled(self, user_id: uuid.UUID) -> builtins.list[models.Device]:
         async with self.session_factory() as session:
             stmt = sqlalchemy.select(DeviceORM).where(
                 DeviceORM.user_id == user_id,
@@ -44,7 +47,7 @@ class DeviceRepository:
 
             return [self._to_domain(row) for row in result.scalars().all()]
 
-    async def delete(self, device_id: int) -> None:
+    async def delete(self, device_id: uuid.UUID) -> None:
         async with self.session_factory() as session:
             orm = await session.get(DeviceORM, device_id)
 

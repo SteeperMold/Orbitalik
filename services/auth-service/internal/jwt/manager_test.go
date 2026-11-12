@@ -14,9 +14,12 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/jwt"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
 	jwtlib "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 const testIssuer = "orbitalik-auth"
+
+var testUserID = uuid.MustParse("00000000-0000-7000-8000-00000000002a")
 
 func newTestManager(t *testing.T) *jwt.TokenManager {
 	t.Helper()
@@ -37,7 +40,7 @@ func newTestManager(t *testing.T) *jwt.TokenManager {
 
 func newTestUser() *models.User {
 	return &models.User{
-		ID:       42,
+		ID:       testUserID,
 		Email:    "test@example.com",
 		Username: "testuser",
 	}
@@ -66,8 +69,7 @@ func TestTokenManager_GenerateAccessToken(t *testing.T) {
 		t.Fatalf("ValidateAccessToken() error = %v", err)
 	}
 
-	// #nosec G115 -- user.ID is 42 which fits in uint32
-	if claims.UserID != uint32(user.ID) {
+	if claims.UserID != user.ID {
 		t.Errorf(
 			"UserID = %d, want %d",
 			claims.UserID,
@@ -116,8 +118,8 @@ func TestTokenManager_GenerateAccessToken_ContainsExpectedClaims(t *testing.T) {
 		t.Errorf("sub = %v, want %q", got, jwt.TokenTypeAccess)
 	}
 
-	if got := claims["user_id"]; got != float64(user.ID) {
-		t.Errorf("user_id = %v, want %d", got, user.ID)
+	if got := claims["user_id"]; got != user.ID.String() {
+		t.Errorf("user_id = %v, want %s", got, user.ID)
 	}
 
 	if _, ok := claims["iat"]; !ok {
@@ -182,8 +184,8 @@ func TestTokenManager_ValidateAccessToken(t *testing.T) {
 		t.Fatalf("ValidateAccessToken() error = %v", err)
 	}
 
-	if claims.UserID != 42 {
-		t.Errorf("UserID = %d, want 42", claims.UserID)
+	if claims.UserID != testUserID {
+		t.Errorf("UserID = %s, want %s", claims.UserID, testUserID)
 	}
 }
 
@@ -333,7 +335,7 @@ func TestTokenManager_ValidateAccessToken_WrongIssuer(t *testing.T) {
 	claims := jwtlib.MapClaims{
 		"iss":     "attacker",
 		"sub":     jwt.TokenTypeAccess,
-		"user_id": 42,
+		"user_id": testUserID.String(),
 		"iat":     time.Now().Unix(),
 		"exp":     time.Now().Add(time.Hour).Unix(),
 	}
@@ -370,7 +372,7 @@ func TestTokenManager_ValidateAccessToken_WrongSubject(t *testing.T) {
 	claims := jwtlib.MapClaims{
 		"iss":     testIssuer,
 		"sub":     "refresh",
-		"user_id": 42,
+		"user_id": testUserID.String(),
 		"iat":     time.Now().Unix(),
 		"exp":     time.Now().Add(time.Hour).Unix(),
 	}

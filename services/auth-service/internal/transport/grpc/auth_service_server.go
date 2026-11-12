@@ -106,8 +106,7 @@ func (a *AuthServiceServer) ValidateToken(
 
 func userToProto(user *models.User) *authpb.AuthUser {
 	return &authpb.AuthUser{
-		// #nosec G115 -- user.ID is a postgres INTEGER and fits in uint32
-		Id:       uint32(user.ID),
+		Id:       user.ID.String(),
 		Email:    user.Email,
 		Username: user.Username,
 	}

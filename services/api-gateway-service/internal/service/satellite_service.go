@@ -49,7 +49,6 @@ func (s *SatelliteService) Get(
 	}
 
 	return &models.Satellite{
-		ID:                metadata.NoradID,
 		NoradID:           metadata.NoradID,
 		CosparID:          stringValue(metadata.CosparID),
 		Name:              metadata.Name,

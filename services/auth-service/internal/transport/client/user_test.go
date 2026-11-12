@@ -8,6 +8,7 @@ import (
 	"github.com/SteeperMold/Orbitalik/auth-service/gen/userpb"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/domain"
 	"github.com/SteeperMold/Orbitalik/auth-service/internal/models"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -15,6 +16,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+)
+
+var (
+	testUserID  = uuid.MustParse("00000000-0000-7000-8000-00000000002a")
+	testID100   = uuid.MustParse("00000000-0000-7000-8000-000000000064")
+	testID123   = uuid.MustParse("00000000-0000-7000-8000-00000000007b")
+	testMissing = uuid.MustParse("00000000-0000-7000-8000-0000000003e7")
 )
 
 // MockUserServiceClient is a Testify mock for userpb.UserServiceClient.
@@ -98,7 +106,7 @@ func TestClient_CreateUser(t *testing.T) {
 
 		expectedResponse := &userpb.CreateUserResponse{
 			User: &userpb.User{
-				Id:       123,
+				Id:       testUserID.String(),
 				Email:    "john@example.com",
 				Username: "john",
 			},
@@ -128,7 +136,7 @@ func TestClient_CreateUser(t *testing.T) {
 		require.NotNil(t, user)
 
 		assert.Equal(t, &models.User{
-			ID:       123,
+			ID:       testUserID,
 			Email:    "john@example.com",
 			Username: "john",
 		}, user)
@@ -261,7 +269,7 @@ func TestClient_CreateUser(t *testing.T) {
 			Return(
 				&userpb.CreateUserResponse{
 					User: &userpb.User{
-						Id:       1,
+						Id:       testUserID.String(),
 						Email:    "john@example.com",
 						Username: "john",
 					},
@@ -279,7 +287,7 @@ func TestClient_CreateUser(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		assert.Equal(t, 1, user.ID)
+		assert.Equal(t, testUserID, user.ID)
 
 		mockClient.AssertExpectations(t)
 	})
@@ -301,7 +309,7 @@ func TestClient_CreateUser(t *testing.T) {
 			Return(
 				&userpb.CreateUserResponse{
 					User: &userpb.User{
-						Id:       0,
+						Id:       uuid.Nil.String(),
 						Email:    "",
 						Username: "",
 					},
@@ -318,7 +326,7 @@ func TestClient_CreateUser(t *testing.T) {
 		require.NotNil(t, user)
 
 		assert.Equal(t, &models.User{
-			ID:       0,
+			ID:       uuid.Nil,
 			Email:    "",
 			Username: "",
 		}, user)
@@ -335,7 +343,7 @@ func TestClient_GetByEmail(t *testing.T) {
 
 		expectedResponse := &userpb.GetUserResponse{
 			User: &userpb.User{
-				Id:       42,
+				Id:       testUserID.String(),
 				Email:    "alice@example.com",
 				Username: "alice",
 			},
@@ -363,7 +371,7 @@ func TestClient_GetByEmail(t *testing.T) {
 		require.NotNil(t, user)
 
 		assert.Equal(t, &models.User{
-			ID:       42,
+			ID:       testUserID,
 			Email:    "alice@example.com",
 			Username: "alice",
 		}, user)
@@ -477,7 +485,7 @@ func TestClient_GetByID(t *testing.T) {
 
 		expectedResponse := &userpb.GetUserResponse{
 			User: &userpb.User{
-				Id:       100,
+				Id:       testID100.String(),
 				Email:    "bob@example.com",
 				Username: "bob",
 			},
@@ -488,7 +496,7 @@ func TestClient_GetByID(t *testing.T) {
 				"GetUserById",
 				ctx,
 				&userpb.GetUserByIdRequest{
-					Id: 100,
+					Id: testID100.String(),
 				},
 			).
 			Return(expectedResponse, nil).
@@ -496,13 +504,13 @@ func TestClient_GetByID(t *testing.T) {
 
 		client := newTestClient(mockClient)
 
-		user, err := client.GetByID(ctx, 100)
+		user, err := client.GetByID(ctx, testID100)
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
 
 		assert.Equal(t, &models.User{
-			ID:       100,
+			ID:       testID100,
 			Email:    "bob@example.com",
 			Username: "bob",
 		}, user)
@@ -510,7 +518,7 @@ func TestClient_GetByID(t *testing.T) {
 		mockClient.AssertExpectations(t)
 	})
 
-	t.Run("zero id", func(t *testing.T) {
+	t.Run("nil id", func(t *testing.T) {
 		mockClient := new(MockUserServiceClient)
 
 		ctx := context.Background()
@@ -520,13 +528,13 @@ func TestClient_GetByID(t *testing.T) {
 				"GetUserById",
 				ctx,
 				&userpb.GetUserByIdRequest{
-					Id: 0,
+					Id: uuid.Nil.String(),
 				},
 			).
 			Return(
 				&userpb.GetUserResponse{
 					User: &userpb.User{
-						Id:       0,
+						Id:       uuid.Nil.String(),
 						Email:    "zero@example.com",
 						Username: "zero",
 					},
@@ -537,12 +545,12 @@ func TestClient_GetByID(t *testing.T) {
 
 		client := newTestClient(mockClient)
 
-		user, err := client.GetByID(ctx, 0)
+		user, err := client.GetByID(ctx, uuid.Nil)
 
 		require.NoError(t, err)
 		require.NotNil(t, user)
 
-		assert.Equal(t, 0, user.ID)
+		assert.Equal(t, uuid.Nil, user.ID)
 		assert.Equal(t, "zero@example.com", user.Email)
 		assert.Equal(t, "zero", user.Username)
 
@@ -559,7 +567,7 @@ func TestClient_GetByID(t *testing.T) {
 				"GetUserById",
 				ctx,
 				&userpb.GetUserByIdRequest{
-					Id: 999,
+					Id: testMissing.String(),
 				},
 			).
 			Return(
@@ -570,7 +578,7 @@ func TestClient_GetByID(t *testing.T) {
 
 		client := newTestClient(mockClient)
 
-		user, err := client.GetByID(ctx, 999)
+		user, err := client.GetByID(ctx, testMissing)
 
 		assert.Nil(t, user)
 		assert.ErrorIs(t, err, domain.ErrUserNotFound)
@@ -588,7 +596,7 @@ func TestClient_GetByID(t *testing.T) {
 				"GetUserById",
 				ctx,
 				&userpb.GetUserByIdRequest{
-					Id: 123,
+					Id: testID123.String(),
 				},
 			).
 			Return(
@@ -599,7 +607,7 @@ func TestClient_GetByID(t *testing.T) {
 
 		client := newTestClient(mockClient)
 
-		user, err := client.GetByID(ctx, 123)
+		user, err := client.GetByID(ctx, testID123)
 
 		assert.Nil(t, user)
 		assert.ErrorIs(t, err, domain.ErrUserAlreadyExists)
@@ -622,7 +630,7 @@ func TestClient_GetByID(t *testing.T) {
 				"GetUserById",
 				ctx,
 				&userpb.GetUserByIdRequest{
-					Id: 123,
+					Id: testID123.String(),
 				},
 			).
 			Return(
@@ -633,7 +641,7 @@ func TestClient_GetByID(t *testing.T) {
 
 		client := newTestClient(mockClient)
 
-		user, err := client.GetByID(ctx, 123)
+		user, err := client.GetByID(ctx, testID123)
 
 		assert.Nil(t, user)
 		assert.ErrorIs(t, err, expectedErr)

@@ -1,6 +1,7 @@
 import dataclasses
 import datetime as dt
 import enum
+import uuid
 
 
 @dataclasses.dataclass(frozen=True)
@@ -39,8 +40,8 @@ class GeodeticInput:
 
 @dataclasses.dataclass
 class Subscription:
-    id: int
-    user_id: int
+    id: uuid.UUID
+    user_id: uuid.UUID
 
     satellite: SatelliteIdentifier
     observer: GeodeticInput
@@ -70,8 +71,8 @@ class DeviceType(enum.IntEnum):
 
 @dataclasses.dataclass
 class Device:
-    id: int | None
-    user_id: int
+    id: uuid.UUID | None
+    user_id: uuid.UUID
 
     type: DeviceType
 
@@ -92,11 +93,11 @@ class NotificationJobStatus(enum.IntEnum):
 
 @dataclasses.dataclass
 class NotificationJob:
-    id: int | None
+    id: uuid.UUID | None
 
-    user_id: int
+    user_id: uuid.UUID
 
-    subscription_id: int
+    subscription_id: uuid.UUID
 
     scheduled_time: dt.datetime
     status: NotificationJobStatus

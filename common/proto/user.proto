@@ -27,7 +27,7 @@ service UserService {
 
 // Информация о пользователе
 message User {
-    uint32 id = 1;
+    string id = 1;
 
     string email = 2;
     string username = 3;
@@ -49,7 +49,7 @@ message CreateUserResponse {
 
 // Запрос пользователя по идентификатору
 message GetUserByIdRequest {
-    uint32 id = 1;
+    string id = 1;
 }
 
 // Запрос пользователя по электронной почте
@@ -65,7 +65,7 @@ message GetUserResponse {
 
 // Запрос на обновление пользователя
 message UpdateUserRequest {
-    uint32 id = 1;
+    string id = 1;
 
     optional string email = 2;
     optional string username = 3;
@@ -79,7 +79,7 @@ message UpdateUserResponse {
 
 // Запрос на удаление пользователя
 message DeleteUserRequest {
-    uint32 id = 1;
+    string id = 1;
 }
 
 // Ответ на удаление пользователя

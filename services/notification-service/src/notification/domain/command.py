@@ -1,11 +1,12 @@
 import dataclasses
+import uuid
 
 from notification.domain.models import GeodeticInput, SatelliteIdentifier
 
 
 @dataclasses.dataclass(frozen=True)
 class CreateSubscriptionCommand:
-    user_id: int
+    user_id: uuid.UUID
 
     satellite: SatelliteIdentifier
     observer: GeodeticInput
@@ -21,7 +22,7 @@ class CreateSubscriptionCommand:
 
 @dataclasses.dataclass(frozen=True)
 class ListSubscriptionsCommand:
-    user_id: int
+    user_id: uuid.UUID
     enabled: bool | None
     offset: int
     limit: int
